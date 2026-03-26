@@ -88,7 +88,7 @@ export function CartDrawer() {
         quantity: item.quantity,
         unit_price: item.price,
         total_price: item.price * item.quantity,
-        type: item.type,
+        type: item.type === 'unit' ? 'UNITARIO' : 'CAIXA_FECHADA',
       }));
 
       const orderData = {
