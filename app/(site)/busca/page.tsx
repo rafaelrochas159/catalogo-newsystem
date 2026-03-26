@@ -16,7 +16,7 @@ export default function SearchPage() {
   const initialQuery = searchParams.get('q') || '';
   
   const [query, setQuery] = useState(initialQuery);
-  const [products, setProducts] = useState<Produto[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
 
@@ -39,7 +39,7 @@ export default function SearchPage() {
         .eq('is_active', true)
         .order('nome');
 
-      setProducts(data as Produto[] || []);
+      setProducts((data as Product[]) || []);
     } catch (error) {
       console.error('Search error:', error);
     } finally {
@@ -53,7 +53,6 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <section className="py-12 border-b border-border/40">
         <div className="container">
           <motion.div
@@ -74,7 +73,6 @@ export default function SearchPage() {
         </div>
       </section>
 
-      {/* Search */}
       <section className="py-6 border-b border-border/40">
         <div className="container">
           <div className="flex gap-4 max-w-2xl mx-auto">
@@ -99,7 +97,6 @@ export default function SearchPage() {
         </div>
       </section>
 
-      {/* Results */}
       <section className="py-12">
         <div className="container">
           {query && (
