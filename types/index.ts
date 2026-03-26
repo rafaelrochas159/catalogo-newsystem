@@ -148,3 +148,8 @@ export interface Stats {
   mostViewedProducts: Product[];
   bestSellingProducts: Product[];
 }
+
+/* ===== ALIAS PARA PORTUGUÊS (EVITA ERRO NO BUILD) ===== */
+
+export type Produto = Product;
+export type Categoria = Category;
