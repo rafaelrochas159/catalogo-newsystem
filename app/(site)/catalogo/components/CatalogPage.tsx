@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { MinOrderAlert } from '@/components/cart/MinOrderAlert';
-import { Produto, Categoria } from '@/types';
+import { Product, Category } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/hooks/useCart';
 
