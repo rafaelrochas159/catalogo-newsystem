@@ -105,7 +105,7 @@ export default function EditarProdutoPage() {
         price_box: product.preco_caixa?.toString() || "",
         stock_unit: product.estoque_unitario.toString(),
         stock_box: product.estoque_caixa.toString(),
-        catalog_type: product.tipo_catalogo,
+        catalog_type: product.tipo_catalogo === 'AMBOS' ? 'UNITARIO' : product.tipo_catalogo,
         quantity_per_box: product.quantidade_por_caixa?.toString() || "",
         box_weight: product.peso_caixa?.toString() || "",
         box_length: product.dimensoes_caixa?.length?.toString() || "",

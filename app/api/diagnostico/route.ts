@@ -67,8 +67,8 @@ export async function GET(request: NextRequest) {
           message: `Erro no storage: ${storageError.message}` 
         };
       } else {
-        const bucketNames = buckets?.map(b => b.name) || [];
-        const imagesBucket = buckets?.find(b => b.name === 'images');
+        const bucketNames = buckets?.map((b: { name: string }) => b.name) || [];
+        const imagesBucket = buckets?.find((b: { name: string }) => b.name === 'images');
         
         if (imagesBucket) {
           diagnostics.checks.storage = { 

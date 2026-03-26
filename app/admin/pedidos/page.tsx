@@ -245,11 +245,11 @@ export default function OrdersPage() {
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>{formatPrice(selectedOrder.subtotal)}</span>
                 </div>
-                {selectedOrder.desconto_valor > 0 && (
+                {(selectedOrder.desconto_valor || 0) > 0 && (
                   <div className="flex justify-between mb-2">
                     <span className="text-muted-foreground">Desconto</span>
                     <span className="text-green-500">
-                      -{formatPrice(selectedOrder.desconto_valor)}
+                      -{formatPrice(selectedOrder.desconto_valor || 0)}
                     </span>
                   </div>
                 )}

@@ -120,7 +120,7 @@ export const useCart = create<CartState & CartActions>()(
             image: product.imagem_principal,
             price, 
             quantity, 
-            type: type === 'UNITARIO' ? 'unit' : 'box',
+            type: (type === 'UNITARIO' ? 'unit' : 'box') as 'unit' | 'box',
             catalogType: type 
           }];
         }

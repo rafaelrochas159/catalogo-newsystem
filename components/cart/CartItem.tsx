@@ -48,7 +48,7 @@ export function CartItem({ item, catalogType }: CartItemProps) {
           SKU: {sku}
         </p>
         <p className="text-xs text-muted-foreground">
-          {type === 'unit' ? 'Unitário' : 'Caixa Fechada'}
+          {type === 'unit' || type === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
         </p>
 
         {/* Quantity Controls */}

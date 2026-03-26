@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('slug, updated_at')
     .eq('is_active', true);
 
-  const productRoutes = (products || []).map((product) => ({
+  const productRoutes = (products || []).map((product: { slug: string; updated_at?: string }) => ({
     url: `${baseUrl}/produto/${product.slug}`,
     lastModified: new Date(product.updated_at || Date.now()),
     changeFrequency: 'weekly' as const,
@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('slug')
     .eq('is_active', true);
 
-  const categoryRoutes = (categories || []).map((category) => ({
+  const categoryRoutes = (categories || []).map((category: { slug: string }) => ({
     url: `${baseUrl}/categoria/${category.slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,

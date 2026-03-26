@@ -64,7 +64,7 @@ export default function DashboardPage() {
         .from('pedidos')
         .select('total');
 
-      const totalRevenue = pedidos?.reduce((sum, pedido) => sum + (pedido.total || 0), 0) || 0;
+      const totalRevenue = pedidos?.reduce((sum: number, pedido: { total?: number }) => sum + (pedido.total || 0), 0) || 0;
       const averageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
 
       // Recent orders
