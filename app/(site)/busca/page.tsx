@@ -7,7 +7,7 @@ import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { Produto } from '@/types';
+import { Product } from '@/types';
 import { supabase } from '@/lib/supabase/client';
 import { useDebounce } from '@/hooks/useDebounce';
 
