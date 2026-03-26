@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetFooter,
-  SheetTrigger 
+  SheetTrigger
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,15 @@ import { CartItem } from './CartItem';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice, generateOrderMessage, getWhatsAppLink } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
-import { ShoppingCart, Trash2, AlertTriangle, Check, MessageCircle, MapPin, ChevronLeft } from 'lucide-react';
+import {
+  ShoppingCart,
+  Trash2,
+  AlertTriangle,
+  Check,
+  MessageCircle,
+  MapPin,
+  ChevronLeft
+} from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
@@ -34,11 +42,25 @@ interface AddressData {
   complemento?: string;
 }
 
+interface ViaCepResponse {
+  cep?: string;
+  logradouro?: string;
+  complemento?: string;
+  bairro?: string;
+  localidade?: string;
+  uf?: string;
+  erro?: boolean;
+}
+
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
+  const [isFetchingCep, setIsFetchingCep] = useState(false);
+  const [lastFetchedCep, setLastFetchedCep] = useState('');
+  const [cepError, setCepError] = useState('');
+  const numberInputRef = useRef<HTMLInputElement | null>(null);
   const [address, setAddress] = useState<AddressData>({
     cep: '',
     rua: '',
@@ -52,7 +74,7 @@ export function CartDrawer() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   const items = useCart((state) => state.items);
   const catalogType = useCart((state) => state.catalogType);
   const clearCart = useCart((state) => state.clearCart);
@@ -69,6 +91,84 @@ export function CartDrawer() {
   const itemCount = getItemCount();
   const canCheckout = hasMinOrder();
   const remainingForMinOrder = getRemainingForMinOrder();
+
+  useEffect(() => {
+    const cepNumbers = address.cep.replace(/\D/g, '');
+
+    if (cepNumbers.length !== 8 || cepNumbers === lastFetchedCep) {
+      return;
+    }
+
+    const fetchCep = async () => {
+      setIsFetchingCep(true);
+      setCepError('');
+
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepNumbers}/json/`);
+        const data: ViaCepResponse = await response.json();
+
+        if (!response.ok || data.erro) {
+          setCepError('CEP não encontrado. Confira o número e preencha o endereço manualmente.');
+          toast.error('CEP não encontrado');
+          return;
+        }
+
+        setAddress((prev) => ({
+          ...prev,
+          rua: data.logradouro || prev.rua,
+          bairro: data.bairro || prev.bairro,
+          cidade: data.localidade || prev.cidade,
+          estado: data.uf || prev.estado,
+          complemento: prev.complemento || data.complemento || '',
+        }));
+
+        setLastFetchedCep(cepNumbers);
+        toast.success('Endereço preenchido automaticamente');
+
+        setTimeout(() => {
+          numberInputRef.current?.focus();
+        }, 50);
+      } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
+        setCepError('Não foi possível consultar o CEP agora. Você pode preencher manualmente.');
+        toast.error('Não foi possível buscar o CEP');
+      } finally {
+        setIsFetchingCep(false);
+      }
+    };
+
+    fetchCep();
+  }, [address.cep, lastFetchedCep]);
+
+  const resetAddressForm = () => {
+    setAddress({
+      cep: '',
+      rua: '',
+      numero: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      complemento: '',
+    });
+    setLastFetchedCep('');
+    setCepError('');
+  };
+
+  const openWhatsApp = (whatsappLink: string) => {
+    window.location.href = whatsappLink;
+
+    setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = whatsappLink;
+        fallbackLink.target = '_self';
+        fallbackLink.rel = 'noopener noreferrer';
+        document.body.appendChild(fallbackLink);
+        fallbackLink.click();
+        fallbackLink.remove();
+      }
+    }, 800);
+  };
 
   const handleCheckout = async () => {
     if (!canCheckout) return;
@@ -132,29 +232,21 @@ export function CartDrawer() {
 
       await supabase
         .from('pedidos')
-        .update({ 
+        .update({
           mensagem_whatsapp: message,
-          whatsapp_enviado: true 
+          whatsapp_enviado: true
         })
         .eq('id', order.id);
 
       const whatsappLink = getWhatsAppLink(COMPANY_INFO.whatsapp, message);
-      window.open(whatsappLink, '_blank');
 
       clearCart();
-      setAddress({
-        cep: '',
-        rua: '',
-        numero: '',
-        bairro: '',
-        cidade: '',
-        estado: '',
-        complemento: '',
-      });
+      resetAddressForm();
       setShowAddressForm(false);
       setIsOpen(false);
-      
+
       toast.success('Pedido enviado com sucesso!');
+      openWhatsApp(whatsappLink);
     } catch (error: any) {
       console.error('Checkout error:', error);
       toast.error(`Erro ao finalizar pedido: ${error.message}`);
@@ -188,7 +280,7 @@ export function CartDrawer() {
             <p className="text-muted-foreground mb-6">
               Adicione produtos ao seu carrinho para continuar.
             </p>
-            <Button 
+            <Button
               onClick={() => setIsOpen(false)}
               className="bg-neon-blue text-black hover:bg-neon-blue/90"
             >
@@ -210,11 +302,8 @@ export function CartDrawer() {
           </span>
         </Button>
       </SheetTrigger>
-      
-      {/* Estrutura: Header Fixo + Conteúdo Scrollable + Footer Fixo */}
+
       <SheetContent className="w-full sm:max-w-md flex flex-col h-[100dvh] p-0 overflow-hidden">
-        
-        {/* HEADER FIXO */}
         <SheetHeader className="px-6 pt-6 pb-2 shrink-0 border-b">
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
@@ -222,19 +311,15 @@ export function CartDrawer() {
           </SheetTitle>
         </SheetHeader>
 
-        {/* CONTEÚDO SCROLLABLE (flex-1 ocupa espaço restante) */}
         <div className="flex-1 min-h-0 overflow-hidden relative">
           <ScrollArea className="h-full w-full">
             <div className="px-6 py-4 space-y-4">
-              
-              {/* Badge do tipo */}
               <div>
                 <Badge variant={catalogType === 'UNITARIO' ? 'default' : 'secondary'}>
                   {catalogType === 'UNITARIO' ? 'Catálogo Unitário' : 'Caixa Fechada'}
                 </Badge>
               </div>
 
-              {/* Alerta de pedido mínimo */}
               {catalogType === 'UNITARIO' && !canCheckout && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -251,7 +336,6 @@ export function CartDrawer() {
                 </motion.div>
               )}
 
-              {/* ETAPA 1: Itens do Carrinho (quando NÃO mostra formulário) */}
               {!showAddressForm && (
                 <>
                   <div className="space-y-4">
@@ -272,13 +356,12 @@ export function CartDrawer() {
 
                   <Separator />
 
-                  {/* Resumo */}
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span>{formatPrice(subtotal)}</span>
                     </div>
-                    
+
                     {discount > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
@@ -296,7 +379,6 @@ export function CartDrawer() {
                 </>
               )}
 
-              {/* ETAPA 2: Formulário de Endereço (quando mostra formulário) */}
               {showAddressForm && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -304,9 +386,9 @@ export function CartDrawer() {
                   className="space-y-4"
                 >
                   <div className="flex items-center gap-2 mb-4">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setShowAddressForm(false)}
                       className="p-0 h-auto"
                     >
@@ -324,16 +406,29 @@ export function CartDrawer() {
                     <Input
                       placeholder="00000-000"
                       maxLength={9}
+                      inputMode="numeric"
                       value={address.cep}
                       onChange={(e) => {
                         let value = e.target.value.replace(/\D/g, '');
                         if (value.length > 5) {
                           value = value.slice(0, 5) + '-' + value.slice(5, 8);
                         }
-                        setAddress({ ...address, cep: value });
+
+                        setAddress((prev) => ({ ...prev, cep: value }));
+                        setCepError('');
+
+                        if (value.replace(/\D/g, '').length < 8) {
+                          setLastFetchedCep('');
+                        }
                       }}
                       className="h-9"
                     />
+                    {isFetchingCep && (
+                      <p className="text-xs text-muted-foreground mt-1">Buscando endereço pelo CEP...</p>
+                    )}
+                    {!!cepError && (
+                      <p className="text-xs text-red-400 mt-1">{cepError}</p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
@@ -342,16 +437,18 @@ export function CartDrawer() {
                       <Input
                         placeholder="Nome da rua"
                         value={address.rua}
-                        onChange={(e) => setAddress({ ...address, rua: e.target.value })}
+                        onChange={(e) => setAddress((prev) => ({ ...prev, rua: e.target.value }))}
                         className="h-9"
                       />
                     </div>
                     <div>
                       <Label className="text-xs">Número *</Label>
                       <Input
+                        ref={numberInputRef}
                         placeholder="123"
+                        inputMode="numeric"
                         value={address.numero}
-                        onChange={(e) => setAddress({ ...address, numero: e.target.value })}
+                        onChange={(e) => setAddress((prev) => ({ ...prev, numero: e.target.value }))}
                         className="h-9"
                       />
                     </div>
@@ -362,7 +459,7 @@ export function CartDrawer() {
                     <Input
                       placeholder="Nome do bairro"
                       value={address.bairro}
-                      onChange={(e) => setAddress({ ...address, bairro: e.target.value })}
+                      onChange={(e) => setAddress((prev) => ({ ...prev, bairro: e.target.value }))}
                       className="h-9"
                     />
                   </div>
@@ -373,7 +470,7 @@ export function CartDrawer() {
                       <Input
                         placeholder="São Paulo"
                         value={address.cidade}
-                        onChange={(e) => setAddress({ ...address, cidade: e.target.value })}
+                        onChange={(e) => setAddress((prev) => ({ ...prev, cidade: e.target.value }))}
                         className="h-9"
                       />
                     </div>
@@ -383,7 +480,7 @@ export function CartDrawer() {
                         placeholder="SP"
                         maxLength={2}
                         value={address.estado}
-                        onChange={(e) => setAddress({ ...address, estado: e.target.value.toUpperCase() })}
+                        onChange={(e) => setAddress((prev) => ({ ...prev, estado: e.target.value.toUpperCase() }))}
                         className="h-9"
                       />
                     </div>
@@ -394,12 +491,11 @@ export function CartDrawer() {
                     <Input
                       placeholder="Apto, bloco, referência..."
                       value={address.complemento}
-                      onChange={(e) => setAddress({ ...address, complemento: e.target.value })}
+                      onChange={(e) => setAddress((prev) => ({ ...prev, complemento: e.target.value }))}
                       className="h-9"
                     />
                   </div>
-                  
-                  {/* Espaço extra no final para não cortar conteúdo */}
+
                   <div className="h-4" />
                 </motion.div>
               )}
@@ -407,7 +503,6 @@ export function CartDrawer() {
           </ScrollArea>
         </div>
 
-        {/* FOOTER FIXO (sempre visível no rodapé) */}
         <SheetFooter className="flex-col gap-2 px-6 py-4 border-t shrink-0 bg-background mt-auto z-10">
           {!showAddressForm ? (
             <>
@@ -433,7 +528,7 @@ export function CartDrawer() {
             <Button
               className="w-full bg-neon-blue hover:bg-neon-blue/90 text-black font-semibold h-11"
               onClick={handleCheckout}
-              disabled={isCheckingOut}
+              disabled={isCheckingOut || isFetchingCep}
             >
               {isCheckingOut ? (
                 <>
