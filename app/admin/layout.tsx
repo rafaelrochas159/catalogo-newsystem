@@ -1,18 +1,16 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Grid3X3, 
-  ShoppingCart, 
+import {
+  LayoutDashboard,
+  Package,
+  Grid3X3,
+  ShoppingCart,
   Upload,
   LogOut,
   Menu,
-  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -33,40 +31,58 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
+  const isLoginPage = pathname === '/admin/login';
+
+  const [isLoading, setIsLoading] = useState(!isLoginPage);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push('/admin/login');
-        return;
-      }
-      
-      setIsAuthenticated(true);
-    } catch (error) {
-      console.error('Auth error:', error);
-      router.push('/admin/login');
-    } finally {
+    if (isLoginPage) {
       setIsLoading(false);
+      return;
     }
-  };
+
+    const checkAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          setIsAuthenticated(false);
+          router.replace('/admin/login');
+          return;
+        }
+
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Auth error:', error);
+        setIsAuthenticated(false);
+        router.replace('/admin/login');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [isLoginPage, router]);
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
       toast.success('Logout realizado com sucesso!');
-      router.push('/admin/login');
-    } catch (error) {
+      router.replace('/admin/login');
+    } catch {
       toast.error('Erro ao fazer logout');
     }
   };
+
+  // IMPORTANTE:
+  // a rota /admin/login precisa passar direto, sem proteção
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
@@ -77,14 +93,11 @@ export default function AdminLayout({
   }
 
   if (!isAuthenticated) {
-    // Show a minimal loading state when redirecting unauthorized users. Returning null causes
-    // a blank screen, so instead render a spinner and a hint to the user. The router push
-    // will still navigate away to the login page.
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neon-blue" />
-          <p className="text-sm text-muted-foreground">Redirecionando…</p>
+          <p className="text-sm text-muted-foreground">Redirecionando...</p>
         </div>
       </div>
     );
@@ -92,7 +105,6 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen flex">
-      {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border/40 bg-card">
         <div className="p-6">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
@@ -131,13 +143,12 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="flex items-center justify-between p-4">
           <Link href="/admin/dashboard" className="font-bold">
             NEW SYSTEM
           </Link>
-          
+
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -169,11 +180,7 @@ export default function AdminLayout({
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 lg:pt-0 pt-16">
-        {children}
-      </main>
-
+      <main className="flex-1 lg:pt-0 pt-16">{children}</main>
       <Toaster position="top-right" />
     </div>
   );
