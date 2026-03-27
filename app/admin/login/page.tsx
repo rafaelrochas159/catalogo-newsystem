@@ -7,10 +7,16 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase/client';
-import toast from 'react-hot-toast';
+  import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,7 +30,9 @@ export default function LoginPage() {
   }, []);
 
   const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (session) {
       router.push('/admin/dashboard');
     }
@@ -55,7 +63,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-neon-blue/5">
-      {/* Background Effects */}
+      {/* Efeitos de fundo */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-neon-blue/10 rounded-full blur-[128px]" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neon-purple/10 rounded-full blur-[128px]" />
@@ -74,11 +82,9 @@ export default function LoginPage() {
               </div>
             </div>
             <CardTitle className="text-2xl">Painel Administrativo</CardTitle>
-            <CardDescription>
-              Faça login para acessar o painel
-            </CardDescription>
+            <CardDescription>Faça login para acessar o painel</CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -138,8 +144,8 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="text-sm text-muted-foreground hover:text-neon-blue transition-colors"
               >
                 Voltar para o site
