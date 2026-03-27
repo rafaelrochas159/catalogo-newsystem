@@ -56,7 +56,9 @@ export async function GET(_request: Request, { params }: Params) {
           external_reference: payment.external_reference || pedido.numero_pedido,
           qr_code: qrCodeBase64,
           pix_copia_cola: qrCode,
-          status_pagamento: payment.status,
+          // Normalize the status for the pagamentos table as well. This ensures
+          // consistency between pedidos.status_pagamento and pagamentos.status_pagamento.
+          status_pagamento: mapped.statusPagamento,
           valor: pedido.total,
           payload_gateway: payment,
           updated_at: new Date().toISOString(),

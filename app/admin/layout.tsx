@@ -77,7 +77,17 @@ export default function AdminLayout({
   }
 
   if (!isAuthenticated) {
-    return null;
+    // Show a minimal loading state when redirecting unauthorized users. Returning null causes
+    // a blank screen, so instead render a spinner and a hint to the user. The router push
+    // will still navigate away to the login page.
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neon-blue" />
+          <p className="text-sm text-muted-foreground">Redirecionando…</p>
+        </div>
+      </div>
+    );
   }
 
   return (
