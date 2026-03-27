@@ -132,7 +132,12 @@ export function formatCNPJ(cnpj: string): string {
 }
 
 export function getWhatsAppLink(phone: string, message?: string): string {
-  const cleanedPhone = phone.replace(/\D/g, '');
+  let cleanedPhone = phone.replace(/\D/g, '');
+
+  if (cleanedPhone.length === 10 || cleanedPhone.length === 11) {
+    cleanedPhone = `55${cleanedPhone}`;
+  }
+
   const encodedMessage = message ? encodeURIComponent(message) : '';
   return `https://wa.me/${cleanedPhone}${encodedMessage ? `?text=${encodedMessage}` : ''}`;
 }

@@ -71,6 +71,18 @@ interface PixPaymentData {
   status_pagamento: string;
 }
 
+interface PixOrderSnapshot {
+  customer: CustomerData;
+  items: Array<{
+    product_name: string;
+    sku: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+  }>;
+  total: number;
+}
+
 function playApprovedTone() {
   if (typeof window === 'undefined') return;
 
@@ -121,6 +133,7 @@ export function CartDrawer() {
   const [lastFetchedCep, setLastFetchedCep] = useState('');
   const [cepError, setCepError] = useState('');
   const [pixPayment, setPixPayment] = useState<PixPaymentData | null>(null);
+  const [pixOrderSnapshot, setPixOrderSnapshot] = useState<PixOrderSnapshot | null>(null);
   const [isPollingPayment, setIsPollingPayment] = useState(false);
   const [pixApproved, setPixApproved] = useState(false);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
@@ -246,6 +259,7 @@ export function CartDrawer() {
     setLastFetchedCep('');
     setCepError('');
     setPixPayment(null);
+    setPixOrderSnapshot(null);
     setPixApproved(false);
     setPaymentMethod('pix');
     setShowCheckoutForm(false);
@@ -363,6 +377,18 @@ export function CartDrawer() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Falha ao gerar o Pix.');
 
+      setPixOrderSnapshot({
+        customer: { ...customer },
+        items: orderItems.map((item) => ({
+          product_name: item.product_name,
+          sku: item.sku,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.total_price,
+        })),
+        total,
+      });
+
       setPixPayment({
         numero_pedido: data.numero_pedido,
         checkout_token: data.checkout_token || null,
@@ -380,6 +406,34 @@ export function CartDrawer() {
     } finally {
       setIsCheckingOut(false);
     }
+  };
+
+
+  const buildApprovedWhatsAppLink = () => {
+    if (!pixPayment || !pixOrderSnapshot?.customer.telefone) return null;
+
+    const itemsText = pixOrderSnapshot.items.length
+      ? pixOrderSnapshot.items
+          .map((item) => `- ${item.product_name}${item.sku ? ` (${item.sku})` : ''} | Qtd: ${item.quantity}`)
+          .join('\n')
+      : '- Itens do pedido indisponíveis';
+
+    const message = [
+      'Olá! Seu pagamento foi aprovado com sucesso ✅',
+      '',
+      `Pedido: ${pixPayment.numero_pedido}`,
+      `Cliente: ${pixOrderSnapshot.customer.nome}`,
+      pixOrderSnapshot.customer.email ? `Email: ${pixOrderSnapshot.customer.email}` : '',
+      '',
+      'Itens do pedido:',
+      itemsText,
+      '',
+      `Total pago: ${formatPrice(pixPayment.valor || pixOrderSnapshot.total)}`,
+      '',
+      'Seu pedido foi confirmado e já está em andamento.'
+    ].filter(Boolean).join('\n');
+
+    return getWhatsAppLink(pixOrderSnapshot.customer.telefone, message);
   };
 
   const handleCopyPix = async () => {
@@ -509,12 +563,28 @@ export function CartDrawer() {
                     </Button>
 
                     {pixApproved && (
-                      <Button className="w-full bg-neon-blue text-black hover:bg-neon-blue/90" onClick={() => {
-                        resetCheckout();
-                        setIsOpen(false);
-                      }}>
-                        Pedido pago. Fechar checkout
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          className="w-full bg-green-500 text-black hover:bg-green-500/90"
+                          onClick={() => {
+                            const whatsappLink = buildApprovedWhatsAppLink();
+                            if (!whatsappLink) {
+                              toast.error('Telefone do cliente não encontrado para abrir o WhatsApp.');
+                              return;
+                            }
+                            openWhatsApp(whatsappLink);
+                          }}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Enviar pedido aprovado para WhatsApp
+                        </Button>
+                        <Button className="w-full bg-neon-blue text-black hover:bg-neon-blue/90" onClick={() => {
+                          resetCheckout();
+                          setIsOpen(false);
+                        }}>
+                          Pedido pago. Fechar checkout
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
