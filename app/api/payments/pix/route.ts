@@ -214,11 +214,7 @@ export async function POST(request: Request) {
       checkout_token: checkoutToken,
       pedido_id: pedido.id,
       valor: Number(body.total),
-      // Expose a normalized payment status to the client. The raw status from
-      // Mercado Pago can be values like 'in_process', 'authorized', etc.
-      // Using the mapped value ensures the frontend only has to check for
-      // 'approved' versus other states.
-      status_pagamento: mapped.statusPagamento,
+      status_pagamento: payment.status,
       payment_id_gateway: String(payment.id),
       external_reference: numeroPedido,
       qr_code_base64: qrCodeBase64,

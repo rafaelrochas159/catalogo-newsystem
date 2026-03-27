@@ -410,23 +410,19 @@ export function CartDrawer() {
 
 
   const buildApprovedWhatsAppLink = () => {
-    // Ensure we have both the payment and snapshot available
-    if (!pixPayment || !pixOrderSnapshot) return null;
+    if (!pixPayment || !pixOrderSnapshot?.customer.telefone) return null;
 
-    // Build a text list of the items with quantity and optional SKU
     const itemsText = pixOrderSnapshot.items.length
       ? pixOrderSnapshot.items
           .map((item) => `- ${item.product_name}${item.sku ? ` (${item.sku})` : ''} | Qtd: ${item.quantity}`)
           .join('\n')
       : '- Itens do pedido indisponíveis';
 
-    // Compose the WhatsApp message including client details and total value
-    const messageLines = [
-      'Olá! Pagamento aprovado ✅',
+    const message = [
+      'Olá! Seu pagamento foi aprovado com sucesso ✅',
       '',
       `Pedido: ${pixPayment.numero_pedido}`,
       `Cliente: ${pixOrderSnapshot.customer.nome}`,
-      `Telefone: ${pixOrderSnapshot.customer.telefone}`,
       pixOrderSnapshot.customer.email ? `Email: ${pixOrderSnapshot.customer.email}` : '',
       '',
       'Itens do pedido:',
@@ -435,12 +431,9 @@ export function CartDrawer() {
       `Total pago: ${formatPrice(pixPayment.valor || pixOrderSnapshot.total)}`,
       '',
       'Seu pedido foi confirmado e já está em andamento.'
-    ].filter(Boolean);
+    ].filter(Boolean).join('\n');
 
-    const message = messageLines.join('\n');
-
-    // Use the company WhatsApp number defined in constants so the buyer can notify the seller
-    return getWhatsAppLink(COMPANY_INFO.whatsapp, message);
+    return getWhatsAppLink(pixOrderSnapshot.customer.telefone, message);
   };
 
   const handleCopyPix = async () => {

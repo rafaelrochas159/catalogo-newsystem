@@ -138,49 +138,29 @@ export async function getPaymentById(paymentId: string | number): Promise<Mercad
 
 export function mapMercadoPagoStatus(status?: string) {
   switch (status) {
-    // Payment has been fully approved/credited.
     case 'approved':
-    case 'accredited':
-    case 'accredited_waiting_for_charger':
       return {
         statusPedido: 'pago',
         statusPagamento: 'approved',
         statusLegado: 'confirmed',
       };
-    // Payment authorized but not yet captured. For PIX this is equivalent to approved
-    // because PIX payments are immediately captured once funds are transferred.
-    case 'authorized':
-      return {
-        statusPedido: 'pago',
-        statusPagamento: 'approved',
-        statusLegado: 'confirmed',
-      };
-    // Payment is pending or still in process of verification/mediation.
     case 'pending':
     case 'in_process':
-    case 'in_mediation':
-    case 'pending_contingency':
-    case 'pending_review_manual':
       return {
         statusPedido: 'aguardando_pagamento',
-        statusPagamento: 'pending',
+        statusPagamento: status || 'pending',
         statusLegado: 'pending',
       };
-    // Payment was rejected, cancelled or refunded.
     case 'rejected':
     case 'cancelled':
-    case 'cancelled_by_collector':
-    case 'cancelled_by_admin':
     case 'refunded':
     case 'charged_back':
-    case 'partially_refunded':
       return {
         statusPedido: 'cancelado',
-        statusPagamento: status || 'cancelled',
+        statusPagamento: status,
         statusLegado: 'cancelled',
       };
     default:
-      // Fallback: treat unknown statuses as pending to avoid false negatives.
       return {
         statusPedido: 'aguardando_pagamento',
         statusPagamento: status || 'pending',

@@ -69,9 +69,7 @@ export async function POST(request: Request) {
       external_reference: numeroPedido,
       qr_code: payment.point_of_interaction?.transaction_data?.qr_code_base64 || null,
       pix_copia_cola: payment.point_of_interaction?.transaction_data?.qr_code || null,
-      // Store the normalized status in pagamentos as well. This makes it
-      // consistent with pedidos.status_pagamento and prevents mismatches.
-      status_pagamento: mapped.statusPagamento,
+      status_pagamento: payment.status,
       valor: pedido.total,
       payload_gateway: payment,
       updated_at: new Date().toISOString(),

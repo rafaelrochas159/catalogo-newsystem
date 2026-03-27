@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import {
-  LayoutDashboard,
-  Package,
-  Grid3X3,
-  ShoppingCart,
+import { motion } from 'framer-motion';
+import { 
+  LayoutDashboard, 
+  Package, 
+  Grid3X3, 
+  ShoppingCart, 
   Upload,
   LogOut,
   Menu,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -34,11 +36,13 @@ export default function AdminLayout({
   const pathname = usePathname();
   const isLoginPage = pathname === '/admin/login';
 
+  // When the current page is the login page, skip loading and auth
   const [isLoading, setIsLoading] = useState(!isLoginPage);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     if (isLoginPage) {
+      // Don't run auth checks on login page
       setIsLoading(false);
       return;
     }
@@ -51,6 +55,7 @@ export default function AdminLayout({
 
         if (!session) {
           setIsAuthenticated(false);
+          // Use replace to prevent pushing another entry onto history
           router.replace('/admin/login');
           return;
         }
@@ -78,8 +83,7 @@ export default function AdminLayout({
     }
   };
 
-  // IMPORTANTE:
-  // a rota /admin/login precisa passar direto, sem proteção
+  // Allow the login page to bypass the admin layout
   if (isLoginPage) {
     return <>{children}</>;
   }
@@ -105,6 +109,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen flex">
+      {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border/40 bg-card">
         <div className="p-6">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
@@ -143,12 +148,13 @@ export default function AdminLayout({
         </div>
       </aside>
 
+      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="flex items-center justify-between p-4">
           <Link href="/admin/dashboard" className="font-bold">
             NEW SYSTEM
           </Link>
-
+          
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -180,7 +186,11 @@ export default function AdminLayout({
         </div>
       </div>
 
-      <main className="flex-1 lg:pt-0 pt-16">{children}</main>
+      {/* Main Content */}
+      <main className="flex-1 lg:pt-0 pt-16">
+        {children}
+      </main>
+
       <Toaster position="top-right" />
     </div>
   );
