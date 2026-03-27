@@ -155,6 +155,12 @@ interface AddressData {
   complemento?: string;
 }
 
+interface CustomerData {
+  nome?: string;
+  telefone?: string;
+  email?: string;
+}
+
 export function generateOrderMessage(order: {
   orderNumber: string;
   catalogType: string;
@@ -163,43 +169,85 @@ export function generateOrderMessage(order: {
   discount: number;
   total: number;
   address?: AddressData;
+  customer?: CustomerData;
+  paymentMethod?: string;
 }): string {
   const typeLabel = order.catalogType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada';
-  
-  let message = `🛒 *NOVO PEDIDO - NEW SYSTEM*\n`;
-  message += `📋 Pedido: ${order.orderNumber}\n`;
-  message += `📦 Tipo: ${typeLabel}\n\n`;
-  
-  message += `*ITENS:*\n`;
+
+  let message = `🛒 *NOVO PEDIDO - NEW SYSTEM*
+`;
+  message += `📋 Pedido: ${order.orderNumber}
+`;
+  message += `📦 Tipo: ${typeLabel}
+`;
+  if (order.paymentMethod) {
+    message += `💳 Pagamento: ${order.paymentMethod}
+`;
+  }
+  message += `
+`;
+
+  if (order.customer?.nome || order.customer?.telefone || order.customer?.email) {
+    message += `*CLIENTE:*
+`;
+    if (order.customer.nome) message += `👤 ${order.customer.nome}
+`;
+    if (order.customer.telefone) message += `📞 ${order.customer.telefone}
+`;
+    if (order.customer.email) message += `✉️ ${order.customer.email}
+`;
+    message += `
+`;
+  }
+
+  message += `*ITENS:*
+`;
   order.items.forEach((item, index) => {
-    message += `${index + 1}. ${item.name}\n`;
-    message += `   SKU: ${item.sku}\n`;
-    message += `   Qtd: ${item.quantity}x\n`;
-    message += `   Unit: ${formatPrice(item.unitPrice)}\n`;
-    message += `   Total: ${formatPrice(item.totalPrice)}\n\n`;
+    message += `${index + 1}. ${item.name}
+`;
+    message += `   SKU: ${item.sku}
+`;
+    message += `   Qtd: ${item.quantity}x
+`;
+    message += `   Unit: ${formatPrice(item.unitPrice)}
+`;
+    message += `   Total: ${formatPrice(item.totalPrice)}
+
+`;
   });
-  
-  message += `*RESUMO:*\n`;
-  message += `Subtotal: ${formatPrice(order.subtotal)}\n`;
+
+  message += `*RESUMO:*
+`;
+  message += `Subtotal: ${formatPrice(order.subtotal)}
+`;
   if (order.discount > 0) {
-    message += `Desconto: -${formatPrice(order.discount)}\n`;
+    message += `Desconto: -${formatPrice(order.discount)}
+`;
   }
-  message += `*TOTAL: ${formatPrice(order.total)}*\n\n`;
-  
-  // Adicionar endereço se fornecido
+  message += `*TOTAL: ${formatPrice(order.total)}*
+
+`;
+
   if (order.address) {
-    message += `*ENDEREÇO DE ENTREGA:*\n`;
-    message += `📮 CEP: ${order.address.cep}\n`;
-    message += `📍 ${order.address.rua}, ${order.address.numero}\n`;
-    message += `🏘️ ${order.address.bairro}\n`;
-    message += `🌆 ${order.address.cidade} - ${order.address.estado}\n`;
+    message += `*ENDEREÇO DE ENTREGA:*
+`;
+    message += `📮 CEP: ${order.address.cep}
+`;
+    message += `📍 ${order.address.rua}, ${order.address.numero}
+`;
+    message += `🏘️ ${order.address.bairro}
+`;
+    message += `🌆 ${order.address.cidade} - ${order.address.estado}
+`;
     if (order.address.complemento) {
-      message += `📝 ${order.address.complemento}\n`;
+      message += `📝 ${order.address.complemento}
+`;
     }
-    message += `\n`;
+    message += `
+`;
   }
-  
+
   message += `Aguardo confirmação! ✅`;
-  
+
   return message;
 }

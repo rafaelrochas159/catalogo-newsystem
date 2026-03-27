@@ -147,6 +147,9 @@ export interface Pedido {
   nome_cliente?: string;
   telefone_cliente?: string;
   email_cliente?: string;
+  cliente_nome?: string;
+  cliente_telefone?: string;
+  cliente_email?: string;
   tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA';
   subtotal: number;
   valor_desconto: number;
@@ -154,10 +157,33 @@ export interface Pedido {
   percentual_desconto: number;
   total: number;
   itens: ItemPedido[];
-  status: 'pending' | 'confirmed' | 'cancelled';
-  enviado_whatsapp: boolean;
-  mensagem_whatsapp?: string;
+  endereco?: {
+    cep: string;
+    rua: string;
+    numero: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+    complemento?: string;
+  } | null;
+  checkout_token?: string | null;
+  status: 'pending' | 'confirmed' | 'cancelled' | string;
+  status_pedido?: string | null;
+  status_pagamento?: string | null;
+  forma_pagamento?: string | null;
+  gateway?: string | null;
+  payment_id_gateway?: string | null;
+  external_reference?: string | null;
+  pix_qr_code?: string | null;
+  pix_copia_cola?: string | null;
+  payment_gateway_response?: unknown;
+  status_gateway_detalhe?: string | null;
+  paid_at?: string | null;
+  enviado_whatsapp?: boolean;
+  whatsapp_enviado?: boolean;
+  mensagem_whatsapp?: string | null;
   created_at: string;
+  updated_at?: string | null;
 
   // aliases em inglês
   order_number?: string;

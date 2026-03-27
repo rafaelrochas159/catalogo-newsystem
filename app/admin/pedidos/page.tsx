@@ -2,23 +2,43 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, MessageCircle, Trash2 } from 'lucide-react';
+import { Eye, Trash2, Copy, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase/client';
 import { Pedido } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+
+function statusBadge(label: string, variant: 'default' | 'secondary' | 'destructive' = 'secondary') {
+  return <Badge variant={variant}>{label}</Badge>;
+}
+
+function paymentStatusBadge(status?: string | null) {
+  switch (status) {
+    case 'approved': return statusBadge('Aprovado', 'default');
+    case 'pending':
+    case 'in_process': return statusBadge('Aguardando', 'secondary');
+    case 'rejected':
+    case 'cancelled': return statusBadge('Recusado', 'destructive');
+    case 'not_applicable': return statusBadge('Sem gateway', 'secondary');
+    default: return statusBadge(status || '—', 'secondary');
+  }
+}
+
+function orderStatusBadge(status?: string | null) {
+  switch (status) {
+    case 'pago': return statusBadge('Pago', 'default');
+    case 'aguardando_pagamento': return statusBadge('Aguardando pagamento', 'secondary');
+    case 'aguardando_contato': return statusBadge('Aguardando contato', 'secondary');
+    case 'cancelado': return statusBadge('Cancelado', 'destructive');
+    case 'erro_pagamento': return statusBadge('Erro no pagamento', 'destructive');
+    default: return statusBadge(status || '—', 'secondary');
+  }
+}
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Pedido[]>([]);
@@ -29,158 +49,101 @@ export default function OrdersPage() {
     fetchOrders();
   }, []);
 
-  const fetchOrders = async () => {
+  async function fetchOrders() {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('pedidos')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data as Pedido[] || []);
+      setOrders((data as Pedido[]) || []);
     } catch (error) {
-      toast.error('Erro ao carregar pedidos');
+      toast.error('Erro ao carregar pedidos.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
-      pending: 'secondary',
-      confirmed: 'default',
-      cancelled: 'destructive',
-    };
-    const labels: Record<string, string> = {
-      pending: 'Pendente',
-      confirmed: 'Confirmado',
-      cancelled: 'Cancelado',
-    };
-    return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
-  };
-
-  const handleDeleteOrder = async (orderId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este pedido?\n\nEsta ação não pode ser desfeita.')) {
-      return;
-    }
+  async function handleDeleteOrder(orderId: string) {
+    if (!confirm('Tem certeza que deseja excluir este pedido?')) return;
 
     try {
-      console.log('Tentando excluir pedido:', orderId);
-      
-      // Tentar excluir
-      const { data, error } = await supabase
-        .from('pedidos')
-        .delete()
-        .eq('id', orderId)
-        .select();
-
-      if (error) {
-        console.error('Erro Supabase ao excluir:', error);
-        toast.error(`Erro ao excluir: ${error.message}`);
-        return;
-      }
-
-      console.log('Resposta da exclusão:', data);
-      
-      if (!data || data.length === 0) {
-        console.warn('Nenhum pedido foi excluído - verifique as políticas do Supabase');
-        toast.error('Pedido não pôde ser excluído. Verifique as permissões no Supabase.');
-        return;
-      }
-
-      console.log('Pedido excluído com sucesso:', data);
-      toast.success('Pedido excluído com sucesso!');
-      
-      // Atualiza a lista removendo o pedido localmente
-      setOrders(prev => prev.filter(o => o.id !== orderId));
-      
-      // Se o pedido excluído estava selecionado no modal, fecha o modal
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder(null);
-      }
-      
-      // Recarrega a lista do servidor para garantir sincronização
-      setTimeout(() => {
-        fetchOrders();
-      }, 500);
+      const { error } = await supabase.from('pedidos').delete().eq('id', orderId);
+      if (error) throw error;
+      toast.success('Pedido excluído.');
+      setOrders((prev) => prev.filter((item) => item.id !== orderId));
+      if (selectedOrder?.id === orderId) setSelectedOrder(null);
     } catch (error: any) {
-      console.error('Delete error:', error);
-      toast.error(`Erro ao excluir pedido: ${error.message}`);
+      toast.error(error.message || 'Erro ao excluir pedido.');
     }
-  };
+  }
+
+  async function copyValue(value?: string | null, label = 'Valor') {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copiado.`);
+    } catch {
+      toast.error(`Não foi possível copiar ${label.toLowerCase()}.`);
+    }
+  }
 
   return (
     <div className="p-6 lg:p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Pedidos</h1>
-          <p className="text-muted-foreground">
-            Visualize todos os pedidos recebidos
-          </p>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Pedidos</h1>
+            <p className="text-muted-foreground">Acompanhe pedido, pagamento, Pix e gateway do Mercado Pago.</p>
+          </div>
+          <Button variant="outline" onClick={fetchOrders}><RefreshCcw className="h-4 w-4 mr-2" />Atualizar</Button>
         </div>
 
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Número</TableHead>
                   <TableHead>Data</TableHead>
-                  <TableHead>Tipo</TableHead>
+                  <TableHead>Cliente</TableHead>
                   <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Pedido</TableHead>
+                  <TableHead>Pagamento</TableHead>
+                  <TableHead>Forma</TableHead>
+                  <TableHead>Gateway ID</TableHead>
+                  <TableHead>Pago em</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      Carregando...
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={10} className="text-center py-8">Carregando...</TableCell></TableRow>
                 ) : orders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      Nenhum pedido encontrado.
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={10} className="text-center py-8">Nenhum pedido encontrado.</TableCell></TableRow>
                 ) : (
                   orders.map((order) => (
                     <TableRow key={order.id}>
-                      <TableCell className="font-medium">
-                        {order.numero_pedido}
-                      </TableCell>
+                      <TableCell className="font-medium">{order.numero_pedido}</TableCell>
+                      <TableCell>{new Date(order.created_at).toLocaleString('pt-BR')}</TableCell>
                       <TableCell>
-                        {new Date(order.created_at).toLocaleDateString('pt-BR')}
+                        <div className="text-sm">
+                          <div className="font-medium">{order.cliente_nome || '—'}</div>
+                          <div className="text-muted-foreground">{order.cliente_email || '—'}</div>
+                        </div>
                       </TableCell>
-                      <TableCell>
-                        {order.tipo_catalogo === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
-                      </TableCell>
-                      <TableCell className="font-bold text-neon-blue">
-                        {formatPrice(order.total)}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell className="font-bold text-neon-blue">{formatPrice(order.total)}</TableCell>
+                      <TableCell>{orderStatusBadge(order.status_pedido || order.status)}</TableCell>
+                      <TableCell>{paymentStatusBadge(order.status_pagamento)}</TableCell>
+                      <TableCell>{order.forma_pagamento || '—'}</TableCell>
+                      <TableCell className="max-w-[160px] truncate">{order.payment_id_gateway || '—'}</TableCell>
+                      <TableCell>{order.paid_at ? new Date(order.paid_at).toLocaleString('pt-BR') : '—'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setSelectedOrder(order)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteOrder(order.id)}
-                            className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setSelectedOrder(order)}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteOrder(order.id)} className="text-red-500 hover:text-red-600 hover:bg-red-500/10"><Trash2 className="h-4 w-4" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -192,95 +155,76 @@ export default function OrdersPage() {
         </Card>
       </motion.div>
 
-      {/* Order Details Dialog */}
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Pedido {selectedOrder?.numero_pedido}</DialogTitle>
           </DialogHeader>
-          
           {selectedOrder && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Data</p>
-                  <p className="font-medium">
-                    {new Date(selectedOrder.created_at).toLocaleDateString('pt-BR')}
-                  </p>
+            <div className="space-y-6 text-sm">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-lg border p-4 space-y-2">
+                  <p className="text-muted-foreground">Cliente</p>
+                  <p className="font-medium">{selectedOrder.cliente_nome || '—'}</p>
+                  <p>{selectedOrder.cliente_email || '—'}</p>
+                  <p>{selectedOrder.cliente_telefone || '—'}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Tipo</p>
-                  <p className="font-medium">
-                    {selectedOrder.tipo_catalogo === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
-                  </p>
+                <div className="rounded-lg border p-4 space-y-2">
+                  <p className="text-muted-foreground">Pagamento</p>
+                  <div className="flex flex-wrap gap-2">
+                    {orderStatusBadge(selectedOrder.status_pedido || selectedOrder.status)}
+                    {paymentStatusBadge(selectedOrder.status_pagamento)}
+                  </div>
+                  <p>Forma: <strong>{selectedOrder.forma_pagamento || '—'}</strong></p>
+                  <p>Gateway: <strong>{selectedOrder.gateway || '—'}</strong></p>
+                  <p>Payment ID: <strong>{selectedOrder.payment_id_gateway || '—'}</strong></p>
+                  <p>External Ref: <strong>{selectedOrder.external_reference || '—'}</strong></p>
+                  {selectedOrder.paid_at && <p>Pago em: <strong>{new Date(selectedOrder.paid_at).toLocaleString('pt-BR')}</strong></p>}
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm text-muted-foreground">Itens do Pedido</p>
-                  <Badge variant="outline">
-                    {selectedOrder.itens.reduce((acc: number, item: any) => acc + (Number(item.quantidade || item.quantity) || 0), 0)} itens no total
-                  </Badge>
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium">Itens do pedido</p>
+                  <Badge variant="outline">{selectedOrder.itens?.reduce((acc, item) => acc + Number(item.quantity || 0), 0)} itens</Badge>
                 </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {selectedOrder.itens.map((item: any, index: number) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                      <div className="flex-1">
-                        <p className="font-medium">{item.nome || item.product_name}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>SKU: {item.sku}</span>
-                          <span>|</span>
-                          <span>{Number(item.quantidade || item.quantity || 0)} x {formatPrice(item.preco || item.unit_price)}</span>
-                        </div>
+                <div className="space-y-2">
+                  {selectedOrder.itens?.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg gap-3">
+                      <div>
+                        <p className="font-medium">{item.product_name}</p>
+                        <p className="text-muted-foreground">SKU: {item.sku} • {item.quantity}x {formatPrice(item.unit_price)}</p>
                       </div>
-                      <p className="font-bold text-neon-blue">{formatPrice(item.total || item.total_price)}</p>
+                      <p className="font-bold text-neon-blue">{formatPrice(item.total_price)}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="border-t pt-4">
-                <div className="flex justify-between mb-2">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatPrice(selectedOrder.subtotal)}</span>
-                </div>
-                {(selectedOrder.desconto_valor || 0) > 0 && (
-                  <div className="flex justify-between mb-2">
-                    <span className="text-muted-foreground">Desconto</span>
-                    <span className="text-green-500">
-                      -{formatPrice(selectedOrder.desconto_valor || 0)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-neon-blue">{formatPrice(selectedOrder.total)}</span>
-                </div>
+              <div className="rounded-lg border p-4 space-y-2">
+                <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(selectedOrder.subtotal)}</span></div>
+                <div className="flex justify-between"><span>Desconto</span><span>{selectedOrder.desconto_valor ? `-${formatPrice(selectedOrder.desconto_valor)}` : '—'}</span></div>
+                <div className="flex justify-between text-lg font-bold"><span>Total</span><span className="text-neon-blue">{formatPrice(selectedOrder.total)}</span></div>
               </div>
 
-              {selectedOrder.mensagem_whatsapp && (
-                <div className="p-4 bg-green-500/10 rounded-lg">
-                  <p className="text-sm text-green-500 mb-2">Mensagem enviada no WhatsApp</p>
-                  <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
-                    {selectedOrder.mensagem_whatsapp}
-                  </pre>
+              {selectedOrder.pix_copia_cola && (
+                <div className="rounded-lg border p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium">Pix copia e cola</p>
+                    <Button variant="outline" size="sm" onClick={() => copyValue(selectedOrder.pix_copia_cola, 'Pix')}><Copy className="h-4 w-4 mr-2" />Copiar</Button>
+                  </div>
+                  <div className="text-xs break-all bg-muted rounded-lg p-3">{selectedOrder.pix_copia_cola}</div>
                 </div>
               )}
 
-              <DialogFooter>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    handleDeleteOrder(selectedOrder.id);
-                    setSelectedOrder(null);
-                  }}
-                  className="gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Excluir Pedido
-                </Button>
-              </DialogFooter>
+              {selectedOrder.pix_qr_code && (
+                <div className="rounded-lg border p-4 space-y-3">
+                  <p className="font-medium">QR Code Pix</p>
+                  <div className="bg-white rounded-xl p-4 max-w-sm">
+                    <img src={`data:image/png;base64,${selectedOrder.pix_qr_code}`} alt="QR Code Pix" className="w-full" />
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
