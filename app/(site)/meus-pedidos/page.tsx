@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatPrice } from '@/lib/utils';
+import { ProductCard } from '@/components/product/ProductCard';
+import { Produto } from '@/types';
 
 interface OrderItem {
   product_name?: string;
@@ -104,9 +106,14 @@ export default function MyOrdersPage() {
     }
   }, []);
   const [orders, setOrders] = useState<OrderData[]>([]);
+  const [recommended, setRecommended] = useState<Produto[]>([]);
+  // Estado de carregamento para produtos recomendados não é usado na interface,
+  // por isso a variável é prefixada com underscore para evitar avisos de variável não utilizada.
+  const [_loadingRecommended, setLoadingRecommended] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const isEmailValid = () => {
     return /.+@.+\..+/.test(email.trim());
@@ -128,7 +135,11 @@ export default function MyOrdersPage() {
         setError(json.error || 'Erro ao buscar pedidos');
         setOrders([]);
       } else {
-        setOrders((json.data as OrderData[]) || []);
+        const fetchedOrders = (json.data as OrderData[]) || [];
+        setOrders(fetchedOrders);
+        // Após buscar os pedidos, tenta atualizar o status de cada um deles.
+        // Isso garante que um pagamento recentemente aprovado seja refletido imediatamente.
+        updateOrdersStatus(fetchedOrders);
       }
     } catch (err) {
       setError('Erro inesperado ao buscar pedidos.');
@@ -138,9 +149,89 @@ export default function MyOrdersPage() {
     }
   };
 
+  /**
+   * Atualiza o status de todos os pedidos fornecidos. Para cada pedido que não
+   * tenha o status de pagamento aprovado, faz uma chamada ao endpoint
+   * `/api/payments/status/[numeroPedido]` que sincroniza o status com o
+   * Mercado Pago e atualiza o banco. Em seguida, atualiza o estado local
+   * com os novos dados de status. Se nenhum pedido for fornecido, usa o
+   * estado atual `orders`.
+   */
+  const updateOrdersStatus = async (currentOrders: OrderData[] = orders) => {
+    if (!currentOrders || currentOrders.length === 0) return;
+    try {
+      setUpdatingStatus(true);
+      const updated = await Promise.all(
+        currentOrders.map(async (order) => {
+          // Se já estiver aprovado/pago, não precisa atualizar
+          const isApproved =
+            order.status_pagamento === 'approved' ||
+            order.status_pedido === 'pago' ||
+            order.status_pedido === 'confirmado';
+          if (isApproved) return order;
+          try {
+            const res = await fetch(`/api/payments/status/${encodeURIComponent(order.numero_pedido)}`);
+            const json = await res.json();
+            if (res.ok && json.status_pagamento) {
+              return {
+                ...order,
+                status_pagamento: json.status_pagamento as any,
+                status_pedido: json.status_pedido as any,
+              };
+            }
+          } catch (e) {
+            // ignore errors silently
+          }
+          return order;
+        }),
+      );
+      setOrders(updated);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  // Busca produtos recomendados para exibir no topo da página. É executado
+  // apenas uma vez no carregamento do componente.
+  useEffect(() => {
+    async function fetchRecommended() {
+      try {
+        setLoadingRecommended(true);
+        const res = await fetch('/api/recommendations');
+        const json = await res.json();
+        if (res.ok) {
+          setRecommended((json.data as Produto[]) || []);
+        }
+      } catch (e) {
+        // ignore errors
+      } finally {
+        setLoadingRecommended(false);
+      }
+    }
+    fetchRecommended();
+  }, []);
+
   return (
-    <div className="container max-w-3xl mx-auto py-8 px-4">
+    <div className="container max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Meus Pedidos</h1>
+
+      {/* Seção de produtos recomendados */}
+      {recommended.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span role="img" aria-label="fogo">🔥</span> Aproveite e compre mais
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {recommended.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product as any}
+                catalogType={(product.tipo_catalogo as any) || 'UNITARIO'}
+              />
+            ))}
+          </div>
+        </section>
+      )}
       <div className="space-y-2 mb-6">
         <Label htmlFor="email">E‑mail utilizado na compra</Label>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -158,6 +249,18 @@ export default function MyOrdersPage() {
         </div>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
+      {/* Botão manual para atualizar o status dos pedidos */}
+      {orders.length > 0 && (
+        <div className="mb-4 flex justify-end">
+          <Button
+            variant="outline"
+            onClick={() => updateOrdersStatus()}
+            disabled={updatingStatus}
+          >
+            {updatingStatus ? 'Atualizando...' : 'Atualizar status'}
+          </Button>
+        </div>
+      )}
       {searched && !loading && orders.length === 0 && !error && (
         <p className="text-muted-foreground">Nenhum pedido encontrado para o e‑mail informado.</p>
       )}
@@ -186,6 +289,11 @@ export default function MyOrdersPage() {
                     </span>
                   )}
                 </CardDescription>
+                {(order.status_pagamento === 'approved' || order.status_pedido === 'pago' || order.status_pedido === 'confirmado') && (
+                  <p className="mt-2 text-sm font-medium text-green-600 flex items-center gap-1">
+                    ✅ Pagamento aprovado
+                  </p>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="overflow-x-auto">
