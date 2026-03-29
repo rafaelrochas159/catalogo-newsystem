@@ -13,8 +13,12 @@ export async function GET() {
   try {
     const supabase = createServerClient();
 
-    // Query for featured and best seller products first
-    const { data: featured, error: featuredError } = await supabase
+    // Busca somente produtos marcados como destaque ou mais vendidos e que estejam ativos.
+    // Dessa forma, o administrador controla exatamente quais itens aparecem na seção
+    // "Aproveite e compre mais" pelo painel de produtos (tornando produtos
+    // "Mais Vendido" ou "Em Destaque"). Se nenhum produto estiver marcado,
+    // a lista retornará vazia e a seção não será exibida no front-end.
+    const { data: recommended, error } = await supabase
       .from('produtos')
       .select('*')
       .eq('is_active', true)
@@ -24,34 +28,11 @@ export async function GET() {
       .order('created_at', { ascending: false })
       .limit(8);
 
-    if (featuredError) {
-      console.error('Erro ao buscar produtos recomendados:', featuredError);
+    if (error) {
+      console.error('Erro ao buscar produtos recomendados:', error);
       return NextResponse.json({ error: 'Erro ao buscar produtos' }, { status: 500 });
     }
-
-    // If there are fewer than 4 products, fetch additional active products
-    let products = featured || [];
-    if (products.length < 4) {
-      const { data: fallback, error: fallbackError } = await supabase
-        .from('produtos')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(8);
-      if (!fallbackError && fallback) {
-        // Merge and dedupe by product id
-        const ids = new Set(products.map((p: any) => p.id));
-        for (const p of fallback) {
-          if (!ids.has(p.id)) {
-            products.push(p);
-            ids.add(p.id);
-          }
-          if (products.length >= 8) break;
-        }
-      }
-    }
-
-    return NextResponse.json({ data: products });
+    return NextResponse.json({ data: recommended || [] });
   } catch (error: any) {
     console.error('Erro inesperado ao buscar produtos recomendados:', error);
     return NextResponse.json({ error: 'Erro inesperado' }, { status: 500 });
