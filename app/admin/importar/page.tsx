@@ -1,0 +1,495 @@
+"use client";
+
+import { useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Upload, FileSpreadsheet, Check, AlertTriangle, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/lib/supabase/client';
+import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
+
+interface ImportRow {
+  name: string;
+  sku: string;
+  description?: string;
+  category_slug: string;
+  price_unit?: number;
+  price_box?: number;
+  stock_unit?: number;
+  stock_box?: number;
+  quantity_per_box?: number;
+  main_image?: string;
+  [key: string]: any;
+}
+
+interface ValidationError {
+  row: number;
+  field: string;
+  message: string;
+}
+
+export default function ImportPage() {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [preview, setPreview] = useState<ImportRow[]>([]);
+  const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [importType, setImportType] = useState<'UNITARIO' | 'CAIXA_FECHADA'>('UNITARIO');
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const validateRow = (row: any, index: number): ValidationError[] => {
+    const errors: ValidationError[] = [];
+
+    if (!row.name) {
+      errors.push({ row: index + 1, field: 'name', message: 'Nome é obrigatório' });
+    }
+    if (!row.sku) {
+      errors.push({ row: index + 1, field: 'sku', message: 'SKU é obrigatório' });
+    }
+    if (!row.category_slug) {
+      errors.push({ row: index + 1, field: 'category_slug', message: 'Categoria é obrigatória' });
+    }
+    
+    // Validação específica por tipo de importação
+    if (importType === 'UNITARIO') {
+      if (!row.price_unit || isNaN(row.price_unit)) {
+        errors.push({ row: index + 1, field: 'price_unit', message: 'Preço unitário é obrigatório para produtos unitários' });
+      }
+    } else {
+      if (!row.price_box || isNaN(row.price_box)) {
+        errors.push({ row: index + 1, field: 'price_box', message: 'Preço da caixa é obrigatório para produtos caixa fechada' });
+      }
+    }
+
+    return errors;
+  };
+
+  const processFile = async (file: File) => {
+    setIsProcessing(true);
+    setErrors([]);
+    setPreview([]);
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      const allErrors: ValidationError[] = [];
+      const validRows: ImportRow[] = [];
+
+      jsonData.forEach((row: any, index) => {
+        const rowErrors = validateRow(row, index);
+        if (rowErrors.length > 0) {
+          allErrors.push(...rowErrors);
+        } else {
+          validRows.push(row as ImportRow);
+        }
+      });
+
+      setErrors(allErrors);
+      setPreview(validRows);
+
+      if (allErrors.length === 0) {
+        toast.success(`${validRows.length} produtos válidos encontrados!`);
+      } else {
+        toast.error(`${allErrors.length} erros encontrados na planilha`);
+      }
+    } catch (error) {
+      toast.error('Erro ao processar arquivo');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      processFile(file);
+    } else {
+      toast.error('Por favor, envie um arquivo Excel (.xlsx ou .xls)');
+    }
+  }, []);
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleImport = async () => {
+    if (preview.length === 0) return;
+
+    setIsProcessing(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const row of preview) {
+      try {
+        // Get category ID
+        const { data: categoria } = await supabase
+          .from('categorias')
+          .select('id')
+          .eq('slug', row.category_slug)
+          .single();
+
+        if (!categoria) {
+          errorCount++;
+          continue;
+        }
+
+        // Create slug
+        const slug = `${row.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${row.sku.toLowerCase()}`;
+
+        const { error } = await supabase.from('produtos').insert({
+          nome: row.name,
+          slug,
+          sku: row.sku.toUpperCase(),
+          descricao: row.description,
+          categoria_id: categoria.id,
+          preco_unitario: row.price_unit,
+          preco_caixa: row.price_box || null,
+          estoque_unitario: row.stock_unit || 0,
+          estoque_caixa: row.stock_box || 0,
+          tipo_catalogo: importType,
+          quantidade_por_caixa: row.quantity_per_box || null,
+          imagem_principal: row.main_image || '/images/placeholder.jpg',
+          is_active: true,
+          is_novo: false,
+          is_promocao: false,
+          is_mais_vendido: false,
+          is_destaque: false,
+        });
+
+        if (error) {
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      } catch (error) {
+        errorCount++;
+      }
+    }
+
+    setIsProcessing(false);
+    
+    if (successCount > 0) {
+      toast.success(`${successCount} produtos importados com sucesso!`);
+    }
+    if (errorCount > 0) {
+      toast.error(`${errorCount} produtos não puderam ser importados`);
+    }
+
+    setPreview([]);
+  };
+
+  const downloadTemplate = () => {
+    const template = [
+      {
+        name: 'Nome do Produto',
+        sku: 'SKU001',
+        description: 'Descrição do produto',
+        category_slug: 'caixa-de-som',
+        price_unit: importType === 'UNITARIO' ? 29.90 : null,
+        price_box: importType === 'CAIXA_FECHADA' ? 299.00 : null,
+        stock_unit: importType === 'UNITARIO' ? 100 : 0,
+        stock_box: importType === 'CAIXA_FECHADA' ? 10 : 0,
+        quantity_per_box: importType === 'CAIXA_FECHADA' ? 10 : null,
+        main_image: '',
+      },
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(template);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template');
+    XLSX.writeFile(wb, 'template-produtos.xlsx');
+  };
+
+  return (
+    <div className="p-6 lg:p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Importar Produtos</h1>
+          <p className="text-muted-foreground">
+            Importe produtos em massa via planilha Excel
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Upload Area */}
+          {/* Tipo de Venda */}
+          <Card className="border-neon-blue/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span>📦 Tipo de Venda</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Selecione para qual catálogo os produtos serão importados:
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setImportType('UNITARIO')}
+                  className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all ${
+                    importType === 'UNITARIO'
+                      ? 'border-blue-500 bg-blue-500/10 text-blue-500'
+                      : 'border-border hover:border-blue-500/50'
+                  }`}
+                >
+                  <div className="font-semibold">Unitário</div>
+                  <div className="text-xs opacity-70">Pedido mínimo R$200</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setImportType('CAIXA_FECHADA')}
+                  className={`flex-1 px-4 py-3 rounded-lg border-2 transition-all ${
+                    importType === 'CAIXA_FECHADA'
+                      ? 'border-purple-500 bg-purple-500/10 text-purple-500'
+                      : 'border-border hover:border-purple-500/50'
+                  }`}
+                >
+                  <div className="font-semibold">Caixa Fechada</div>
+                  <div className="text-xs opacity-70">Venda por caixa</div>
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                💡 <strong>Importante:</strong> Todos os produtos desta planilha serão cadastrados como "{importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}".
+                Para importar produtos de tipos diferentes, faça importações separadas.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload da Planilha</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`
+                  border-2 border-dashed rounded-xl p-12 text-center transition-colors
+                  ${isDragging 
+                    ? 'border-neon-blue bg-neon-blue/5' 
+                    : 'border-border hover:border-muted-foreground'
+                  }
+                `}
+              >
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-medium mb-2">
+                  Arraste e solte sua planilha aqui
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  ou clique para selecionar o arquivo
+                </p>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileInput}
+                  className="hidden"
+                  id="file-input"
+                />
+                <label htmlFor="file-input">
+                  <Button variant="outline" className="cursor-pointer" asChild>
+                    <span>Selecionar Arquivo</span>
+                  </Button>
+                </label>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={downloadTemplate}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Baixar Template
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Instructions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Instruções</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>
+                    <strong>name</strong> - Nome do produto (obrigatório)
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>
+                    <strong>sku</strong> - Código único do produto (obrigatório)
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>
+                    <strong>category_slug</strong> - Slug da categoria (obrigatório)
+                  </span>
+                </li>
+                {importType === 'UNITARIO' ? (
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                    <span>
+                      <strong>price_unit</strong> - Preço unitário (obrigatório)
+                    </span>
+                  </li>
+                ) : (
+                  <>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                      <span>
+                        <strong>price_box</strong> - Preço da caixa (obrigatório)
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                      <span>
+                        <strong>quantity_per_box</strong> - Quantidade de peças por caixa
+                      </span>
+                    </li>
+                  </>
+                )}
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>
+                    <strong>main_image</strong> - URL da imagem principal
+                  </span>
+                </li>
+              </ul>
+              <div className="mt-4 p-3 bg-blue-500/10 rounded-lg">
+                <p className="text-sm text-blue-500">
+                  📌 <strong>Importando como {importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}</strong>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Preview */}
+        {preview.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8"
+          >
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Pré-visualização ({preview.length} produtos)</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Tipo: <Badge variant={importType === 'UNITARIO' ? 'default' : 'secondary'}>
+                      {importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
+                    </Badge>
+                  </p>
+                </div>
+                <Button
+                  onClick={handleImport}
+                  disabled={isProcessing}
+                  className="bg-neon-blue text-black hover:bg-neon-blue/90"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Importar Produtos
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Nome</th>
+                        <th className="text-left py-2">SKU</th>
+                        <th className="text-left py-2">Categoria</th>
+                        <th className="text-right py-2">Preço</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {preview.slice(0, 5).map((row, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="py-2">{row.name}</td>
+                          <td className="py-2">{row.sku}</td>
+                          <td className="py-2">{row.category_slug}</td>
+                          <td className="py-2 text-right">R$ {row.price_unit}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {preview.length > 5 && (
+                    <p className="text-center text-sm text-muted-foreground mt-4">
+                      ... e mais {preview.length - 5} produtos
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Errors */}
+        {errors.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8"
+          >
+            <Card className="border-red-500/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-500">
+                  <AlertTriangle className="h-5 w-5" />
+                  Erros Encontrados ({errors.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {errors.map((error, index) => (
+                    <div
+                      key={index}
+                      className="p-3 bg-red-500/10 rounded-lg text-sm"
+                    >
+                      <span className="font-medium">Linha {error.row}:</span>{' '}
+                      {error.message}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
