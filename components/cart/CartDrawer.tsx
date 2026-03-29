@@ -143,6 +143,9 @@ export function CartDrawer() {
   const [pixOrderSnapshot, setPixOrderSnapshot] = useState<PixOrderSnapshot | null>(null);
   const [isPollingPayment, setIsPollingPayment] = useState(false);
   const [pixApproved, setPixApproved] = useState(false);
+  // Sessão do cliente. Se null, o usuário não está autenticado. É usada
+  // para impedir o checkout de usuários não logados.
+  const [clientSession, setClientSession] = useState<any>(null);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
 
   // Ao montar, se o usuário estiver logado via Supabase, busca seus dados
@@ -177,6 +180,23 @@ export function CartDrawer() {
       }
     }
     loadCustomerFromSession();
+  }, []);
+
+  // Observa a sessão do usuário para atualizar o estado clientSession. Isso
+  // garante que o componente saiba se o cliente está logado e possa restringir
+  // o checkout para usuários autenticados. Tipamos explicitamente os
+  // retornos para evitar erros de compilação.
+  useEffect(() => {
+    supabase.auth.getSession().then((res: any) => {
+      const { data }: any = res;
+      setClientSession(data?.session ?? null);
+    });
+    const { data: listener }: any = supabase.auth.onAuthStateChange((_: any, session: any) => {
+      setClientSession(session);
+    });
+    return () => {
+      listener?.subscription?.unsubscribe?.();
+    };
   }, []);
 
   // Persist customer email locally whenever a valid email is entered. This is used
@@ -347,6 +367,11 @@ export function CartDrawer() {
   };
 
   const handleWhatsAppCheckout = async () => {
+    // Impede checkout via WhatsApp se não houver sessão do cliente
+    if (!clientSession) {
+      toast.error('Você precisa estar logado para finalizar o pedido.');
+      return;
+    }
     if (!canCheckout || !validateCheckoutData()) return;
 
     setIsCheckingOut(true);
@@ -412,6 +437,13 @@ export function CartDrawer() {
   };
 
   const handlePixCheckout = async () => {
+    // Impede checkout se o usuário não estiver autenticado. Esse check
+    // complementa a validação feita ao abrir o formulário, garantindo que
+    // requisições programáticas também sejam bloqueadas.
+    if (!clientSession) {
+      toast.error('Você precisa estar logado para finalizar o pedido.');
+      return;
+    }
     if (!canCheckout || !validateCheckoutData()) return;
 
     setIsCheckingOut(true);
@@ -805,7 +837,24 @@ export function CartDrawer() {
             {!showCheckoutForm ? (
               <div className="w-full flex gap-2">
                 <Button variant="outline" onClick={clearCart} className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
-                <Button onClick={() => setShowCheckoutForm(true)} disabled={!canCheckout} className="flex-1 bg-neon-blue text-black hover:bg-neon-blue/90">
+                <Button
+                  onClick={() => {
+                    // Requer autenticação para prosseguir com o checkout. Se o
+                    // usuário não estiver logado, redireciona para a página de login
+                    // e mostra um aviso. Caso contrário, exibe o formulário de
+                    // checkout.
+                    if (!clientSession) {
+                      toast.error('Para finalizar o pedido, faça login ou cadastro.');
+                      if (typeof window !== 'undefined') {
+                        window.location.href = '/login';
+                      }
+                      return;
+                    }
+                    setShowCheckoutForm(true);
+                  }}
+                  disabled={!canCheckout}
+                  className="flex-1 bg-neon-blue text-black hover:bg-neon-blue/90"
+                >
                   <Check className="h-4 w-4 mr-2" /> Continuar checkout
                 </Button>
               </div>

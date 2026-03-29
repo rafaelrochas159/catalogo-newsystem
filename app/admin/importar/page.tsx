@@ -88,7 +88,31 @@ export default function ImportPage() {
       const allErrors: ValidationError[] = [];
       const validRows: ImportRow[] = [];
 
-      jsonData.forEach((row: any, index) => {
+      jsonData.forEach((rawRow: any, index) => {
+        // Clone the row to avoid mutating the original object. Convert price
+        // fields (strings like "R$ 6,26" or "6.26") to numbers. Remove any
+        // currency symbols and replace commas with dots. Do similar conversion
+        // for quantities if they come as strings.
+        const row: any = { ...rawRow };
+        if (row.price_unit != null) {
+          const cleaned = String(row.price_unit).replace(/[^0-9.,-]+/g, '').replace(',', '.');
+          const parsed = parseFloat(cleaned);
+          row.price_unit = isNaN(parsed) ? undefined : parsed;
+        }
+        if (row.price_box != null) {
+          const cleaned = String(row.price_box).replace(/[^0-9.,-]+/g, '').replace(',', '.');
+          const parsed = parseFloat(cleaned);
+          row.price_box = isNaN(parsed) ? undefined : parsed;
+        }
+        if (row.stock_unit != null && typeof row.stock_unit === 'string') {
+          const parsed = parseInt(row.stock_unit, 10);
+          row.stock_unit = isNaN(parsed) ? undefined : parsed;
+        }
+        if (row.stock_box != null && typeof row.stock_box === 'string') {
+          const parsed = parseInt(row.stock_box, 10);
+          row.stock_box = isNaN(parsed) ? undefined : parsed;
+        }
+
         const rowErrors = validateRow(row, index);
         if (rowErrors.length > 0) {
           allErrors.push(...rowErrors);
@@ -106,6 +130,7 @@ export default function ImportPage() {
         toast.error(`${allErrors.length} erros encontrados na planilha`);
       }
     } catch (error) {
+      console.error('Erro ao processar arquivo', error);
       toast.error('Erro ao processar arquivo');
     } finally {
       setIsProcessing(false);
@@ -132,6 +157,10 @@ export default function ImportPage() {
   };
 
   const handleImport = async () => {
+    // Importa produtos em massa. Para cada linha válida, procura a categoria
+    // correspondente. Se não existir, conta como erro. Usa upsert para
+    // permitir atualizar produtos existentes (com base no SKU). Isso evita
+    // erros por chave duplicada quando o produto já existe no catálogo.
     if (preview.length === 0) return;
 
     setIsProcessing(true);
@@ -140,61 +169,77 @@ export default function ImportPage() {
 
     for (const row of preview) {
       try {
-        // Get category ID
-        const { data: categoria } = await supabase
+        // Obtém o ID da categoria pelo slug. Usa try/catch para evitar que um
+        // erro em uma linha interrompa todo o processo.
+        const { data: categoria, error: catError } = await supabase
           .from('categorias')
           .select('id')
           .eq('slug', row.category_slug)
           .single();
-
-        if (!categoria) {
+        if (catError || !categoria) {
           errorCount++;
           continue;
         }
 
-        // Create slug
-        const slug = `${row.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}-${row.sku.toLowerCase()}`;
+        // Gera um slug único combinando nome e SKU. Remove acentos e
+        // caracteres especiais. Mantém a legibilidade para SEO.
+        // Normaliza e remove acentos utilizando range unicode para diacríticos.
+        const generatedSlug = `${row.name
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '')}-${row.sku.toLowerCase()}`;
 
-        const { error } = await supabase.from('produtos').insert({
-          nome: row.name,
-          slug,
-          sku: row.sku.toUpperCase(),
-          descricao: row.description,
-          categoria_id: categoria.id,
-          preco_unitario: row.price_unit,
-          preco_caixa: row.price_box || null,
-          estoque_unitario: row.stock_unit || 0,
-          estoque_caixa: row.stock_box || 0,
-          tipo_catalogo: importType,
-          quantidade_por_caixa: row.quantity_per_box || null,
-          imagem_principal: row.main_image || '/images/placeholder.jpg',
-          is_active: true,
-          is_novo: false,
-          is_promocao: false,
-          is_mais_vendido: false,
-          is_destaque: false,
-        });
+        const { error } = await supabase
+          .from('produtos')
+          .upsert({
+            nome: row.name,
+            slug: generatedSlug,
+            sku: row.sku.toUpperCase(),
+            descricao: row.description || null,
+            categoria_id: categoria.id,
+            preco_unitario: row.price_unit ?? null,
+            preco_caixa: row.price_box ?? null,
+            estoque_unitario: row.stock_unit ?? 0,
+            estoque_caixa: row.stock_box ?? 0,
+            tipo_catalogo: importType,
+            quantidade_por_caixa: row.quantity_per_box ?? null,
+            imagem_principal: row.main_image || '/images/placeholder.jpg',
+            is_active: true,
+            is_novo: false,
+            is_promocao: false,
+            is_mais_vendido: false,
+            is_destaque: false,
+          }, { onConflict: 'sku' });
 
         if (error) {
+          console.error('Erro ao importar produto', error);
           errorCount++;
         } else {
           successCount++;
         }
-      } catch (error) {
+      } catch (err) {
+        console.error('Erro inesperado ao importar produto', err);
         errorCount++;
       }
     }
-
     setIsProcessing(false);
-    
     if (successCount > 0) {
       toast.success(`${successCount} produtos importados com sucesso!`);
     }
     if (errorCount > 0) {
       toast.error(`${errorCount} produtos não puderam ser importados`);
     }
-
     setPreview([]);
+    // Recarrega a página de produtos do admin para refletir as mudanças se
+    // possível. Isto envia um evento para que outras telas possam atualizar.
+    try {
+      const event = new CustomEvent('nsProductsImported');
+      window.dispatchEvent(event);
+    } catch (e) {
+      // ignore if dispatch fails (e.g., server environment)
+    }
   };
 
   const downloadTemplate = () => {

@@ -10,6 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatPrice } from '@/lib/utils';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Produto } from '@/types';
+import { generateOrderMessage, getWhatsAppLink } from '@/lib/utils';
+import { COMPANY_INFO } from '@/lib/constants';
+import toast from 'react-hot-toast';
 
 interface OrderItem {
   product_name?: string;
@@ -45,6 +48,14 @@ interface OrderData {
   desconto_valor?: number;
   total: number;
   endereco?: OrderAddress | null;
+
+  // Dados do cliente (opcionais)
+  cliente_nome?: string;
+  cliente_email?: string;
+  cliente_telefone?: string;
+  cliente_cpf_cnpj?: string | null;
+  forma_pagamento?: string | null;
+  tipo_catalogo?: 'UNITARIO' | 'CAIXA_FECHADA' | string;
 }
 
 function paymentStatusBadge(status?: string | null) {
@@ -114,6 +125,54 @@ export default function MyOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  /**
+   * Constrói e abre um link do WhatsApp para reenviar o pedido ao WhatsApp oficial da empresa.
+   * Aceita um pedido e utiliza a função generateOrderMessage para construir uma
+   * mensagem completa com itens, resumo e endereço. Caso algum dado
+   * necessário esteja ausente, a função tenta inferir usando campos
+   * alternativos e exibe uma notificação de erro se não conseguir.
+   */
+  const sendOrderToWhatsApp = (order: OrderData) => {
+    try {
+      // Converte os itens do pedido para o formato esperado por generateOrderMessage
+      const itemsForMessage = order.itens.map((item) => {
+        const name = (item.product_name || item.nome || 'Produto') as string;
+        const sku = item.sku || '';
+        const quantity = (item.quantity ?? item.quantidade ?? 0) as number;
+        const unitPrice = (item.unit_price ?? item.preco_unitario ?? 0) as number;
+        const totalPrice = (item.total_price ?? item.preco_total ?? 0) as number;
+        return { name, sku, quantity, unitPrice, totalPrice };
+      });
+      const subtotalVal = order.subtotal ?? order.total;
+      const discountVal = order.desconto_valor || 0;
+      const totalVal = order.total;
+      const catalogType = (order.tipo_catalogo ?? 'UNITARIO') as any;
+      const message = generateOrderMessage({
+        orderNumber: order.numero_pedido,
+        catalogType,
+        items: itemsForMessage,
+        subtotal: subtotalVal,
+        discount: discountVal,
+        total: totalVal,
+        address: order.endereco as any,
+        customer: {
+          nome: (order.cliente_nome as any) || '',
+          email: (order.cliente_email as any) || '',
+          telefone: (order.cliente_telefone as any) || '',
+          cpf_cnpj: (order.cliente_cpf_cnpj as any) || undefined,
+        },
+        paymentMethod: order.forma_pagamento || 'Pix',
+      });
+      const link = getWhatsAppLink(COMPANY_INFO.whatsapp, message);
+      if (typeof window !== 'undefined') {
+        window.location.href = link;
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Não foi possível gerar o link do WhatsApp.');
+    }
+  };
 
   const isEmailValid = () => {
     return /.+@.+\..+/.test(email.trim());
@@ -348,6 +407,13 @@ export default function MyOrdersPage() {
                     <p>🏘️ {order.endereco.bairro}</p>
                     <p>🌆 {order.endereco.cidade} - {order.endereco.estado}</p>
                     {order.endereco.complemento && <p>📝 {order.endereco.complemento}</p>}
+                  </div>
+                )}
+                {(order.status_pagamento === 'approved' || order.status_pedido === 'pago' || order.status_pedido === 'confirmado') && (
+                  <div className="pt-3">
+                    <Button variant="outline" onClick={() => sendOrderToWhatsApp(order)}>
+                      Enviar pedido para WhatsApp
+                    </Button>
                   </div>
                 )}
               </CardContent>

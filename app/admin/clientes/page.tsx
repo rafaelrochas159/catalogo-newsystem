@@ -65,9 +65,9 @@ export default function ClientesPage() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8">Carregando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8">Carregando...</TableCell></TableRow>
               ) : clientes.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8">Nenhum cliente encontrado.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8">Nenhum cliente encontrado.</TableCell></TableRow>
               ) : (
                 clientes.map((cliente) => (
                   <TableRow key={cliente.id}>
@@ -83,6 +83,38 @@ export default function ClientesPage() {
                           <div>{cliente.endereco?.cep}</div>
                         </div>
                       ) : '—'}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="flex gap-2">
+                        {/* Ver pedidos: abre a página de pedidos do cliente passando o e-mail como query string */}
+                        <a href={`/meus-pedidos?email=${encodeURIComponent(cliente.email)}`} target="_blank" rel="noreferrer">
+                          <Button size="sm" variant="outline">Ver pedidos</Button>
+                        </a>
+                        {/* Alterar senha: solicita nova senha e envia requisição para o endpoint de atualização */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            const newPassword = prompt('Digite a nova senha para o cliente');
+                            if (!newPassword) return;
+                            try {
+                              const res = await fetch('/api/admin/change-password', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ userId: cliente.id, password: newPassword }),
+                              });
+                              const json = await res.json();
+                              if (!res.ok) throw new Error(json.error || 'Erro ao alterar senha');
+                              toast.success('Senha alterada com sucesso');
+                            } catch (err: any) {
+                              console.error(err);
+                              toast.error(err.message || 'Falha ao alterar senha');
+                            }
+                          }}
+                        >
+                          Alterar senha
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
