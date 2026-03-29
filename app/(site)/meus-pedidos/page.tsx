@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -82,6 +83,25 @@ function orderStatusBadge(status?: string | null) {
 
 export default function MyOrdersPage() {
   const [email, setEmail] = useState('');
+  const searchParams = useSearchParams();
+
+  // Prefill the email field from query parameter or from localStorage. This
+  // effect runs only on mount and improves the UX by remembering the
+  // customer's last used email. It does not interfere with manual input.
+  useEffect(() => {
+    const paramEmail = searchParams.get('email');
+    if (paramEmail) {
+      setEmail(paramEmail);
+    } else {
+      try {
+        const stored = localStorage.getItem('ns_last_email');
+        if (stored) setEmail(stored);
+      } catch (e) {
+        // ignore storage errors
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

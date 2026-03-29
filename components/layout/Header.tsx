@@ -14,7 +14,8 @@ import {
   Box,
   Home,
   Grid3X3,
-  Contact
+  Contact,
+  ClipboardList
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,8 @@ const navItems = [
   { href: '/catalogo/unitario', label: 'Catálogo Unitário', icon: Package },
   { href: '/catalogo/caixa-fechada', label: 'Caixa Fechada', icon: Box },
   { href: '/contato', label: 'Contato', icon: Contact },
+  // Added link to the customer area/history page.
+  { href: '/meus-pedidos', label: 'Meus Pedidos', icon: ClipboardList },
 ];
 
 export function Header() {

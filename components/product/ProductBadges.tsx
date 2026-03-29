@@ -44,10 +44,20 @@ export function ProductBadges({ product, catalogType, className = '' }: ProductB
     );
   }
 
+  // Show a badge for the catalog type to clearly differentiate between
+  // unitário and caixa fechada. This helps the customer understand the
+  // product offering at a glance. The colors are kept consistent with the
+  // existing badge palette.
   if (catalogType === 'CAIXA_FECHADA') {
     badges.push(
       <Badge key="box" className="bg-blue-500 text-white">
         Caixa Fechada
+      </Badge>
+    );
+  } else if (catalogType === 'UNITARIO') {
+    badges.push(
+      <Badge key="unit" className="bg-blue-500 text-white">
+        Unitário
       </Badge>
     );
   }

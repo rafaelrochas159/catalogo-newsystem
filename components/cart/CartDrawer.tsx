@@ -138,6 +138,21 @@ export function CartDrawer() {
   const [pixApproved, setPixApproved] = useState(false);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Persist customer email locally whenever a valid email is entered. This is used
+  // for customer recovery (prefilling the "Meus Pedidos" page and showing
+  // recommendations on the home page). Storing the email helps us link the
+  // customer across sessions without breaking existing flows. Errors are
+  // silently ignored to avoid impacting the checkout experience.
+  useEffect(() => {
+    if (customer.email && isValidEmail(customer.email)) {
+      try {
+        localStorage.setItem('ns_last_email', customer.email.trim().toLowerCase());
+      } catch (e) {
+        // ignore storage errors (e.g., private mode)
+      }
+    }
+  }, [customer.email]);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
