@@ -180,6 +180,10 @@ export async function POST(request: Request) {
     const qrCode = payment.point_of_interaction?.transaction_data?.qr_code || null;
     const qrCodeBase64 = payment.point_of_interaction?.transaction_data?.qr_code_base64 || null;
 
+    // Armazenamos o status normalizado no registro de pagamentos para manter
+    // consistência com a tabela de pedidos. O campo raw `payment.status` pode
+    // conter valores como 'authorized' ou 'in_process', mas o frontend
+    // utiliza apenas 'approved', 'pending' e 'cancelled'.
     await db.from('pagamentos').upsert({
       pedido_id: pedido.id,
       numero_pedido: numeroPedido,
@@ -189,12 +193,13 @@ export async function POST(request: Request) {
       external_reference: numeroPedido,
       qr_code: qrCodeBase64,
       pix_copia_cola: qrCode,
-      status_pagamento: payment.status,
+      status_pagamento: mapped.statusPagamento,
       valor: Number(body.total),
       payload_gateway: payment,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'payment_id_gateway' });
 
+    // Atualiza o pedido com os dados do pagamento e o status normalizado
     await db.from('pedidos').update({
       payment_id_gateway: String(payment.id),
       external_reference: numeroPedido,
@@ -214,7 +219,11 @@ export async function POST(request: Request) {
       checkout_token: checkoutToken,
       pedido_id: pedido.id,
       valor: Number(body.total),
-      status_pagamento: payment.status,
+      // Expose a normalized payment status to the client. The raw status from
+      // Mercado Pago can be values like 'in_process', 'authorized', etc.
+      // Using the mapped value ensures the frontend only has to check for
+      // 'approved' versus other states.
+      status_pagamento: mapped.statusPagamento,
       payment_id_gateway: String(payment.id),
       external_reference: numeroPedido,
       qr_code_base64: qrCodeBase64,

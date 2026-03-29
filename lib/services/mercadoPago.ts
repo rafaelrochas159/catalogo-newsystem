@@ -136,31 +136,91 @@ export async function getPaymentById(paymentId: string | number): Promise<Mercad
   return json as MercadoPagoPixResponse;
 }
 
+/**
+ * Busca um pagamento no Mercado Pago usando o campo external_reference.
+ *
+ * O endpoint de pesquisa (`/v1/payments/search`) pode retornar vários resultados para
+ * a mesma referência externa. Para o fluxo de Pix consideramos que existe um
+ * único pagamento por `external_reference`. Caso existam vários, retorna-se o
+ * primeiro resultado. Se nenhum pagamento for encontrado, devolve `null`.
+ *
+ * @param reference O valor de external_reference usado durante a criação do Pix.
+ */
+export async function getPaymentByExternalReference(reference: string): Promise<MercadoPagoPixResponse | null> {
+  const accessToken = getAccessToken();
+  const url = `${getApiBase()}/v1/payments/search?external_reference=${encodeURIComponent(reference)}`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
+
+  const json = await response.json();
+  if (!response.ok) {
+    const message = json?.message || json?.error || 'Falha ao consultar pagamento por external_reference no Mercado Pago';
+    throw new Error(message);
+  }
+
+  // `results` retorna um array de objetos de pagamento. Em alguns casos, a API
+  // pode aninhar o pagamento em `results[].payment` ou `results[].collection`.
+  const results = (json?.results as any[]) || [];
+  if (results.length > 0) {
+    const first = results[0];
+    if (first && typeof first === 'object') {
+      // Verifica formatos possíveis e retorna o objeto de pagamento encontrado.
+      return (first.payment || first.collection || first) as MercadoPagoPixResponse;
+    }
+  }
+  return null;
+}
+
 export function mapMercadoPagoStatus(status?: string) {
   switch (status) {
+    // Payment has been fully approved/credited.
     case 'approved':
+    case 'accredited':
+    case 'accredited_waiting_for_charger':
       return {
         statusPedido: 'pago',
         statusPagamento: 'approved',
         statusLegado: 'confirmed',
       };
+    // Payment authorized but not yet captured. For PIX this is equivalent to approved
+    // because PIX payments are immediately captured once funds are transferred.
+    case 'authorized':
+      return {
+        statusPedido: 'pago',
+        statusPagamento: 'approved',
+        statusLegado: 'confirmed',
+      };
+    // Payment is pending or still in process of verification/mediation.
     case 'pending':
     case 'in_process':
+    case 'in_mediation':
+    case 'pending_contingency':
+    case 'pending_review_manual':
       return {
         statusPedido: 'aguardando_pagamento',
-        statusPagamento: status || 'pending',
+        statusPagamento: 'pending',
         statusLegado: 'pending',
       };
+    // Payment was rejected, cancelled or refunded.
     case 'rejected':
     case 'cancelled':
+    case 'cancelled_by_collector':
+    case 'cancelled_by_admin':
     case 'refunded':
     case 'charged_back':
+    case 'partially_refunded':
       return {
         statusPedido: 'cancelado',
-        statusPagamento: status,
+        statusPagamento: status || 'cancelled',
         statusLegado: 'cancelled',
       };
     default:
+      // Fallback: treat unknown statuses as pending to avoid false negatives.
       return {
         statusPedido: 'aguardando_pagamento',
         statusPagamento: status || 'pending',

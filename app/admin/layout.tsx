@@ -34,59 +34,48 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const isLoginPage = pathname === '/admin/login';
-
-  // When the current page is the login page, skip loading and auth
-  const [isLoading, setIsLoading] = useState(!isLoginPage);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    if (isLoginPage) {
-      // Don't run auth checks on login page
-      setIsLoading(false);
-      return;
-    }
-
-    const checkAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session) {
-          setIsAuthenticated(false);
-          // Use replace to prevent pushing another entry onto history
-          router.replace('/admin/login');
-          return;
-        }
-
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Auth error:', error);
-        setIsAuthenticated(false);
-        router.replace('/admin/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     checkAuth();
-  }, [isLoginPage, router]);
+  }, [pathname]);
+
+  const checkAuth = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        // redireciona apenas se não estivermos na página de login
+        if (pathname !== '/admin/login') {
+          router.push('/admin/login');
+        }
+        return;
+      }
+      
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Auth error:', error);
+      // em caso de erro de autenticação, redireciona somente se não estivermos na página de login
+      if (pathname !== '/admin/login') {
+        router.push('/admin/login');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
       toast.success('Logout realizado com sucesso!');
-      router.replace('/admin/login');
-    } catch {
+      router.push('/admin/login');
+    } catch (error) {
       toast.error('Erro ao fazer logout');
     }
   };
-
-  // Allow the login page to bypass the admin layout
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
 
   if (isLoading) {
     return (
@@ -97,11 +86,14 @@ export default function AdminLayout({
   }
 
   if (!isAuthenticated) {
+    // Show a minimal loading state when redirecting unauthorized users. Returning null causes
+    // a blank screen, so instead render a spinner and a hint to the user. The router push
+    // will still navigate away to the login page.
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neon-blue" />
-          <p className="text-sm text-muted-foreground">Redirecionando...</p>
+          <p className="text-sm text-muted-foreground">Redirecionando…</p>
         </div>
       </div>
     );
