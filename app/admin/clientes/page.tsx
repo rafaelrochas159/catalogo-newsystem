@@ -1,128 +1,37 @@
-"use client";
+import Link from 'next/link';
+import { createRequiredServerClient } from '@/lib/supabase/client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/lib/supabase/client';
-import { Cliente } from '@/types';
-import toast from 'react-hot-toast';
+export default async function AdminClientesPage() {
+  const db = createRequiredServerClient() as any;
+  const { data } = await db
+    .from('customer_profiles')
+    .select('*, customer_addresses(*), pedidos(total,id)')
+    .order('created_at', { ascending: false });
 
-/**
- * Página de clientes para o administrador.
- * Lista todos os clientes cadastrados no sistema com dados básicos e CPF/CNPJ.
- */
-export default function ClientesPage() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchClientes();
-  }, []);
-
-  async function fetchClientes() {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.from('clientes').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      setClientes((data as Cliente[]) || []);
-    } catch (error: any) {
-      const message = error?.message || '';
-      if (message.includes('clientes') || message.includes('schema cache')) {
-        console.warn('Tabela clientes não encontrada. Execute o script SQL para criá-la.', message);
-        toast.error('Tabela de clientes não encontrada no banco.');
-        setClientes([]);
-      } else {
-        console.error(error);
-        toast.error('Erro ao carregar clientes.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  const rows = (data || []).map((item: any) => ({
+    ...item,
+    total_gasto: (item.pedidos || []).reduce((acc: number, p: any) => acc + Number(p.total || 0), 0),
+    qtd_pedidos: (item.pedidos || []).length,
+  }));
 
   return (
     <div className="p-6 lg:p-8">
-      <div className="mb-8 flex items-center justify-between gap-2 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Clientes</h1>
-          <p className="text-muted-foreground">Gerencie os clientes cadastrados na plataforma.</p>
-        </div>
-        <Button variant="outline" onClick={fetchClientes}>Atualizar</Button>
+      <h1 className="text-3xl font-bold mb-6">Clientes</h1>
+      <div className="space-y-4">
+        {rows.map((c: any) => (
+          <div key={c.id} className="rounded-xl border p-4 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="font-semibold">{c.nome || 'Sem nome'}</div>
+              <div className="text-sm text-muted-foreground">{c.email || 'Sem e-mail'} • {c.telefone || 'Sem telefone'}</div>
+              <div className="text-sm text-muted-foreground">Pedidos: {c.qtd_pedidos} • Total gasto: R$ {c.total_gasto.toFixed(2)}</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm">{c.status}</span>
+              <Link href={`/admin/clientes/${c.id}`} className="underline">Abrir</Link>
+            </div>
+          </div>
+        ))}
       </div>
-      <Card>
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>E-mail</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>CPF/CNPJ</TableHead>
-                <TableHead>Endereço</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8">Carregando...</TableCell></TableRow>
-              ) : clientes.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8">Nenhum cliente encontrado.</TableCell></TableRow>
-              ) : (
-                clientes.map((cliente) => (
-                  <TableRow key={cliente.id}>
-                    <TableCell className="font-medium">{cliente.nome}</TableCell>
-                    <TableCell>{cliente.email}</TableCell>
-                    <TableCell>{cliente.telefone || '—'}</TableCell>
-                    <TableCell>{cliente.cpf_cnpj || '—'}</TableCell>
-                    <TableCell>
-                      {cliente.endereco ? (
-                        <div className="text-sm">
-                          <div>{cliente.endereco?.rua}, {cliente.endereco?.numero}</div>
-                          <div>{cliente.endereco?.cidade} - {cliente.endereco?.estado}</div>
-                          <div>{cliente.endereco?.cep}</div>
-                        </div>
-                      ) : '—'}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      <div className="flex gap-2">
-                        {/* Ver pedidos: abre a página de pedidos do cliente passando o e-mail como query string */}
-                        <a href={`/meus-pedidos?email=${encodeURIComponent(cliente.email)}`} target="_blank" rel="noreferrer">
-                          <Button size="sm" variant="outline">Ver pedidos</Button>
-                        </a>
-                        {/* Alterar senha: solicita nova senha e envia requisição para o endpoint de atualização */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={async () => {
-                            const newPassword = prompt('Digite a nova senha para o cliente');
-                            if (!newPassword) return;
-                            try {
-                              const res = await fetch('/api/admin/change-password', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ userId: cliente.id, password: newPassword }),
-                              });
-                              const json = await res.json();
-                              if (!res.ok) throw new Error(json.error || 'Erro ao alterar senha');
-                              toast.success('Senha alterada com sucesso');
-                            } catch (err: any) {
-                              console.error(err);
-                              toast.error(err.message || 'Falha ao alterar senha');
-                            }
-                          }}
-                        >
-                          Alterar senha
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 }
