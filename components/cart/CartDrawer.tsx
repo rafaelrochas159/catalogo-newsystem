@@ -410,36 +410,37 @@ export function CartDrawer() {
 
 
   const buildApprovedWhatsAppLink = () => {
-    // Ensure we have both the payment and snapshot available
+    // Somente gera link se houver pagamento confirmado e snapshot do pedido
     if (!pixPayment || !pixOrderSnapshot) return null;
 
-    // Build a text list of the items with quantity and optional SKU
-    const itemsText = pixOrderSnapshot.items.length
-      ? pixOrderSnapshot.items
-          .map((item) => `- ${item.product_name}${item.sku ? ` (${item.sku})` : ''} | Qtd: ${item.quantity}`)
-          .join('\n')
-      : '- Itens do pedido indisponíveis';
+    // Converte os itens do snapshot para o formato esperado por generateOrderMessage
+    const orderItemsForMessage = pixOrderSnapshot.items.map((item) => ({
+      name: item.product_name,
+      sku: item.sku,
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+      totalPrice: item.total_price,
+    }));
 
-    // Compose the WhatsApp message including client details and total value
-    const messageLines = [
-      'Olá! Pagamento aprovado ✅',
-      '',
-      `Pedido: ${pixPayment.numero_pedido}`,
-      `Cliente: ${pixOrderSnapshot.customer.nome}`,
-      `Telefone: ${pixOrderSnapshot.customer.telefone}`,
-      pixOrderSnapshot.customer.email ? `Email: ${pixOrderSnapshot.customer.email}` : '',
-      '',
-      'Itens do pedido:',
-      itemsText,
-      '',
-      `Total pago: ${formatPrice(pixPayment.valor || pixOrderSnapshot.total)}`,
-      '',
-      'Seu pedido foi confirmado e já está em andamento.'
-    ].filter(Boolean);
+    // Calcula subtotal e desconto com base nos itens do snapshot
+    const subtotalValue = orderItemsForMessage.reduce((acc, item) => acc + item.totalPrice, 0);
+    const totalValue = pixOrderSnapshot.total;
+    const discountValue = subtotalValue - totalValue;
 
-    const message = messageLines.join('\n');
+    // Gera mensagem estruturada utilizando utilidade padrão do projeto
+    const message = generateOrderMessage({
+      orderNumber: pixPayment.numero_pedido,
+      catalogType: catalogType!,
+      items: orderItemsForMessage,
+      subtotal: subtotalValue,
+      discount: discountValue,
+      total: totalValue,
+      address,
+      customer,
+      paymentMethod: 'Pix aprovado',
+    });
 
-    // Use the company WhatsApp number defined in constants so the buyer can notify the seller
+    // Usa o número de WhatsApp da empresa definido em constants para enviar a mensagem
     return getWhatsAppLink(COMPANY_INFO.whatsapp, message);
   };
 
