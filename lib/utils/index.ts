@@ -164,6 +164,8 @@ interface CustomerData {
   nome?: string;
   telefone?: string;
   email?: string;
+  /** CPF ou CNPJ do cliente. Opcional para controlar fiscalmente e identificar o cliente */
+  cpf_cnpj?: string | null;
 }
 
 export function generateOrderMessage(order: {
