@@ -47,14 +47,15 @@ export function Header() {
   const [clientSession, setClientSession] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setClientSession(data.session);
+    supabase.auth.getSession().then((res: any) => {
+      const { data } = res;
+      setClientSession(data?.session ?? null);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener }: any = supabase.auth.onAuthStateChange((event, session) => {
       setClientSession(session);
     });
     return () => {
-      listener?.subscription?.unsubscribe();
+      listener?.subscription?.unsubscribe?.();
     };
   }, []);
 
