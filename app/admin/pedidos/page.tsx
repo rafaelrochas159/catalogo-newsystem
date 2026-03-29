@@ -184,9 +184,12 @@ export default function OrdersPage() {
                       <TableCell className="font-medium">{order.numero_pedido}</TableCell>
                       <TableCell>{new Date(order.created_at).toLocaleString('pt-BR')}</TableCell>
                       <TableCell>
-                        <div className="text-sm">
+                        <div className="text-sm space-y-1">
                           <div className="font-medium">{order.cliente_nome || '—'}</div>
                           <div className="text-muted-foreground">{order.cliente_email || '—'}</div>
+                          {order.cliente_cpf_cnpj && (
+                            <div className="text-xs text-muted-foreground">CPF/CNPJ: {order.cliente_cpf_cnpj}</div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="font-bold text-neon-blue">{formatPrice(order.total)}</TableCell>

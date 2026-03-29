@@ -50,6 +50,12 @@ interface CustomerData {
   nome: string;
   telefone: string;
   email: string;
+  /**
+   * CPF ou CNPJ do comprador. Não é obrigatório, mas ajuda no controle
+   * administrativo e na emissão de notas fiscais. Deve ser informado
+   * sem máscara ou com máscara (o backend removerá os caracteres não numéricos).
+   */
+  cpf_cnpj?: string;
 }
 
 interface ViaCepResponse {
@@ -128,6 +134,7 @@ export function CartDrawer() {
     nome: '',
     telefone: '',
     email: '',
+    cpf_cnpj: '',
   });
   const [isFetchingCep, setIsFetchingCep] = useState(false);
   const [lastFetchedCep, setLastFetchedCep] = useState('');
@@ -137,6 +144,40 @@ export function CartDrawer() {
   const [isPollingPayment, setIsPollingPayment] = useState(false);
   const [pixApproved, setPixApproved] = useState(false);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Ao montar, se o usuário estiver logado via Supabase, busca seus dados
+  // na tabela de clientes para preencher automaticamente os campos de checkout.
+  useEffect(() => {
+    async function loadCustomerFromSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return;
+        const { data: cliente, error } = await supabase
+          .from('clientes')
+          .select('nome, email, telefone, cpf_cnpj, endereco')
+          .eq('id', userId)
+          .single();
+        if (error || !cliente) return;
+        setCustomer((prev) => ({
+          ...prev,
+          nome: cliente.nome || prev.nome,
+          email: cliente.email || prev.email,
+          telefone: cliente.telefone || prev.telefone,
+          cpf_cnpj: cliente.cpf_cnpj || prev.cpf_cnpj,
+        }));
+        if (cliente.endereco) {
+          setAddress((prev) => ({
+            ...prev,
+            ...cliente.endereco,
+          }));
+        }
+      } catch (e) {
+        console.error('Erro ao carregar dados do cliente logado', e);
+      }
+    }
+    loadCustomerFromSession();
+  }, []);
 
   // Persist customer email locally whenever a valid email is entered. This is used
   // for customer recovery (prefilling the "Meus Pedidos" page and showing
@@ -336,6 +377,7 @@ export function CartDrawer() {
           cliente_nome: customer.nome,
           cliente_telefone: customer.telefone,
           cliente_email: customer.email,
+          cliente_cpf_cnpj: customer.cpf_cnpj || null,
           tipo_catalogo: catalogType,
           subtotal,
           desconto_valor: discount,
@@ -386,6 +428,7 @@ export function CartDrawer() {
           desconto_percentual: discount > 0 ? BUSINESS_RULES.discountPercentage : 0,
           total,
           tipo_catalogo: catalogType,
+          cpf_cnpj: customer.cpf_cnpj || null,
         }),
       });
 
@@ -675,6 +718,14 @@ export function CartDrawer() {
                     <div className="grid gap-2">
                       <Label>Telefone *</Label>
                       <Input value={customer.telefone} onChange={(e) => setCustomer((prev) => ({ ...prev, telefone: maskPhone(e.target.value) }))} placeholder="(11) 99999-9999" inputMode="tel" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>CPF/CNPJ</Label>
+                      <Input
+                        value={customer.cpf_cnpj || ''}
+                        onChange={(e) => setCustomer((prev) => ({ ...prev, cpf_cnpj: e.target.value }))}
+                        placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                      />
                     </div>
                     <div className="grid gap-2">
                       <Label>E-mail *</Label>

@@ -24,6 +24,8 @@ import { useCart } from '@/hooks/useCart';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { COMPANY_INFO } from '@/lib/constants';
 import { cn, formatPrice } from '@/lib/utils';
+import { supabase } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
@@ -40,6 +42,25 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const cartItemCount = useCart((state) => state.getItemCount());
   const cartTotal = useCart((state) => state.getTotal());
+
+  // Estado para gerenciar a sessão do cliente (autenticado ou não)
+  const [clientSession, setClientSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setClientSession(data.session);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      setClientSession(session);
+    });
+    return () => {
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  async function handleClientLogout() {
+    await supabase.auth.signOut();
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +174,22 @@ export function Header() {
           {/* Cart */}
           <CartDrawer />
 
+        {/* Client account links (desktop) */}
+        <div className="hidden sm:flex items-center gap-2">
+          {!clientSession ? (
+            <>
+              <Link href="/login" className="text-sm text-foreground/70 hover:text-foreground">Entrar</Link>
+              <span className="text-muted-foreground">/</span>
+              <Link href="/cadastro" className="text-sm text-foreground/70 hover:text-foreground">Cadastrar</Link>
+            </>
+          ) : (
+            <>
+              <Link href="/minha-conta" className="text-sm text-foreground/70 hover:text-foreground">Minha conta</Link>
+              <button onClick={handleClientLogout} className="text-sm text-foreground/70 hover:text-foreground">Sair</button>
+            </>
+          )}
+        </div>
+
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
@@ -193,6 +230,29 @@ export function Header() {
                     </Link>
                   ))}
                 </nav>
+
+              {/* Mobile client links */}
+              <div className="flex flex-col gap-2 mt-4 border-t pt-4">
+                {!clientSession ? (
+                  <>
+                    <Link href="/login" className="px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-accent flex items-center gap-3">
+                      Entrar
+                    </Link>
+                    <Link href="/cadastro" className="px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-accent flex items-center gap-3">
+                      Cadastrar
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/minha-conta" className="px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-accent flex items-center gap-3">
+                      Minha conta
+                    </Link>
+                    <button onClick={handleClientLogout} className="px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-accent flex items-center gap-3 text-left">
+                      Sair
+                    </button>
+                  </>
+                )}
+              </div>
 
                 {/* Cart Summary */}
                 {cartItemCount > 0 && (

@@ -196,6 +196,32 @@ export interface Pedido {
   items?: ItemPedido[];
   whatsapp_sent?: boolean;
   whatsapp_message?: string;
+
+  /** CPF ou CNPJ do cliente, quando informado no checkout */
+  cliente_cpf_cnpj?: string | null;
+}
+
+/**
+ * Tipo para representar um cliente cadastrado no sistema.
+ * Os clientes são registrados na tabela 'clientes'.
+ */
+export interface Cliente {
+  id: string;
+  nome: string;
+  email: string;
+  cpf_cnpj?: string | null;
+  telefone?: string | null;
+  endereco?: {
+    cep?: string;
+    rua?: string;
+    numero?: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
+    complemento?: string;
+  } | null;
+  created_at?: string;
+  updated_at?: string | null;
 }
 
 export interface UsuarioAdmin {

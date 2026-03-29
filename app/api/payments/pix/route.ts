@@ -13,6 +13,7 @@ interface CheckoutBody {
     nome: string;
     telefone: string;
     email: string;
+    cpf_cnpj?: string | null;
   };
   endereco: {
     cep: string;
@@ -37,6 +38,8 @@ interface CheckoutBody {
   desconto_percentual: number;
   total: number;
   tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA';
+  /** CPF ou CNPJ informado pelo cliente, enviado separadamente para conveniência */
+  cpf_cnpj?: string | null;
 }
 
 function getBaseUrl(request: Request) {
@@ -110,6 +113,7 @@ export async function POST(request: Request) {
       cliente_nome: body.cliente.nome,
       cliente_telefone: body.cliente.telefone,
       cliente_email: body.cliente.email,
+      cliente_cpf_cnpj: body.cliente.cpf_cnpj || body.cpf_cnpj || null,
       tipo_catalogo: body.tipo_catalogo,
       subtotal: Number(body.subtotal),
       desconto_valor: Number(body.desconto_valor || 0),

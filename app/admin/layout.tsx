@@ -14,6 +14,8 @@ import {
   Menu,
   ChevronRight
 } from 'lucide-react';
+import { Users } from 'lucide-react';
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/lib/supabase/client';
@@ -25,6 +27,7 @@ const navItems = [
   { href: '/admin/categorias', label: 'Categorias', icon: Grid3X3 },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
   { href: '/admin/importar', label: 'Importar Excel', icon: Upload },
+  { href: '/admin/clientes', label: 'Clientes', icon: Users },
 ];
 
 export default function AdminLayout({
