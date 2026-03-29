@@ -51,7 +51,7 @@ export function Header() {
       const { data } = res;
       setClientSession(data?.session ?? null);
     });
-    const { data: listener }: any = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener }: any = supabase.auth.onAuthStateChange((_: any, session: any) => {
       setClientSession(session);
     });
     return () => {
