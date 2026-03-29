@@ -40,30 +40,39 @@ export default function MyAccountPage() {
       }
       setClienteId(session.user.id);
       // Busca dados do cliente
-      const { data, error } = await supabase
-        .from('clientes')
-        .select('nome, email, telefone, cpf_cnpj, endereco')
-        .eq('id', session.user.id)
-        .single();
-      if (error) {
-        console.error(error);
-      }
-      if (data) {
-        setNome(data.nome || '');
-        setEmail(data.email || '');
-        setTelefone(data.telefone || '');
-        setCpfCnpj(data.cpf_cnpj || '');
-        if (data.endereco) {
-          setCep(data.endereco.cep || '');
-          setRua(data.endereco.rua || '');
-          setNumero(data.endereco.numero || '');
-          setBairro(data.endereco.bairro || '');
-          setCidade(data.endereco.cidade || '');
-          setEstado(data.endereco.estado || '');
-          setComplemento(data.endereco.complemento || '');
+      try {
+        const { data, error } = await supabase
+          .from('clientes')
+          .select('nome, email, telefone, cpf_cnpj, endereco')
+          .eq('id', session.user.id)
+          .single();
+        if (error) throw error;
+        if (data) {
+          setNome(data.nome || '');
+          setEmail(data.email || '');
+          setTelefone(data.telefone || '');
+          setCpfCnpj(data.cpf_cnpj || '');
+          if (data.endereco) {
+            setCep(data.endereco.cep || '');
+            setRua(data.endereco.rua || '');
+            setNumero(data.endereco.numero || '');
+            setBairro(data.endereco.bairro || '');
+            setCidade(data.endereco.cidade || '');
+            setEstado(data.endereco.estado || '');
+            setComplemento(data.endereco.complemento || '');
+          }
         }
+      } catch (error: any) {
+        const message = error?.message || '';
+        if (message.includes('clientes') || message.includes('schema cache')) {
+          console.warn('Tabela clientes não encontrada. Execute o script SQL para criá-la.', message);
+          // continua com dados em branco
+        } else {
+          console.error(error);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadUser();
   }, [router]);
@@ -94,7 +103,13 @@ export default function MyAccountPage() {
       if (error) throw error;
       toast.success('Dados atualizados com sucesso.');
     } catch (error: any) {
-      toast.error(error.message || 'Erro ao atualizar dados.');
+      const message = error?.message || '';
+      if (message.includes('clientes') || message.includes('schema cache')) {
+        console.warn('Tabela clientes não encontrada. Execute o script SQL para criá-la.', message);
+        toast.error('Funcionalidade indisponível: tabela de clientes não está criada.');
+      } else {
+        toast.error(message || 'Erro ao atualizar dados.');
+      }
     } finally {
       setSaving(false);
     }

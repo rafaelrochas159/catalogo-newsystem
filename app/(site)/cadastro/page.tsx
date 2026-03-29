@@ -50,20 +50,36 @@ export default function RegisterPage() {
       return;
     }
     const user = data.user;
-    // Insere registro na tabela 'clientes' com os dados adicionais
-    const { error: dbError } = await supabase.from('clientes').insert({
-      id: user.id,
-      nome: name.trim(),
-      email: email.trim(),
-      cpf_cnpj: cpfCnpj.trim() || null,
-      telefone: phone.trim() || null,
-    });
-    setLoading(false);
-    if (dbError) {
-      toast.error(dbError.message || 'Erro ao salvar dados do cliente.');
-      return;
+    // Tenta inserir o registro na tabela 'clientes' com os dados adicionais. Em
+    // ambientes onde a tabela ainda não existe, capturamos o erro e
+    // prosseguimos com o cadastro, mostrando um aviso para o administrador
+    // executar o script de criação.
+    try {
+      const { error: dbError } = await supabase.from('clientes').insert({
+        id: user.id,
+        nome: name.trim(),
+        email: email.trim(),
+        cpf_cnpj: cpfCnpj.trim() || null,
+        telefone: phone.trim() || null,
+      });
+      if (dbError) {
+        throw dbError;
+      }
+      toast.success('Cadastro realizado com sucesso!');
+    } catch (dbError: any) {
+      // Se a tabela 'clientes' não existir, ignoramos a inserção e
+      // continuamos; caso contrário, exibimos o erro para o usuário.
+      const message = dbError?.message || '';
+      if (message.includes('clientes') || message.includes('schema cache')) {
+        console.warn('Tabela clientes não encontrada. Execute o script SQL para criá-la.', message);
+        toast.success('Cadastro realizado, mas os dados extras não foram salvos.');
+      } else {
+        toast.error(message || 'Erro ao salvar dados do cliente.');
+        setLoading(false);
+        return;
+      }
     }
-    toast.success('Cadastro realizado com sucesso!');
+    setLoading(false);
     router.replace('/');
   }
 

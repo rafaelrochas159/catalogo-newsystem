@@ -28,8 +28,15 @@ export default function ClientesPage() {
       if (error) throw error;
       setClientes((data as Cliente[]) || []);
     } catch (error: any) {
-      console.error(error);
-      toast.error('Erro ao carregar clientes.');
+      const message = error?.message || '';
+      if (message.includes('clientes') || message.includes('schema cache')) {
+        console.warn('Tabela clientes não encontrada. Execute o script SQL para criá-la.', message);
+        toast.error('Tabela de clientes não encontrada no banco.');
+        setClientes([]);
+      } else {
+        console.error(error);
+        toast.error('Erro ao carregar clientes.');
+      }
     } finally {
       setLoading(false);
     }

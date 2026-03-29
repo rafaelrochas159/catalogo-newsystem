@@ -47,10 +47,16 @@ export function Header() {
   const [clientSession, setClientSession] = useState<any>(null);
 
   useEffect(() => {
+    // Recupera a sessão atual e armazena no estado. Definimos tipos explícitos
+    // para evitar erros do compilador. `res` pode ser qualquer objeto com o campo
+    // `data`, portanto o desestruturamos como `any`.
     supabase.auth.getSession().then((res: any) => {
-      const { data } = res;
+      const { data }: any = res;
       setClientSession(data?.session ?? null);
     });
+    // Adiciona um listener de mudança de autenticação. O primeiro parâmetro não
+    // é usado, por isso o descartamos com `_`. Tipamos ambos os parâmetros como
+    // `any` para satisfazer o TypeScript.
     const { data: listener }: any = supabase.auth.onAuthStateChange((_: any, session: any) => {
       setClientSession(session);
     });
