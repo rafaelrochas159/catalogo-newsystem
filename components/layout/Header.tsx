@@ -25,7 +25,7 @@ import { CartDrawer } from '@/components/cart/CartDrawer';
 import { COMPANY_INFO } from '@/lib/constants';
 import { cn, formatPrice } from '@/lib/utils';
 import { supabase } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },

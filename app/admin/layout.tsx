@@ -4,17 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Grid3X3, 
-  ShoppingCart, 
+import {
+  LayoutDashboard,
+  Package,
+  Grid3X3,
+  ShoppingCart,
   Upload,
   LogOut,
   Menu,
-  ChevronRight
-} from 'lucide-react';
-import { Users } from 'lucide-react';
+  ChevronRight,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
