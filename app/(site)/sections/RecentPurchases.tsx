@@ -18,7 +18,9 @@ export async function RecentPurchasesSection() {
   const { data: pedidos } = await supabase
     .from('pedidos')
     .select('id, created_at, endereco')
-    .in('status_pagamento', ['approved', 'pago'])
+    // Show orders whose payment status is approved or marked as pago. Using
+    // `.or()` avoids TypeScript issues with the `.in()` helper.
+    .or('status_pagamento.eq.approved,status_pagamento.eq.pago')
     .order('created_at', { ascending: false })
     .limit(5);
 
@@ -42,7 +44,7 @@ export async function RecentPurchasesSection() {
         <h2 className="text-2xl font-bold mb-6">Compras recentes</h2>
         {pedidos && pedidos.length > 0 ? (
           <ul className="space-y-4">
-            {pedidos.map((pedido) => {
+            {pedidos.map((pedido: any) => {
               // Extract city and state from the address JSON if available.
               let city: string | undefined;
               let state: string | undefined;
