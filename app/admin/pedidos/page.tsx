@@ -13,6 +13,31 @@ import { Pedido } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
+// Faz uma requisição ao endpoint que sincroniza o status do pagamento. Esse
+// helper retorna um objeto com os status atualizados para um pedido quando
+// for aprovado e mantém o pedido intacto caso contrário.
+async function syncOrderStatus(order: Pedido): Promise<Pedido> {
+  try {
+    const isApproved =
+      order.status_pagamento === 'approved' ||
+      order.status_pedido === 'pago' ||
+      order.status_pedido === 'confirmado';
+    if (isApproved) return order;
+    const response = await fetch(`/api/payments/status/${encodeURIComponent(order.numero_pedido)}`);
+    const json = await response.json();
+    if (response.ok && json.status_pagamento) {
+      return {
+        ...order,
+        status_pagamento: json.status_pagamento as any,
+        status_pedido: json.status_pedido as any,
+      };
+    }
+  } catch (e) {
+    // Falha silenciosa
+  }
+  return order;
+}
+
 function statusBadge(label: string, variant: 'default' | 'secondary' | 'destructive' = 'secondary') {
   return <Badge variant={variant}>{label}</Badge>;
 }
@@ -44,6 +69,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Pedido[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -58,11 +84,33 @@ export default function OrdersPage() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders((data as Pedido[]) || []);
+      const pedidos: Pedido[] = (data as Pedido[]) || [];
+      setOrders(pedidos);
+      // Após carregar os pedidos, sincroniza os status de pagamento/pedido
+      // para garantir que pagamentos aprovados via Pix apareçam aqui também.
+      updateOrdersStatus(pedidos);
     } catch (error) {
       toast.error('Erro ao carregar pedidos.');
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  /**
+   * Atualiza o status de todos os pedidos carregados. Para cada pedido com
+   * status pendente, chama o endpoint de sincronização e atualiza o estado
+   * local. Exibe um toast no final informando que a atualização foi
+   * concluída.
+   */
+  async function updateOrdersStatus(currentOrders: Pedido[] = orders) {
+    if (!currentOrders || currentOrders.length === 0) return;
+    try {
+      setUpdatingStatus(true);
+      const updated = await Promise.all(currentOrders.map((order) => syncOrderStatus(order)));
+      setOrders(updated);
+    } finally {
+      setUpdatingStatus(false);
+      toast.success('Status de pedidos sincronizado.');
     }
   }
 
@@ -93,12 +141,19 @@ export default function OrdersPage() {
   return (
     <div className="p-6 lg:p-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold mb-2">Pedidos</h1>
             <p className="text-muted-foreground">Acompanhe pedido, pagamento, Pix e gateway do Mercado Pago.</p>
           </div>
-          <Button variant="outline" onClick={fetchOrders}><RefreshCcw className="h-4 w-4 mr-2" />Atualizar</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={fetchOrders}><RefreshCcw className="h-4 w-4 mr-2" />Atualizar</Button>
+            {orders.length > 0 && (
+              <Button variant="outline" onClick={() => updateOrdersStatus()} disabled={updatingStatus}>
+                {updatingStatus ? 'Sincronizando…' : 'Atualizar status'}
+              </Button>
+            )}
+          </div>
         </div>
 
         <Card>
