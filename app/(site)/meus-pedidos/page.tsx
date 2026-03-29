@@ -42,6 +42,7 @@ interface OrderData {
   created_at: string;
   status_pedido?: string | null;
   status_pagamento?: string | null;
+  /** Forma de pagamento utilizada (pix, whatsapp, cartão etc.). Opcional. */
   forma_pagamento?: string | null;
   itens: OrderItem[];
   subtotal?: number;
@@ -54,7 +55,6 @@ interface OrderData {
   cliente_email?: string;
   cliente_telefone?: string;
   cliente_cpf_cnpj?: string | null;
-  forma_pagamento?: string | null;
   tipo_catalogo?: 'UNITARIO' | 'CAIXA_FECHADA' | string;
 }
 
