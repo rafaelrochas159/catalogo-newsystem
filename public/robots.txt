@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://newsystem.com.br/sitemap.xml
-
-# Disallow admin routes
-Disallow: /admin/
-Disallow: /api/
