@@ -25,8 +25,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
+    supabase.auth.getSession().then(({ data }: any) => {
+      if (data?.session) {
         router.replace('/');
       }
     });

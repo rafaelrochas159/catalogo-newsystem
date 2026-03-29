@@ -22,8 +22,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     // Se já houver sessão, redireciona para a página inicial
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
+    supabase.auth.getSession().then((res: any) => {
+      const { data } = res;
+      if (data?.session) {
         router.replace('/');
       }
     });
