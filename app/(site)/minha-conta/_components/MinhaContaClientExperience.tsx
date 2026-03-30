@@ -54,7 +54,31 @@ export function MinhaContaClientExperience() {
         throw new Error('Nao foi possivel interpretar os dados da sua conta.');
       }
 
-      setAccount(json.data);
+      const mergedAccount = {
+        ...json.data,
+        profile: {
+          ...(json.data.profile || {}),
+          email:
+            json.data.profile?.email ||
+            session.user.email?.trim().toLowerCase() ||
+            '',
+          nome:
+            json.data.profile?.nome ||
+            session.user.user_metadata?.name ||
+            session.user.user_metadata?.full_name ||
+            '',
+          telefone:
+            json.data.profile?.telefone ||
+            session.user.user_metadata?.phone ||
+            '',
+          cpf_cnpj:
+            json.data.profile?.cpf_cnpj ||
+            session.user.user_metadata?.cpf_cnpj ||
+            '',
+        },
+      };
+
+      setAccount(mergedAccount);
     } catch (loadError: any) {
       setError(loadError?.message || 'Erro ao carregar sua conta.');
     } finally {
