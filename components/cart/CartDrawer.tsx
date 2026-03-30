@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { CartItem } from './CartItem';
 import { useCart } from '@/hooks/useCart';
-import { formatPrice, generateOrderMessage, getWhatsAppLink, isValidEmail, maskPhone } from '@/lib/utils';
+import { formatPrice, generateProfessionalOrderMessage, getWhatsAppLink, isValidEmail, maskPhone } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import {
   ShoppingCart,
@@ -377,7 +377,7 @@ export function CartDrawer() {
     setIsCheckingOut(true);
     try {
       const orderNumber = `NS${Date.now()}`;
-      const message = generateOrderMessage({
+      const message = generateProfessionalOrderMessage({
         orderNumber,
         catalogType: catalogType!,
         items: orderItems.map((item) => ({
@@ -518,7 +518,7 @@ export function CartDrawer() {
     const discountValue = subtotalValue - totalValue;
 
     // Gera mensagem estruturada utilizando utilidade padrão do projeto
-    const message = generateOrderMessage({
+    const message = generateProfessionalOrderMessage({
       orderNumber: pixPayment.numero_pedido,
       catalogType: catalogType!,
       items: orderItemsForMessage,

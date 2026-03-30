@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
+import { requireAdminPage } from '@/lib/auth/server';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 
 export default async function AdminClienteDetalhePage({ params }: { params: { id: string } }) {
+  await requireAdminPage();
   const db = createRequiredServerClient() as any;
   const { data } = await db.from('customer_profiles').select('*, customer_addresses(*), pedidos(*)').eq('id', params.id).maybeSingle();
   if (!data) return notFound();

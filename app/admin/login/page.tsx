@@ -24,8 +24,8 @@ export default function LoginPage() {
   }, []);
 
   const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
+    const response = await fetch('/api/admin/session', { cache: 'no-store' });
+    if (response.ok) {
       router.push('/admin/dashboard');
     }
   };
@@ -44,6 +44,26 @@ export default function LoginPage() {
         throw error;
       }
 
+      const accessToken = data.session?.access_token;
+      if (!accessToken) {
+        throw new Error('Sessão inválida após o login.');
+      }
+
+      const adminSessionResponse = await fetch('/api/admin/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken }),
+      });
+      const adminSession = await adminSessionResponse.json();
+
+      if (!adminSessionResponse.ok) {
+        await supabase.auth.signOut();
+        throw new Error(adminSession.error || 'Acesso administrativo negado.');
+      }
+
+      await supabase.auth.refreshSession();
       toast.success('Login realizado com sucesso!');
       router.push('/admin/dashboard');
     } catch (error: any) {

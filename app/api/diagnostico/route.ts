@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/client';
+import { requireAdminRequest } from '@/lib/auth/server';
+import { createRequiredServerClient } from '@/lib/supabase/client';
 import { logger } from '@/lib/logger';
 
 /**
@@ -8,6 +9,11 @@ import { logger } from '@/lib/logger';
  */
 
 export async function GET(request: NextRequest) {
+  const adminSession = await requireAdminRequest(request);
+  if (!adminSession) {
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+  }
+
   const diagnostics = {
     timestamp: new Date().toISOString(),
     status: 'ok' as 'ok' | 'error' | 'warning',
@@ -26,11 +32,11 @@ export async function GET(request: NextRequest) {
   };
 
   try {
-    const supabase = createServerClient();
+    const supabase = createRequiredServerClient();
 
     // Check Database Connection
     try {
-      const { data: products, error: productsError } = await supabase
+      const { count: totalProducts, error: productsError } = await supabase
         .from('produtos')
         .select('id', { count: 'exact', head: true });
 
@@ -45,7 +51,7 @@ export async function GET(request: NextRequest) {
           status: 'ok', 
           message: 'Conexão estabelecida' 
         };
-        diagnostics.stats.totalProducts = products?.length || 0;
+        diagnostics.stats.totalProducts = totalProducts || 0;
       }
     } catch (error: any) {
       diagnostics.checks.database = { 

@@ -40,12 +40,17 @@ export async function ensureCustomerProfile(user: { id: string; email?: string |
   return data;
 }
 
-export async function getCustomerAccount(userId: string) {
+export async function getCustomerAccount(userId: string, email?: string | null) {
   const db = createRequiredServerClient() as any;
+  const normalizedEmail = email?.trim().toLowerCase() || null;
+  const ordersQuery = normalizedEmail
+    ? db.from('pedidos').select('*').eq('cliente_email', normalizedEmail).order('created_at', { ascending: false })
+    : Promise.resolve({ data: [] });
+
   const [{ data: profile }, { data: addresses }, { data: orders }] = await Promise.all([
     db.from('customer_profiles').select('*').eq('id', userId).maybeSingle(),
     db.from('customer_addresses').select('*').eq('user_id', userId).order('principal', { ascending: false }),
-    db.from('pedidos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+    ordersQuery,
   ]);
 
   return {

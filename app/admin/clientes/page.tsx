@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { requireAdminPage } from '@/lib/auth/server';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 
 export default async function AdminClientesPage() {
+  await requireAdminPage();
   const db = createRequiredServerClient() as any;
   const { data } = await db
     .from('customer_profiles')

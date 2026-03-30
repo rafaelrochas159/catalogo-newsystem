@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
   Package,
@@ -12,7 +11,6 @@ import {
   Upload,
   LogOut,
   Menu,
-  ChevronRight,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,8 +38,8 @@ export default function AdminLayout({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    checkAuth();
-  }, [pathname]);
+    checkAdminAccess();
+  }, [pathname, router]);
 
   const checkAuth = async () => {
     try {
@@ -69,8 +67,33 @@ export default function AdminLayout({
     }
   };
 
+  const checkAdminAccess = async () => {
+    try {
+      if (pathname === '/admin/login') {
+        setIsAuthenticated(false);
+        return;
+      }
+
+      const response = await fetch('/api/admin/session', { cache: 'no-store' });
+      if (!response.ok) {
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Admin auth error:', error);
+      if (pathname !== '/admin/login') {
+        router.push('/admin/login');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
+      await fetch('/api/admin/session', { method: 'DELETE' });
       await supabase.auth.signOut();
       toast.success('Logout realizado com sucesso!');
       router.push('/admin/login');
@@ -78,6 +101,10 @@ export default function AdminLayout({
       toast.error('Erro ao fazer logout');
     }
   };
+
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

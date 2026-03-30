@@ -23,7 +23,7 @@ import { ProductBadges } from '@/components/product/ProductBadges';
 import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
 import { Produto } from '@/types';
-import { formatPrice, getWhatsAppLink } from '@/lib/utils';
+import { formatPrice, getBoxSavings, getBoxUnitPrice, getWhatsAppLink } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
@@ -35,7 +35,9 @@ interface ProductPageProps {
 export function ProductPage({ product, relatedProducts }: ProductPageProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [catalogType, setCatalogType] = useState<'UNITARIO' | 'CAIXA_FECHADA'>('UNITARIO');
+  const [catalogType, setCatalogType] = useState<'UNITARIO' | 'CAIXA_FECHADA'>(
+    product.tipo_catalogo === 'CAIXA_FECHADA' ? 'CAIXA_FECHADA' : 'UNITARIO',
+  );
   const [isAdding, setIsAdding] = useState(false);
   
   const addItem = useCart((state) => state.addItem);
@@ -53,7 +55,10 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
 
   const hasDiscount = price < originalPrice;
   const stock = catalogType === 'UNITARIO' ? product.estoque_unitario : product.estoque_caixa;
-  const canAddBox = product.tipo_catalogo === 'CAIXA_FECHADA';
+  const supportsUnit = product.tipo_catalogo === 'UNITARIO' || product.tipo_catalogo === 'AMBOS';
+  const supportsBox = product.tipo_catalogo === 'CAIXA_FECHADA' || product.tipo_catalogo === 'AMBOS';
+  const boxPricing = getBoxSavings(product);
+  const unitPriceInBox = getBoxUnitPrice(product);
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -176,8 +181,9 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
             </p>
 
             {/* Catalog Type Selector */}
-            {canAddBox && product.preco_caixa && (
+            {supportsBox && product.preco_caixa && (
               <div className="flex gap-2">
+                {supportsUnit && (
                 <button
                   onClick={() => setCatalogType('UNITARIO')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
@@ -189,6 +195,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                   <Package className="h-4 w-4" />
                   Unitário
                 </button>
+                )}
                 <button
                   onClick={() => setCatalogType('CAIXA_FECHADA')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
@@ -228,6 +235,50 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                 </p>
               </div>
             )}
+
+            {supportsUnit && supportsBox && unitPriceInBox && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">
+                    Economia na caixa
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Cada unidade na caixa sai por <strong className="text-foreground">{formatPrice(unitPriceInBox)}</strong>.
+                  </p>
+                  {boxPricing.savingsPerUnit > 0 && (
+                    <p className="mt-2 text-sm text-emerald-500">
+                      Economize {formatPrice(boxPricing.savingsPerUnit)} por unidade ({boxPricing.savingsPercent.toFixed(0)}%).
+                    </p>
+                  )}
+                </div>
+                <div className="rounded-xl border bg-card p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neon-blue">
+                    Escolha inteligente
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {catalogType === 'UNITARIO'
+                      ? 'Vai levar volume? A caixa reduz o custo unitario.'
+                      : 'Precisa de reposicao rapida? Voce tambem pode comprar no unitario.'}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => setCatalogType(catalogType === 'UNITARIO' ? 'CAIXA_FECHADA' : 'UNITARIO')}
+                  >
+                    {catalogType === 'UNITARIO' ? 'Leve mais barato na caixa' : 'Comprar unitario'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 text-xs">
+              <Badge variant="outline" className="border-amber-500/40 text-amber-500">Compra segura</Badge>
+              <Badge variant="outline" className="border-green-500/40 text-green-500">Envio rapido</Badge>
+              <Badge variant="outline" className="border-neon-blue/40 text-neon-blue">
+                {stock > 0 ? 'Estoque disponivel' : 'Reposicao em breve'}
+              </Badge>
+            </div>
 
             {/* Stock */}
             <div className="flex items-center gap-2">
@@ -278,7 +329,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                 ) : (
                   <>
                     <ShoppingCart className="h-5 w-5 mr-2" />
-                    Adicionar ao Carrinho
+                    {catalogType === 'CAIXA_FECHADA' ? 'Comprar caixa agora' : 'Comprar agora'}
                   </>
                 )}
               </Button>

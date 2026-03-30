@@ -30,7 +30,8 @@ async function getFeaturedProducts() {
       categoria:categorias(*)
     `)
     .eq('is_active', true)
-    .eq('is_destaque', true)
+    .or('destaque_home.eq.true,is_destaque.eq.true')
+    .in('tipo_catalogo', ['UNITARIO', 'AMBOS'])
     .limit(8);
   
   return data || [];
@@ -46,6 +47,7 @@ async function getBestSellers() {
     `)
     .eq('is_active', true)
     .eq('is_mais_vendido', true)
+    .in('tipo_catalogo', ['UNITARIO', 'AMBOS'])
     .limit(8);
   
   return data || [];
@@ -61,6 +63,7 @@ async function getNewArrivals() {
     `)
     .eq('is_active', true)
     .eq('is_novo', true)
+    .in('tipo_catalogo', ['UNITARIO', 'AMBOS'])
     .order('created_at', { ascending: false })
     .limit(8);
   
@@ -77,6 +80,7 @@ async function getPromotions() {
     `)
     .eq('is_active', true)
     .eq('is_promocao', true)
+    .in('tipo_catalogo', ['UNITARIO', 'AMBOS'])
     .limit(8);
   
   return data || [];
@@ -110,7 +114,7 @@ export default async function HomePage() {
         <Link href="/meus-pedidos">
           <Button
             size="lg"
-            className="bg-neon-blue/10 hover:bg-neon-blue/20 border border-neon-blue text-neon-blue font-semibold"
+            className="bg-neon-blue text-black hover:bg-neon-blue/90 font-semibold shadow-[0_18px_60px_rgba(0,243,255,0.18)]"
           >
             📦 Acompanhar meus pedidos
           </Button>
@@ -118,13 +122,13 @@ export default async function HomePage() {
       </div>
       {/* Recovery banner shown only to returning customers with stored email */}
       <RecoveryBanner />
+      <BestSellers products={bestSellers} />
+      <FeaturedProducts products={featuredProducts} />
+      <PromotionsSection products={promotions} />
       <FeaturesSection />
       {/* Display recent purchases to build social proof */}
       <RecentPurchasesSection />
       <CategoriesSection categories={categories} />
-      <FeaturedProducts products={featuredProducts} />
-      <PromotionsSection products={promotions} />
-      <BestSellers products={bestSellers} />
       <NewArrivals products={newArrivals} />
       {/* Trust and benefits section at the bottom of the home page */}
       <TrustSection />

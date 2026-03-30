@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, Eye, Check } from 'lucide-react';
+import { Heart, ShoppingCart, Eye, Check, ShieldCheck, Truck, PackageCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Produto } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getBoxSavings, getBoxUnitPrice } from '@/lib/utils';
 import { PRODUCT_BADGES } from '@/lib/constants';
 import { QuickView } from './QuickView';
 import toast from 'react-hot-toast';
@@ -36,6 +36,9 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
     : (product.preco_caixa || 0);
 
   const hasDiscount = price < originalPrice;
+  const stock = catalogType === 'UNITARIO' ? product.estoque_unitario : product.estoque_caixa;
+  const boxPricing = getBoxSavings(product);
+  const unitPriceInBox = getBoxUnitPrice(product);
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -191,39 +194,67 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
               )}
             </div>
 
+            {catalogType === 'CAIXA_FECHADA' && unitPriceInBox && (
+              <p className="text-xs text-emerald-500">
+                Caixa por {formatPrice(unitPriceInBox)} cada unidade
+              </p>
+            )}
+
+            {catalogType === 'UNITARIO' && boxPricing.savingsPerUnit > 0 && (
+              <p className="text-xs text-emerald-500">
+                Leve mais barato na caixa e economize {formatPrice(boxPricing.savingsPerUnit)} por unidade
+              </p>
+            )}
+
             {/* Box Info */}
             {catalogType === 'CAIXA_FECHADA' && product.quantidade_por_caixa && (
               <p className="text-xs text-muted-foreground">
                 {product.quantidade_por_caixa} unidades por caixa
               </p>
             )}
+
+            <div className="flex flex-wrap gap-2 pt-1 text-[11px]">
+              {(product.is_mais_vendido || product.is_promocao) && (
+                <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-amber-500">
+                  <PackageCheck className="h-3 w-3" />
+                  {product.is_mais_vendido ? 'Mais vendido' : 'Oferta'}
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-green-500">
+                <Truck className="h-3 w-3" />
+                Envio rapido
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-neon-blue">
+                <ShieldCheck className="h-3 w-3" />
+                Compra segura
+              </span>
+              <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 ${
+                stock > 0 ? 'text-green-500' : 'text-muted-foreground'
+              }`}>
+                <PackageCheck className="h-3 w-3" />
+                {stock > 0 ? 'Estoque disponivel' : 'Sem estoque'}
+              </span>
+            </div>
+
+            <Button
+              className={`w-full mt-3 ${isAdding ? 'bg-green-500 hover:bg-green-500' : 'bg-neon-blue hover:bg-neon-blue/90'} text-black font-semibold`}
+              onClick={handleAddToCart}
+              disabled={isAdding || stock === 0}
+            >
+              {isAdding ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  Adicionado
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  {catalogType === 'CAIXA_FECHADA' ? 'Comprar caixa' : 'Comprar agora'}
+                </>
+              )}
+            </Button>
           </div>
         </div>
-
-      {/* Add to Cart Button */}
-      <motion.div
-        className="absolute bottom-4 right-4"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 0.8 }}
-        transition={{ duration: 0.2 }}
-      >
-        <Button
-          size="icon"
-          className={`
-            rounded-full shadow-lg transition-all duration-300
-            ${isAdding ? 'bg-green-500' : 'bg-neon-blue hover:bg-neon-blue/90'}
-          `}
-          onClick={handleAddToCart}
-          disabled={isAdding}
-        >
-          {isAdding ? (
-            <Check className="h-4 w-4 text-black" />
-          ) : (
-            <ShoppingCart className="h-4 w-4 text-black" />
-          )}
-        </Button>
-      </motion.div>
-
       {/* Quick View Dialog */}
       <QuickView
         product={product}

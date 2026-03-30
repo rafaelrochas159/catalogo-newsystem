@@ -65,6 +65,7 @@ export interface Database {
           is_promocao: boolean;
           is_mais_vendido: boolean;
           is_destaque: boolean;
+          destaque_home: boolean | null;
           tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
           meta_title: string | null;
           meta_description: string | null;
@@ -96,6 +97,7 @@ export interface Database {
           is_promocao?: boolean;
           is_mais_vendido?: boolean;
           is_destaque?: boolean;
+          destaque_home?: boolean | null;
           tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
           meta_title?: string | null;
           meta_description?: string | null;
@@ -127,6 +129,7 @@ export interface Database {
           is_promocao?: boolean;
           is_mais_vendido?: boolean;
           is_destaque?: boolean;
+          destaque_home?: boolean | null;
           tipo_catalogo?: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
           meta_title?: string | null;
           meta_description?: string | null;

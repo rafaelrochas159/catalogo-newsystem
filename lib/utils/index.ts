@@ -168,6 +168,46 @@ interface CustomerData {
   cpf_cnpj?: string | null;
 }
 
+interface CatalogPricingProduct {
+  preco_unitario?: number | null;
+  preco_caixa?: number | null;
+  quantidade_por_caixa?: number | null;
+}
+
+export function getBoxUnitPrice(product: CatalogPricingProduct): number | null {
+  if (!product.preco_caixa || !product.quantidade_por_caixa || product.quantidade_por_caixa <= 0) {
+    return null;
+  }
+
+  return product.preco_caixa / product.quantidade_por_caixa;
+}
+
+export function getBoxSavings(product: CatalogPricingProduct): {
+  unitPriceInBox: number | null;
+  savingsPerUnit: number;
+  savingsPercent: number;
+} {
+  const unitPriceInBox = getBoxUnitPrice(product);
+  const unitPrice = product.preco_unitario || 0;
+
+  if (!unitPriceInBox || !unitPrice || unitPriceInBox >= unitPrice) {
+    return {
+      unitPriceInBox,
+      savingsPerUnit: 0,
+      savingsPercent: 0,
+    };
+  }
+
+  const savingsPerUnit = unitPrice - unitPriceInBox;
+  const savingsPercent = (savingsPerUnit / unitPrice) * 100;
+
+  return {
+    unitPriceInBox,
+    savingsPerUnit,
+    savingsPercent,
+  };
+}
+
 export function generateOrderMessage(order: {
   orderNumber: string;
   catalogType: string;
@@ -257,4 +297,64 @@ export function generateOrderMessage(order: {
   message += `Aguardo confirmação! ✅`;
 
   return message;
+}
+
+export function generateProfessionalOrderMessage(order: {
+  orderNumber: string;
+  catalogType: string;
+  items: OrderMessageItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  address?: AddressData;
+  customer?: CustomerData;
+  paymentMethod?: string;
+}): string {
+  const typeLabel = order.catalogType === 'CAIXA_FECHADA' ? 'Caixa fechada' : 'Unitario';
+  const paymentLabel = order.paymentMethod || 'Pagamento confirmado';
+  const lines: string[] = [
+    '🛒 *NOVO PEDIDO - NEW SYSTEM*',
+    `📋 Pedido: ${order.orderNumber}`,
+    `📦 Tipo: ${typeLabel}`,
+    `💳 Pagamento: ${paymentLabel}`,
+    '',
+    '*CLIENTE*',
+    `👤 ${order.customer?.nome || 'Nao informado'}`,
+    `📞 ${order.customer?.telefone || 'Nao informado'}`,
+    `✉️ ${order.customer?.email || 'Nao informado'}`,
+    '',
+    '*ITENS*',
+  ];
+
+  order.items.forEach((item) => {
+    lines.push(`* ${item.name} | SKU: ${item.sku || '-'}`);
+    lines.push(`  Qtd: ${item.quantity}`);
+    lines.push(`  Unit: ${formatPrice(item.unitPrice)}`);
+    lines.push(`  Total: ${formatPrice(item.totalPrice)}`);
+    lines.push('');
+  });
+
+  lines.push('*RESUMO*');
+  lines.push(`Subtotal: ${formatPrice(order.subtotal)}`);
+  if (order.discount > 0) {
+    lines.push(`Desconto: -${formatPrice(order.discount)}`);
+  }
+  lines.push(`TOTAL: ${formatPrice(order.total)}`);
+
+  if (order.address) {
+    lines.push('');
+    lines.push('*ENDERECO*');
+    lines.push(order.address.cep || '-');
+    lines.push([order.address.rua, order.address.numero].filter(Boolean).join(', '));
+    lines.push(order.address.bairro || '-');
+    lines.push([order.address.cidade, order.address.estado].filter(Boolean).join(' - '));
+    if (order.address.complemento) {
+      lines.push(order.address.complemento);
+    }
+  }
+
+  lines.push('');
+  lines.push('Aguardando confirmacao ✅');
+
+  return lines.join('\n');
 }

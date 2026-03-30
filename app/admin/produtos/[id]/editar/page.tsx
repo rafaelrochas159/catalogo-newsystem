@@ -50,7 +50,7 @@ export default function EditarProdutoPage() {
     price_box: "",
     stock_unit: "",
     stock_box: "",
-    catalog_type: "UNITARIO" as "UNITARIO" | "CAIXA_FECHADA",
+    catalog_type: "UNITARIO" as "UNITARIO" | "CAIXA_FECHADA" | "AMBOS",
     quantity_per_box: "",
     box_weight: "",
     box_length: "",
@@ -62,6 +62,7 @@ export default function EditarProdutoPage() {
     is_promotion: false,
     is_new: false,
     is_bestseller: false,
+    highlight_on_home: false,
     is_active: true,
   });
 
@@ -105,7 +106,7 @@ export default function EditarProdutoPage() {
         price_box: product.preco_caixa?.toString() || "",
         stock_unit: product.estoque_unitario.toString(),
         stock_box: product.estoque_caixa.toString(),
-        catalog_type: product.tipo_catalogo === 'AMBOS' ? 'UNITARIO' : product.tipo_catalogo,
+        catalog_type: product.tipo_catalogo,
         quantity_per_box: product.quantidade_por_caixa?.toString() || "",
         box_weight: product.peso_caixa?.toString() || "",
         box_length: product.dimensoes_caixa?.length?.toString() || "",
@@ -117,6 +118,7 @@ export default function EditarProdutoPage() {
         is_promotion: product.is_promocao,
         is_new: product.is_novo,
         is_bestseller: product.is_mais_vendido,
+        highlight_on_home: product.destaque_home || false,
         is_active: product.is_active,
       });
 
@@ -170,6 +172,7 @@ export default function EditarProdutoPage() {
         is_promocao: formData.is_promotion,
         is_novo: formData.is_new,
         is_mais_vendido: formData.is_bestseller,
+        destaque_home: formData.highlight_on_home,
         is_active: formData.is_active,
       };
 
@@ -410,7 +413,7 @@ export default function EditarProdutoPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-2 flex-wrap">
-                  {["UNITARIO", "CAIXA_FECHADA"].map((type) => (
+                  {["UNITARIO", "CAIXA_FECHADA", "AMBOS"].map((type) => (
                     <button
                       key={type}
                       type="button"
@@ -422,6 +425,7 @@ export default function EditarProdutoPage() {
                       }`}
                     >
                       {type === "UNITARIO" ? "Unitário" : "Caixa Fechada"}
+                      {type === "AMBOS" && <span className="ml-2 text-xs opacity-80">+ Unitario</span>}
                     </button>
                   ))}
                 </div>
@@ -431,7 +435,7 @@ export default function EditarProdutoPage() {
                   "<strong>Caixa Fechada</strong>" aparece apenas no catálogo de caixa fechada. Cada produto deve ser cadastrado separadamente para cada catálogo.
                 </p>
 
-                {formData.catalog_type === "CAIXA_FECHADA" && (
+                {(formData.catalog_type === "CAIXA_FECHADA" || formData.catalog_type === "AMBOS") && (
                   <div className="pt-4 border-t space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -648,6 +652,13 @@ export default function EditarProdutoPage() {
                   />
                   <Label className="cursor-pointer">Em Destaque</Label>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={formData.highlight_on_home}
+                    onCheckedChange={(v) => setFormData({ ...formData, highlight_on_home: v as boolean })}
+                  />
+                  <Label className="cursor-pointer">Destaque na Home</Label>
+                </div>
               </CardContent>
             </Card>
 
@@ -676,6 +687,7 @@ export default function EditarProdutoPage() {
                   {formData.is_promotion && <Badge className="bg-red-500">Promo</Badge>}
                   {formData.is_bestseller && <Badge className="bg-yellow-500">Top</Badge>}
                   {formData.is_featured && <Badge className="bg-purple-500">Destaque</Badge>}
+                  {formData.highlight_on_home && <Badge className="bg-neon-blue text-black">Home</Badge>}
                 </div>
               </CardContent>
             </Card>
@@ -701,4 +713,3 @@ export default function EditarProdutoPage() {
     </div>
   );
 }
-

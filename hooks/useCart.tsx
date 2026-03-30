@@ -59,6 +59,7 @@ export const useCart = create<CartState & CartActions>()(
 
       addItem: (product, quantity, type) => {
         const { items, catalogType, canAddType } = get();
+        const normalizedType = type === 'UNITARIO' ? 'unit' : 'box';
         
         // Verificar se pode adicionar este tipo
         const canAdd = canAddType(type);
@@ -67,7 +68,7 @@ export const useCart = create<CartState & CartActions>()(
         }
 
         // Verificar se o produto suporta este tipo
-        if (product.tipo_catalogo !== type) {
+        if (product.tipo_catalogo !== type && product.tipo_catalogo !== 'AMBOS') {
           return { 
             success: false, 
             message: `Este produto não está disponível no catálogo ${type === 'UNITARIO' ? 'unitário' : 'de caixa fechada'}.`
@@ -93,7 +94,9 @@ export const useCart = create<CartState & CartActions>()(
         }
 
         const existingItemIndex = items.findIndex(
-          item => item.productId === product.id && item.type === type
+          item =>
+            item.productId === product.id &&
+            (item.catalogType === type || item.type === normalizedType)
         );
 
         let newItems;
@@ -120,7 +123,7 @@ export const useCart = create<CartState & CartActions>()(
             image: product.imagem_principal,
             price, 
             quantity, 
-            type: (type === 'UNITARIO' ? 'unit' : 'box') as 'unit' | 'box',
+            type: normalizedType as 'unit' | 'box',
             catalogType: type 
           }];
         }

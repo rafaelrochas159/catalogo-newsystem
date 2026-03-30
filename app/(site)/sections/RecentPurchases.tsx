@@ -41,7 +41,10 @@ export async function RecentPurchasesSection() {
   return (
     <section className="py-10 border-t border-border bg-background/60">
       <div className="container">
-        <h2 className="text-2xl font-bold mb-6">Compras recentes</h2>
+        <h2 className="text-2xl font-bold mb-2">Ultimas compras reais</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Sem nomes inventados. Quando existe volume real, ele aparece aqui.
+        </p>
         {pedidos && pedidos.length > 0 ? (
           <ul className="space-y-4">
             {pedidos.map((pedido: any) => {

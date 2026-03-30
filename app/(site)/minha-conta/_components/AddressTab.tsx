@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/lib/supabase/client';
 
 export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: (v: any) => void }) {
   const main = addresses?.[0] || {};
@@ -24,10 +25,33 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
 
   async function save() {
     setSaving(true);
-    const res = await fetch('/api/account/address', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-    const json = await res.json();
-    onSaved(json.data);
-    setSaving(false);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error('SessÃ£o expirada.');
+      }
+
+      const res = await fetch('/api/account/address', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(form),
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.error || 'Erro ao salvar endereÃ§o.');
+      }
+
+      onSaved(json.data);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return <div className="space-y-4 max-w-xl"><Input value={form.cep} onChange={(e)=>{ const v=e.target.value; setForm({...form,cep:v}); lookupCep(v); }} placeholder="CEP" />{loadingCep && <p className="text-sm text-muted-foreground">Buscando CEP...</p>}<Input value={form.rua} onChange={(e)=>setForm({...form,rua:e.target.value})} placeholder="Rua" /><Input value={form.numero} onChange={(e)=>setForm({...form,numero:e.target.value})} placeholder="Número" /><Input value={form.complemento} onChange={(e)=>setForm({...form,complemento:e.target.value})} placeholder="Complemento" /><Input value={form.bairro} onChange={(e)=>setForm({...form,bairro:e.target.value})} placeholder="Bairro" /><Input value={form.cidade} onChange={(e)=>setForm({...form,cidade:e.target.value})} placeholder="Cidade" /><Input value={form.estado} onChange={(e)=>setForm({...form,estado:e.target.value})} placeholder="Estado" /><Button onClick={save} disabled={saving}>{saving ? 'Salvando...' : 'Salvar endereço'}</Button></div>;

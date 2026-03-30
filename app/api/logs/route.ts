@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminRequest } from '@/lib/auth/server';
 import { logger, LogLevel } from '@/lib/logger';
 
 /**
@@ -11,6 +12,11 @@ import { logger, LogLevel } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
+    const adminSession = await requireAdminRequest(request);
+    if (!adminSession) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     
     // Parâmetros de filtro
@@ -57,6 +63,11 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const adminSession = await requireAdminRequest(request);
+    if (!adminSession) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     logger.clearLogs();
     
     return NextResponse.json({

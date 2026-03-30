@@ -24,9 +24,9 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
         >
           <div>
-            <h2 className="text-3xl font-bold mb-2">Produtos em Destaque</h2>
+            <h2 className="text-3xl font-bold mb-2">Destaques</h2>
             <p className="text-muted-foreground">
-              Os produtos mais populares da nossa loja
+              Selecionados no painel para puxar conversao logo no topo
             </p>
           </div>
           <Link href="/catalogo/unitario">

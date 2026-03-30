@@ -56,6 +56,7 @@ export interface Produto {
   is_promocao: boolean;
   is_mais_vendido: boolean;
   is_destaque: boolean;
+  destaque_home?: boolean;
 
   // Tipo de catálogo
   tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
@@ -94,6 +95,7 @@ export interface Produto {
   is_promotion?: boolean;
   is_bestseller?: boolean;
   is_featured?: boolean;
+  home_featured?: boolean;
   catalog_type?: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
   views?: number;
 }

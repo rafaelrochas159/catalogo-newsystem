@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatPrice } from '@/lib/utils';
 import { ProductCard } from '@/components/product/ProductCard';
 import { Produto } from '@/types';
-import { generateOrderMessage, getWhatsAppLink } from '@/lib/utils';
+import { generateProfessionalOrderMessage, getWhatsAppLink } from '@/lib/utils';
 import { COMPANY_INFO } from '@/lib/constants';
+import { supabase } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 
 interface OrderItem {
@@ -39,6 +40,7 @@ interface OrderAddress {
 interface OrderData {
   id: string;
   numero_pedido: string;
+  checkout_token?: string | null;
   created_at: string;
   status_pedido?: string | null;
   status_pagamento?: string | null;
@@ -101,20 +103,37 @@ export default function MyOrdersPage() {
   // customer's last used email. It uses the browser's URLSearchParams to
   // avoid Next.js Suspense requirements for `useSearchParams()`.
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        const paramEmail = params.get('email');
-        if (paramEmail) {
-          setEmail(paramEmail);
+    const loadInitialEmail = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const sessionEmail = session?.user?.email?.trim().toLowerCase();
+        if (sessionEmail) {
+          setEmail(sessionEmail);
           return;
         }
-        const stored = localStorage.getItem('ns_last_email');
-        if (stored) setEmail(stored);
+
+        if (typeof window !== 'undefined') {
+          const storedLastOrder = localStorage.getItem('ns_last_order_number');
+          if (storedLastOrder) {
+            setLastOrderNumber(storedLastOrder);
+          }
+          const params = new URLSearchParams(window.location.search);
+          const paramEmail = params.get('email');
+          if (paramEmail) {
+            setEmail(paramEmail);
+            return;
+          }
+          const stored = localStorage.getItem('ns_last_email');
+          if (stored) setEmail(stored);
+        }
+      } catch (e) {
+        // ignore errors (e.g., SSR, storage access)
       }
-    } catch (e) {
-      // ignore errors (e.g., SSR, storage access)
-    }
+    };
+
+    loadInitialEmail();
   }, []);
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [recommended, setRecommended] = useState<Produto[]>([]);
@@ -125,6 +144,8 @@ export default function MyOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [lastOrderNumber, setLastOrderNumber] = useState<string | null>(null);
+  const autoLoadedRef = useRef(false);
 
   /**
    * Constrói e abre um link do WhatsApp para reenviar o pedido ao WhatsApp oficial da empresa.
@@ -148,7 +169,7 @@ export default function MyOrdersPage() {
       const discountVal = order.desconto_valor || 0;
       const totalVal = order.total;
       const catalogType = (order.tipo_catalogo ?? 'UNITARIO') as any;
-      const message = generateOrderMessage({
+      const message = generateProfessionalOrderMessage({
         orderNumber: order.numero_pedido,
         catalogType,
         items: itemsForMessage,
@@ -178,6 +199,32 @@ export default function MyOrdersPage() {
     return /.+@.+\..+/.test(email.trim());
   };
 
+  const getAccessToken = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    return session?.access_token || null;
+  };
+
+  useEffect(() => {
+    const autoLoadOrders = async () => {
+      if (autoLoadedRef.current || !/.+@.+\..+/.test(email.trim())) {
+        return;
+      }
+
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        return;
+      }
+
+      autoLoadedRef.current = true;
+      fetchOrdersByEmail();
+    };
+
+    autoLoadOrders();
+  }, [email]);
+
   const fetchOrdersByEmail = async () => {
     setSearched(true);
     if (!isEmailValid()) {
@@ -188,7 +235,18 @@ export default function MyOrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/pedidos/email/${encodeURIComponent(email.trim())}`);
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        setError('FaÃ§a login para consultar seus pedidos.');
+        setOrders([]);
+        return;
+      }
+
+      const response = await fetch(`/api/pedidos/email/${encodeURIComponent(email.trim())}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const json = await response.json();
       if (!response.ok) {
         setError(json.error || 'Erro ao buscar pedidos');
@@ -196,6 +254,13 @@ export default function MyOrdersPage() {
       } else {
         const fetchedOrders = (json.data as OrderData[]) || [];
         setOrders(fetchedOrders);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('ns_last_email', email.trim().toLowerCase());
+          if (fetchedOrders[0]?.numero_pedido) {
+            localStorage.setItem('ns_last_order_number', fetchedOrders[0].numero_pedido);
+            setLastOrderNumber(fetchedOrders[0].numero_pedido);
+          }
+        }
         // Após buscar os pedidos, tenta atualizar o status de cada um deles.
         // Isso garante que um pagamento recentemente aprovado seja refletido imediatamente.
         updateOrdersStatus(fetchedOrders);
@@ -220,6 +285,7 @@ export default function MyOrdersPage() {
     if (!currentOrders || currentOrders.length === 0) return;
     try {
       setUpdatingStatus(true);
+      const accessToken = await getAccessToken();
       const updated = await Promise.all(
         currentOrders.map(async (order) => {
           // Se já estiver aprovado/pago, não precisa atualizar
@@ -229,7 +295,12 @@ export default function MyOrdersPage() {
             order.status_pedido === 'confirmado';
           if (isApproved) return order;
           try {
-            const res = await fetch(`/api/payments/status/${encodeURIComponent(order.numero_pedido)}`);
+            const reference = order.checkout_token || order.numero_pedido;
+            const res = await fetch(`/api/payments/status/${encodeURIComponent(reference)}`, {
+              headers: !order.checkout_token && accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : undefined,
+            });
             const json = await res.json();
             if (res.ok && json.status_pagamento) {
               return {
@@ -256,7 +327,12 @@ export default function MyOrdersPage() {
     async function fetchRecommended() {
       try {
         setLoadingRecommended(true);
-        const res = await fetch('/api/recommendations');
+        const accessToken = await getAccessToken();
+        const res = await fetch('/api/recommendations', {
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : undefined,
+        });
         const json = await res.json();
         if (res.ok) {
           setRecommended((json.data as Produto[]) || []);
@@ -270,9 +346,38 @@ export default function MyOrdersPage() {
     fetchRecommended();
   }, []);
 
+  const latestOrder =
+    orders.find((order) => order.numero_pedido === lastOrderNumber) ||
+    orders[0] ||
+    null;
+
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Meus Pedidos</h1>
+
+      {latestOrder && (
+        <section className="mb-6 rounded-2xl border bg-card p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neon-blue">
+                Ultimo pedido
+              </p>
+              <h2 className="text-xl font-bold mt-1">{latestOrder.numero_pedido}</h2>
+              <p className="text-sm text-muted-foreground">
+                {new Date(latestOrder.created_at).toLocaleString('pt-BR')}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {orderStatusBadge(latestOrder.status_pedido)}
+              {paymentStatusBadge(latestOrder.status_pagamento)}
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Total do ultimo acesso salvo</span>
+            <span className="text-lg font-bold text-neon-blue">{formatPrice(latestOrder.total)}</span>
+          </div>
+        </section>
+      )}
 
       {/* Seção de produtos recomendados */}
       {recommended.length > 0 && (
@@ -285,7 +390,7 @@ export default function MyOrdersPage() {
               <ProductCard
                 key={product.id}
                 product={product as any}
-                catalogType={(product.tipo_catalogo as any) || 'UNITARIO'}
+                catalogType={product.tipo_catalogo === 'CAIXA_FECHADA' ? 'CAIXA_FECHADA' : 'UNITARIO'}
               />
             ))}
           </div>

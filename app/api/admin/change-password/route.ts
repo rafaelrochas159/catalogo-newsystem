@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireAdminRequest } from '@/lib/auth/server';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 
 /**
@@ -14,6 +15,11 @@ import { createRequiredServerClient } from '@/lib/supabase/client';
  */
 export async function POST(request: Request) {
   try {
+    const adminSession = await requireAdminRequest(request);
+    if (!adminSession) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
     const { userId, password } = await request.json();
     if (!userId || typeof userId !== 'string' || !password || typeof password !== 'string') {
       return NextResponse.json({ error: 'Parâmetros inválidos' }, { status: 400 });

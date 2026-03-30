@@ -172,13 +172,23 @@ export default function ProductsPage() {
                         >
                           {product.tipo_catalogo === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
                         </Badge>
+                        {product.tipo_catalogo === 'AMBOS' && (
+                          <Badge variant="outline" className="ml-2 border-emerald-500 text-emerald-500">
+                            Unitario + Caixa
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell>{formatPrice(product.preco_unitario)}</TableCell>
                       <TableCell>{product.estoque_unitario}</TableCell>
                       <TableCell>
-                        <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                          {product.is_active ? 'Ativo' : 'Inativo'}
-                        </Badge>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={product.is_active ? 'default' : 'secondary'}>
+                            {product.is_active ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                          {product.destaque_home && (
+                            <Badge className="bg-neon-blue text-black">Home</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">

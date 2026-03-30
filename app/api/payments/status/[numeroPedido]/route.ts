@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 import { getApprovedAt, getPaymentById, mapMercadoPagoStatus, getPaymentByExternalReference } from '@/lib/services/mercadoPago';
+import { getAuthenticatedUserFromRequest, requireAdminRequest } from '@/lib/auth/server';
 
 interface Params {
   params: {
@@ -12,8 +13,11 @@ export async function GET(_request: Request, { params }: Params) {
   try {
     const db = createRequiredServerClient() as any;
     const reference = decodeURIComponent(params.numeroPedido);
+    const adminSession = await requireAdminRequest(_request);
+    const { user } = adminSession ? { user: null } : await getAuthenticatedUserFromRequest(_request);
 
     let pedido: any = null;
+    let matchedByCheckoutToken = false;
 
     const byToken = await db
       .from('pedidos')
@@ -23,6 +27,7 @@ export async function GET(_request: Request, { params }: Params) {
 
     if (byToken.data) {
       pedido = byToken.data;
+      matchedByCheckoutToken = true;
     } else {
       const byNumber = await db
         .from('pedidos')
@@ -35,6 +40,19 @@ export async function GET(_request: Request, { params }: Params) {
 
     if (!pedido) {
       return NextResponse.json({ error: 'Pedido não encontrado.' }, { status: 404 });
+    }
+
+    if (!matchedByCheckoutToken && !adminSession) {
+      const normalizedOrderEmail = pedido.cliente_email?.trim().toLowerCase();
+      const normalizedUserEmail = user?.email?.trim().toLowerCase();
+
+      if (!normalizedUserEmail) {
+        return NextResponse.json({ error: 'Sessao invalida.' }, { status: 401 });
+      }
+
+      if (!normalizedOrderEmail || normalizedOrderEmail !== normalizedUserEmail) {
+        return NextResponse.json({ error: 'Acesso negado ao pedido informado.' }, { status: 403 });
+      }
     }
 
     /*

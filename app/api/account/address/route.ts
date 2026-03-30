@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createRequiredServerClient } from '@/lib/supabase/client';
 import { upsertPrimaryAddress } from '@/lib/customer-account';
+import { getAuthenticatedUserFromRequest } from '@/lib/auth/server';
 
 export async function POST(request: Request) {
-  const db = createRequiredServerClient() as any;
-  const { data: auth } = await db.auth.getUser();
-  const user = auth.user;
+  const { user } = await getAuthenticatedUserFromRequest(request);
   if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
 
   const body = await request.json();
