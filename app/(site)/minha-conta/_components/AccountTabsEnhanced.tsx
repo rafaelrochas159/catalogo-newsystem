@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,11 +12,11 @@ export function AccountTabsEnhanced({ initialData }: { initialData: any }) {
 
   return (
     <Tabs defaultValue="pedidos" className="space-y-6">
-      <TabsList className="grid w-full max-w-3xl grid-cols-2 sm:grid-cols-4">
-        <TabsTrigger value="pedidos">Meus pedidos</TabsTrigger>
-        <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
-        <TabsTrigger value="dados">Meus dados</TabsTrigger>
-        <TabsTrigger value="enderecos">Meus enderecos</TabsTrigger>
+      <TabsList className="grid w-full rounded-2xl border bg-card p-1 grid-cols-2 sm:grid-cols-4">
+        <TabsTrigger value="pedidos" className="rounded-xl">Meus pedidos</TabsTrigger>
+        <TabsTrigger value="favoritos" className="rounded-xl">Favoritos</TabsTrigger>
+        <TabsTrigger value="dados" className="rounded-xl">Meus dados</TabsTrigger>
+        <TabsTrigger value="enderecos" className="rounded-xl">Enderecos</TabsTrigger>
       </TabsList>
       <TabsContent value="pedidos"><OrdersTab orders={data.orders || []} profile={data.profile} addresses={data.addresses || []} /></TabsContent>
       <TabsContent value="favoritos"><FavoritesTab favorites={data.favorites || []} /></TabsContent>
@@ -25,3 +25,4 @@ export function AccountTabsEnhanced({ initialData }: { initialData: any }) {
     </Tabs>
   );
 }
+

@@ -1,19 +1,25 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Package, Box, Truck, Percent, Clock } from 'lucide-react';
+import { ArrowRight, Box, Clock, Package, Percent, ShieldCheck, Truck, WalletCards } from 'lucide-react';
 import { authorizedFetch, getAnonymousVisitorId, storeExperimentAssignments } from '@/lib/client-auth';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 
 const features = [
   { icon: Clock, text: `Desde ${COMPANY_INFO.since} no mercado` },
-  { icon: Package, text: `Pedido mínimo R$${BUSINESS_RULES.minOrderValue}` },
-  { icon: Percent, text: `${BUSINESS_RULES.discountPercentage}% off acima de R$${BUSINESS_RULES.discountThreshold}` },
-  { icon: Truck, text: 'Entrega em SP no mesmo dia' },
+  { icon: Package, text: `Pedido minimo de R$${BUSINESS_RULES.minOrderValue}` },
+  { icon: Percent, text: `${BUSINESS_RULES.discountPercentage}% OFF acima de R$${BUSINESS_RULES.discountThreshold}` },
+  { icon: Truck, text: 'Entrega rapida em Sao Paulo' },
+];
+
+const trustStats = [
+  { label: 'Reposicao agil', value: 'Giro alto e compra rapida' },
+  { label: 'Compra segura', value: 'Checkout protegido e Pix validado' },
+  { label: 'Atacado flexivel', value: 'Unitario e caixa fechada no mesmo catalogo' },
 ];
 
 export function HeroSection() {
@@ -42,11 +48,11 @@ export function HeroSection() {
           storeExperimentAssignments(assignments);
         }
       } catch {
-        // nÃ£o bloquear a home
+        // nao bloquear a home
       }
     };
 
-    assignVariant();
+    void assignVariant();
   }, []);
 
   const copyByVariant: Record<string, {
@@ -58,231 +64,151 @@ export function HeroSection() {
     secondaryCta: string;
   }> = {
     control: {
-      badge: 'Distribuidora de Acessorios para Celular',
-      titleTop: 'NEW SYSTEM',
-      titleBottom: 'DISTRIBUIDORA',
-      description: 'Desde 2016 oferecendo qualidade, preco competitivo e atendimento rapido no mercado de acessorios para celular.',
-      primaryCta: 'Catalogo Unitario',
-      secondaryCta: 'Caixa Fechada',
+      badge: 'Distribuidora pronta para atacado e reposicao rapida',
+      titleTop: 'Compre com margem.',
+      titleBottom: 'Receba com agilidade.',
+      description: 'Acessorios para celular com giro real, pedido minimo acessivel, oferta clara e atendimento rapido para voce vender melhor.',
+      primaryCta: 'Comprar no catalogo',
+      secondaryCta: 'Ver caixa fechada',
     },
     oferta: {
-      badge: 'Oferta valida para atacado e reposicao',
-      titleTop: 'Compre rapido.',
-      titleBottom: 'Reponha melhor.',
-      description: 'Produtos com giro alto, envio agil e condicoes para aumentar sua margem desde o primeiro pedido.',
-      primaryCta: 'Comprar com oferta',
-      secondaryCta: 'Ver caixas fechadas',
+      badge: 'Oferta valida para quem precisa repor estoque sem perder margem',
+      titleTop: 'Preco forte.',
+      titleBottom: 'Reposicao segura.',
+      description: 'Mais vendidos, produtos com saida rapida e condicoes para aumentar ticket medio sem complicar o pedido.',
+      primaryCta: 'Aproveitar ofertas',
+      secondaryCta: 'Comparar unitario e caixa',
     },
     urgencia: {
-      badge: 'Estoque com giro real e envio rapido',
-      titleTop: 'Reposicao pronta',
-      titleBottom: 'para vender.',
-      description: 'Mais vendidos, destaques e oportunidades de caixa fechada para acelerar sua decisao e seu ticket medio.',
+      badge: 'Estoque com giro real e decisao mais rapida na compra',
+      titleTop: 'Entre, escolha',
+      titleBottom: 'e compre rapido.',
+      description: 'Hero pensado para quem quer decidir sem friccao: beneficios, tipo de compra e atalhos claros logo acima da dobra.',
       primaryCta: 'Ver mais vendidos',
-      secondaryCta: 'Levar em caixa',
+      secondaryCta: 'Levar caixa fechada',
     },
   };
 
   const copy = copyByVariant[variantKey] || copyByVariant.control;
 
   return (
-    <section className="relative overflow-hidden min-h-[80vh] flex items-center">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-neon-blue/5" />
-      
-      {/* Animated Grid Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px',
-          }}
-        />
-      </div>
-
-      {/* Glow Effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-neon-blue/20 rounded-full blur-[128px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neon-purple/20 rounded-full blur-[128px]" />
-
-      <div className="container relative z-10 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Content */}
+    <section className="relative overflow-hidden border-b border-border/40 bg-[radial-gradient(circle_at_top_left,rgba(0,243,255,0.12),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(124,58,237,0.12),transparent_35%)]">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:28px_28px] opacity-30" />
+      <div className="container relative z-10 py-14 sm:py-18 lg:py-24">
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             className="space-y-8"
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Badge 
-                variant="outline" 
-                className="px-4 py-2 text-sm border-neon-blue/50 text-neon-blue"
-              >
-                Distribuidora de Acessórios para Celular
+            <div className="space-y-4">
+              <Badge variant="outline" className="border-neon-blue/30 bg-neon-blue/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-neon-blue">
+                {copy.badge}
               </Badge>
-            </motion.div>
+              <div className="space-y-3">
+                <h1 className="max-w-4xl text-4xl font-bold leading-[1.02] sm:text-5xl lg:text-6xl">
+                  <span className="bg-gradient-to-r from-white via-neon-blue to-neon-purple bg-clip-text text-transparent">
+                    {copy.titleTop}
+                  </span>
+                  <br />
+                  <span className="text-foreground">{copy.titleBottom}</span>
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                  {copy.description}
+                </p>
+              </div>
+            </div>
 
-            {/* Title */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight"
-            >
-              <span className="bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-                NEW SYSTEM
-              </span>
-              <br />
-              <span className="text-foreground">DISTRIBUIDORA</span>
-            </motion.h1>
-
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-lg text-muted-foreground max-w-lg"
-            >
-              Desde 2016 oferecendo qualidade, preço competitivo e atendimento 
-              rápido no mercado de acessórios para celular.
-            </motion.p>
-
-            {/* Features */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="grid grid-cols-2 gap-4"
-            >
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {features.map((feature, index) => (
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.6 + index * 0.1 }}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50"
+                  key={feature.text}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08 * index }}
+                  className="rounded-2xl border border-white/8 bg-card/70 p-4 backdrop-blur"
                 >
-                  <feature.icon className="h-5 w-5 text-neon-blue flex-shrink-0" />
-                  <span className="text-sm">{feature.text}</span>
+                  <feature.icon className="h-5 w-5 text-neon-blue" />
+                  <p className="mt-3 text-sm font-medium leading-6">{feature.text}</p>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
 
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-wrap gap-4"
-            >
-              <div className="w-full rounded-xl border border-neon-blue/20 bg-card/40 px-4 py-3 text-sm">
-                <p className="font-semibold text-neon-blue">{copy.badge}</p>
-                <p className="mt-1 text-muted-foreground">{copy.description}</p>
-              </div>
-              <Link href="/catalogo/unitario">
-                <Button 
-                  size="lg" 
-                  className="bg-neon-blue hover:bg-neon-blue/90 text-black font-semibold group"
-                >
-                  <Package className="h-5 w-5 mr-2" />
-                  Catálogo Unitário
-                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/catalogo/unitario" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full bg-neon-blue px-7 text-black hover:bg-neon-blue/90 sm:w-auto">
+                  <Package className="mr-2 h-5 w-5" />
+                  {copy.primaryCta}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/catalogo/caixa-fechada">
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-neon-blue text-neon-blue hover:bg-neon-blue/10 group"
-                >
-                  <Box className="h-5 w-5 mr-2" />
-                  Caixa Fechada
-                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              <Link href="/catalogo/caixa-fechada" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full border-neon-blue/30 bg-background/70 px-7 text-neon-blue hover:bg-neon-blue/10 sm:w-auto">
+                  <Box className="mr-2 h-5 w-5" />
+                  {copy.secondaryCta}
                 </Button>
               </Link>
-            </motion.div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              {trustStats.map((item) => (
+                <div key={item.label} className="rounded-2xl border border-white/8 bg-background/70 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neon-blue">{item.label}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{item.value}</p>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
-          {/* Visual Element */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="relative hidden lg:block"
+            transition={{ duration: 0.45, delay: 0.15 }}
+            className="relative"
           >
-            <div className="relative w-full aspect-square">
-              {/* Central Circle */}
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              >
-                <div className="w-80 h-80 rounded-full border-2 border-dashed border-neon-blue/30" />
-              </motion.div>
-              
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center"
-                animate={{ rotate: -360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              >
-                <div className="w-64 h-64 rounded-full border-2 border-dashed border-neon-purple/30" />
-              </motion.div>
-
-              {/* Center Content */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5, type: "spring" }}
-                    className="w-32 h-32 rounded-full bg-gradient-to-br from-neon-blue to-neon-purple flex items-center justify-center mx-auto mb-4"
-                  >
-                    <span className="text-4xl font-bold text-black">NS</span>
-                  </motion.div>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="text-muted-foreground"
-                  >
-                    Qualidade Garantida
-                  </motion.p>
+            <div className="absolute -top-6 right-8 hidden h-28 w-28 rounded-full bg-neon-blue/20 blur-3xl sm:block" />
+            <div className="absolute -bottom-10 left-6 hidden h-28 w-28 rounded-full bg-neon-purple/20 blur-3xl sm:block" />
+            <div className="relative overflow-hidden rounded-[32px] border border-neon-blue/20 bg-gradient-to-br from-card via-card to-neon-blue/10 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.24)] sm:p-7">
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-background/75 p-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neon-blue">Compra orientada para conversao</p>
+                  <p className="mt-2 text-lg font-bold">Escolha o formato ideal para o seu giro</p>
+                </div>
+                <div className="rounded-2xl bg-neon-blue/10 p-3 text-neon-blue">
+                  <WalletCards className="h-6 w-6" />
                 </div>
               </div>
 
-              {/* Floating Elements */}
-              <motion.div
-                className="absolute top-10 right-10 p-4 rounded-xl bg-card border border-border shadow-lg"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              >
-                <Package className="h-8 w-8 text-neon-blue" />
-              </motion.div>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Unitario</p>
+                  <h3 className="mt-2 text-2xl font-bold">Reposicao rapida</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">Ideal para testar giro, recomprar campeoes de venda e montar pedido sem travar caixa.</p>
+                </div>
+                <div className="rounded-2xl border border-neon-purple/20 bg-neon-purple/5 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neon-purple">Caixa fechada</p>
+                  <h3 className="mt-2 text-2xl font-bold">Mais margem por unidade</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">Visual claro de economia por unidade para aumentar ticket medio sem parecer promocao falsa.</p>
+                </div>
+              </div>
 
-              <motion.div
-                className="absolute bottom-20 left-10 p-4 rounded-xl bg-card border border-border shadow-lg"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-              >
-                <Box className="h-8 w-8 text-neon-purple" />
-              </motion.div>
-
-              <motion.div
-                className="absolute top-1/2 right-0 p-4 rounded-xl bg-card border border-border shadow-lg"
-                animate={{ x: [0, 10, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity }}
-              >
-                <Truck className="h-8 w-8 text-green-500" />
-              </motion.div>
+              <div className="mt-5 grid gap-3">
+                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-background/70 p-4">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 text-green-500" />
+                  <div>
+                    <p className="font-semibold">Mais confianca na decisao</p>
+                    <p className="text-sm text-muted-foreground">Pix, atendimento via WhatsApp e acompanhamento de pedido no mesmo fluxo.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-background/70 p-4">
+                  <Truck className="mt-0.5 h-5 w-5 text-neon-blue" />
+                  <div>
+                    <p className="font-semibold">Logistica explicada sem ruído</p>
+                    <p className="text-sm text-muted-foreground">Entrega rapida em Sao Paulo e estrutura pronta para recompra com menos friccao.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -290,3 +216,5 @@ export function HeroSection() {
     </section>
   );
 }
+
+

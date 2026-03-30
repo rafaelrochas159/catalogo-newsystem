@@ -1,26 +1,48 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/lib/supabase/client';
+import { getResponseErrorMessage, readJsonSafely } from '@/lib/http';
+import toast from 'react-hot-toast';
 
 export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: (v: any) => void }) {
   const main = addresses?.[0] || {};
-  const [form, setForm] = useState({ cep: main.cep || '', rua: main.rua || '', numero: main.numero || '', complemento: main.complemento || '', bairro: main.bairro || '', cidade: main.cidade || '', estado: main.estado || '' });
+  const [form, setForm] = useState({
+    cep: main.cep || '',
+    rua: main.rua || '',
+    numero: main.numero || '',
+    complemento: main.complemento || '',
+    bairro: main.bairro || '',
+    cidade: main.cidade || '',
+    estado: main.estado || '',
+  });
   const [loadingCep, setLoadingCep] = useState(false);
   const [saving, setSaving] = useState(false);
 
   async function lookupCep(cep: string) {
     const clean = cep.replace(/\D/g, '');
     if (clean.length !== 8) return;
+
     setLoadingCep(true);
-    const res = await fetch(`/api/viacep/${clean}`);
-    const json = await res.json();
-    if (json.data) {
-      setForm((p) => ({ ...p, rua: json.data.logradouro || '', bairro: json.data.bairro || '', cidade: json.data.localidade || '', estado: json.data.uf || '' }));
+    try {
+      const res = await fetch(`/api/viacep/${clean}`);
+      const json = await readJsonSafely<{ data?: any }>(res);
+      if (json?.data) {
+        setForm((current) => ({
+          ...current,
+          rua: json.data.logradouro || '',
+          bairro: json.data.bairro || '',
+          cidade: json.data.localidade || '',
+          estado: json.data.uf || '',
+        }));
+      }
+    } finally {
+      setLoadingCep(false);
     }
-    setLoadingCep(false);
   }
 
   async function save() {
@@ -31,7 +53,7 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
       } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
-        throw new Error('SessÃ£o expirada.');
+        throw new Error('Sessao expirada. Entre novamente para continuar.');
       }
 
       const res = await fetch('/api/account/address', {
@@ -42,17 +64,80 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
         },
         body: JSON.stringify(form),
       });
-      const json = await res.json();
+      const json = await readJsonSafely<{ data?: any; error?: string }>(res);
 
       if (!res.ok) {
-        throw new Error(json.error || 'Erro ao salvar endereÃ§o.');
+        throw new Error(getResponseErrorMessage(res, json, 'Erro ao salvar endereco.'));
+      }
+
+      if (!json?.data) {
+        throw new Error('Nao foi possivel atualizar seu endereco.');
       }
 
       onSaved(json.data);
+      toast.success('Endereco atualizado com sucesso.');
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao salvar endereco.');
     } finally {
       setSaving(false);
     }
   }
 
-  return <div className="space-y-4 max-w-xl"><Input value={form.cep} onChange={(e)=>{ const v=e.target.value; setForm({...form,cep:v}); lookupCep(v); }} placeholder="CEP" />{loadingCep && <p className="text-sm text-muted-foreground">Buscando CEP...</p>}<Input value={form.rua} onChange={(e)=>setForm({...form,rua:e.target.value})} placeholder="Rua" /><Input value={form.numero} onChange={(e)=>setForm({...form,numero:e.target.value})} placeholder="Número" /><Input value={form.complemento} onChange={(e)=>setForm({...form,complemento:e.target.value})} placeholder="Complemento" /><Input value={form.bairro} onChange={(e)=>setForm({...form,bairro:e.target.value})} placeholder="Bairro" /><Input value={form.cidade} onChange={(e)=>setForm({...form,cidade:e.target.value})} placeholder="Cidade" /><Input value={form.estado} onChange={(e)=>setForm({...form,estado:e.target.value})} placeholder="Estado" /><Button onClick={save} disabled={saving}>{saving ? 'Salvando...' : 'Salvar endereço'}</Button></div>;
+  return (
+    <Card className="border-neon-blue/15">
+      <CardHeader>
+        <CardTitle>Endereco principal</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid gap-2 sm:grid-cols-[180px_1fr_120px]">
+          <div className="grid gap-2">
+            <Label htmlFor="address-cep">CEP</Label>
+            <Input
+              id="address-cep"
+              value={form.cep}
+              onChange={(e) => {
+                const value = e.target.value;
+                setForm({ ...form, cep: value });
+                void lookupCep(value);
+              }}
+              placeholder="00000-000"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="address-street">Rua</Label>
+            <Input id="address-street" value={form.rua} onChange={(e) => setForm({ ...form, rua: e.target.value })} placeholder="Rua" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="address-number">Numero</Label>
+            <Input id="address-number" value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} placeholder="123" />
+          </div>
+        </div>
+        {loadingCep && <p className="text-sm text-muted-foreground">Buscando CEP...</p>}
+        <div className="grid gap-2">
+          <Label htmlFor="address-extra">Complemento</Label>
+          <Input id="address-extra" value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} placeholder="Sala, bloco, referencia" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-2">
+            <Label htmlFor="address-neighborhood">Bairro</Label>
+            <Input id="address-neighborhood" value={form.bairro} onChange={(e) => setForm({ ...form, bairro: e.target.value })} placeholder="Bairro" />
+          </div>
+          <div className="grid gap-2 sm:col-span-1">
+            <Label htmlFor="address-city">Cidade</Label>
+            <Input id="address-city" value={form.cidade} onChange={(e) => setForm({ ...form, cidade: e.target.value })} placeholder="Cidade" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="address-state">Estado</Label>
+            <Input id="address-state" value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} placeholder="UF" />
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={save} disabled={saving} className="bg-neon-blue text-black hover:bg-neon-blue/90">
+            {saving ? 'Salvando...' : 'Salvar endereco'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
+

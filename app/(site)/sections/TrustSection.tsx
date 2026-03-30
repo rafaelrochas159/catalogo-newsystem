@@ -1,69 +1,94 @@
-import { ShieldCheck, Truck, ThumbsUp, Tag, Headphones } from 'lucide-react';
+﻿import { ShieldCheck, Truck, ThumbsUp, Tag, Headphones, WalletCards, Clock3 } from 'lucide-react';
 
-/**
- * TrustSection
- *
- * This server component renders a “Confiança e Benefícios” section to
- * strengthen customer trust. It highlights key advantages such as secure
- * payment, competitive pricing, fast shipping, responsive support and product
- * quality. It also serves as a placeholder for future real testimonials or
- * ratings. To keep the section honest, no fake reviews are shown; instead,
- * customers are invited to evaluate the store when data becomes available.
- */
 export function TrustSection() {
   const trustItems = [
     {
       icon: ShieldCheck,
       title: 'Compra segura',
-      description: 'Pagamentos protegidos e segurança de dados.',
+      description: 'Checkout protegido, dados tratados com seguranca e autenticacao server-side ativa.',
     },
     {
       icon: Truck,
-      title: 'Envio rápido',
-      description: 'Entregamos com agilidade para você receber logo.',
+      title: 'Entrega rapida',
+      description: 'Operacao preparada para envio agil, com foco em reposicao e atacado.',
     },
     {
       icon: Tag,
-      title: 'Preço competitivo',
-      description: 'Preços justos e descontos especiais em compras maiores.',
+      title: 'Preco competitivo',
+      description: 'Oferta clara, desconto real por volume e comparacao visual entre unitario e caixa.',
     },
     {
-      icon: ThumbsUp,
-      title: 'Qualidade garantida',
-      description: 'Produtos testados e aprovados pelos nossos clientes.',
+      icon: WalletCards,
+      title: 'Pix integrado',
+      description: 'Pagamento validado no fluxo atual sem inventar urgencia nem esconder etapas.',
     },
     {
       icon: Headphones,
       title: 'Atendimento via WhatsApp',
-      description: 'Suporte rápido e atencioso para tirar suas dúvidas.',
+      description: 'Contato rapido para duvidas, pedido e pos-compra com mensagem estruturada.',
+    },
+    {
+      icon: ThumbsUp,
+      title: 'Pos-compra organizado',
+      description: 'Area do cliente, meus pedidos e historico para facilitar recompra e confianca.',
     },
   ];
 
+  const highlights = [
+    { label: 'Desde 2016', value: 'Operacao ativa no mercado' },
+    { label: 'Unitario + Caixa', value: 'Compra mais flexivel para o cliente' },
+    { label: 'Sem prova social fake', value: 'Dados reais e linguagem honesta' },
+    { label: 'Checkout pronto', value: 'Fluxo rapido com Pix e acompanhamento' },
+  ];
+
   return (
-    <section className="py-12 border-t border-border bg-background/60">
-      <div className="container">
-        <h2 className="text-2xl font-bold mb-6">Confiança e benefícios</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="border-t border-border/40 bg-gradient-to-b from-background to-muted/20 py-16">
+      <div className="container space-y-10">
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-neon-blue">Confianca percebida</p>
+            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Mais clareza, mais seguranca e menos atrito para comprar.</h2>
+            <p className="mt-4 max-w-2xl text-muted-foreground">
+              Esta secao deixa explicito o que antes estava diluido: seguranca, entrega, atendimento, Pix e estrutura para recompra. Tudo visivel, sem parecer promessa vaga.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {highlights.map((item) => (
+              <div key={item.label} className="rounded-2xl border border-neon-blue/15 bg-card p-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neon-blue">{item.label}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {trustItems.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.title} className="flex items-start gap-4 p-5 rounded-lg bg-card border border-border shadow-sm">
-                <Icon className="h-8 w-8 text-neon-blue flex-shrink-0" />
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-snug">
-                    {item.description}
-                  </p>
+              <div key={item.title} className="rounded-[24px] border border-white/8 bg-card/90 p-5 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:border-neon-blue/35">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-2xl bg-neon-blue/10 p-3 text-neon-blue">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
-        {/* Placeholder for future real testimonials */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          Em breve: notas e depoimentos reais de clientes!
+
+        <div className="flex items-start gap-3 rounded-[24px] border border-emerald-500/20 bg-emerald-500/5 p-5 text-sm">
+          <Clock3 className="mt-0.5 h-5 w-5 text-emerald-500" />
+          <p className="text-muted-foreground">
+            Prova social futura continua preparada, mas so entra quando houver dado real suficiente. Sem inventar nomes, contagens ou urgencia falsa.
+          </p>
         </div>
       </div>
     </section>
   );
 }
+
