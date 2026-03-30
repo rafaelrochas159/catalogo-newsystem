@@ -20,7 +20,7 @@ import { supabase } from '@/lib/supabase/client';
 import toast, { Toaster } from 'react-hot-toast';
 
 const navItems = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/conversao', label: 'Conversao', icon: LayoutDashboard },
   { href: '/admin/produtos', label: 'Produtos', icon: Package },
   { href: '/admin/categorias', label: 'Categorias', icon: Grid3X3 },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
@@ -135,7 +135,7 @@ export default function AdminLayout({
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-border/40 bg-card">
         <div className="p-6">
-          <Link href="/admin/dashboard" className="flex items-center gap-2">
+          <Link href="/admin/conversao" className="flex items-center gap-2">
             <span className="text-xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
               NEW SYSTEM
             </span>
@@ -174,7 +174,7 @@ export default function AdminLayout({
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur">
         <div className="flex items-center justify-between p-4">
-          <Link href="/admin/dashboard" className="font-bold">
+          <Link href="/admin/conversao" className="font-bold">
             NEW SYSTEM
           </Link>
           

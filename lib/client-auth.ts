@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase/client';
 
 const ANONYMOUS_ID_STORAGE_KEY = 'ns_anonymous_id';
+const EXPERIMENT_ASSIGNMENTS_STORAGE_KEY = 'ns_experiment_assignments';
 
 declare global {
   interface Window {
@@ -42,12 +43,43 @@ export function getAnonymousVisitorId() {
   }
 }
 
+export function getStoredExperimentAssignments() {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const raw = window.localStorage.getItem(EXPERIMENT_ASSIGNMENTS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function storeExperimentAssignments(assignments: Record<string, string>) {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const current = getStoredExperimentAssignments();
+    window.localStorage.setItem(
+      EXPERIMENT_ASSIGNMENTS_STORAGE_KEY,
+      JSON.stringify({
+        ...current,
+        ...assignments,
+      }),
+    );
+  } catch {
+    // nÃ£o bloquear a navegaÃ§Ã£o
+  }
+}
+
 function getStandardEventName(eventName: string) {
   const eventMap: Record<string, string> = {
     visit: 'page_view',
     product_view: 'view_item',
     view_item: 'view_item',
     add_to_cart: 'add_to_cart',
+    initiate_checkout: 'begin_checkout',
     checkout_started: 'begin_checkout',
     pix_generated: 'add_payment_info',
     order_completed: 'purchase',
@@ -63,6 +95,7 @@ function getMetaPixelEventName(eventName: string) {
     product_view: 'ViewContent',
     view_item: 'ViewContent',
     add_to_cart: 'AddToCart',
+    initiate_checkout: 'InitiateCheckout',
     checkout_started: 'InitiateCheckout',
     pix_generated: 'AddPaymentInfo',
     order_completed: 'Purchase',
@@ -148,6 +181,7 @@ export async function trackClientEvent(payload: {
     const metadata = {
       ...(payload.metadata || {}),
       anonymousId,
+      experiments: getStoredExperimentAssignments(),
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
     };
 

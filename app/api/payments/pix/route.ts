@@ -12,6 +12,7 @@ import {
 } from '@/lib/services/mercadoPago';
 
 interface CheckoutBody {
+  anonymousId?: string | null;
   cliente: {
     nome: string;
     telefone: string;
@@ -120,6 +121,7 @@ export async function POST(request: Request) {
       numero_pedido: numeroPedido,
       checkout_token: checkoutToken,
       user_id: user?.id || null,
+      anonymous_id: body.anonymousId || null,
       cliente_nome: body.cliente.nome,
       cliente_telefone: body.cliente.telefone,
       cliente_email: body.cliente.email,
@@ -261,6 +263,7 @@ export async function POST(request: Request) {
     await trackUserEvent({
       userId: user?.id || null,
       email: body.cliente.email,
+      anonymousId: body.anonymousId || null,
       eventName: 'pix_generated',
       orderId: pedido.id,
       metadata: {

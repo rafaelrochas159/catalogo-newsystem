@@ -108,6 +108,7 @@ export async function POST(request: Request) {
       await trackUserEvent({
         userId: pedido.user_id || null,
         email: pedido.cliente_email,
+        anonymousId: pedido.anonymous_id || null,
         eventName: 'order_completed',
         orderId: pedido.id,
         metadata: {
@@ -116,6 +117,28 @@ export async function POST(request: Request) {
           total: pedido.total,
         },
       });
+
+      if (Array.isArray(pedido.itens)) {
+        await Promise.all(
+          pedido.itens.map((item: any) =>
+            trackUserEvent({
+              userId: pedido.user_id || null,
+              email: pedido.cliente_email,
+              anonymousId: pedido.anonymous_id || null,
+              eventName: 'purchase',
+              page: '/checkout',
+              productId: item.product_id || item.produto_id || null,
+              orderId: pedido.id,
+              metadata: {
+                numeroPedido,
+                quantity: Number(item.quantity || item.quantidade || 1),
+                price: Number(item.unit_price || item.preco_unitario || 0),
+                total: Number(item.total_price || item.preco_total || pedido.total || 0),
+              },
+            }),
+          ),
+        );
+      }
 
       await sendPostPurchaseWhatsAppNotifications(pedido);
     }

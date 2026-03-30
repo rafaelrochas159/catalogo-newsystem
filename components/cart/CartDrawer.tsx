@@ -719,6 +719,7 @@ export function CartDrawer() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          anonymousId: getAnonymousVisitorId(),
           cliente: customer,
           endereco: address,
           itens: orderItems,
@@ -1250,7 +1251,7 @@ export function CartDrawer() {
                       return;
                     }
                     await trackClientEvent({
-                      eventName: 'checkout_started',
+                      eventName: 'initiate_checkout',
                       page: '/checkout',
                       metadata: {
                         phase: 'form_opened',

@@ -172,6 +172,7 @@ export interface Pedido {
   } | null;
   checkout_token?: string | null;
   user_id?: string | null;
+  anonymous_id?: string | null;
   original_total?: number | null;
   coupon_code?: string | null;
   coupon_discount_type?: string | null;

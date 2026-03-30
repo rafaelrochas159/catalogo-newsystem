@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Package, Box, Truck, Percent, Clock } from 'lucide-react';
+import { authorizedFetch, getAnonymousVisitorId, storeExperimentAssignments } from '@/lib/client-auth';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 
 const features = [
@@ -15,6 +17,74 @@ const features = [
 ];
 
 export function HeroSection() {
+  const [variantKey, setVariantKey] = useState('control');
+
+  useEffect(() => {
+    const assignVariant = async () => {
+      try {
+        const response = await authorizedFetch('/api/experiments/assign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            path: '/',
+            anonymousId: getAnonymousVisitorId(),
+          }),
+        });
+
+        if (!response.ok) return;
+        const json = await response.json();
+        const assignments = json.assignments || {};
+
+        if (assignments.home_hero_cro) {
+          setVariantKey(assignments.home_hero_cro);
+          storeExperimentAssignments(assignments);
+        }
+      } catch {
+        // nÃ£o bloquear a home
+      }
+    };
+
+    assignVariant();
+  }, []);
+
+  const copyByVariant: Record<string, {
+    badge: string;
+    titleTop: string;
+    titleBottom: string;
+    description: string;
+    primaryCta: string;
+    secondaryCta: string;
+  }> = {
+    control: {
+      badge: 'Distribuidora de Acessorios para Celular',
+      titleTop: 'NEW SYSTEM',
+      titleBottom: 'DISTRIBUIDORA',
+      description: 'Desde 2016 oferecendo qualidade, preco competitivo e atendimento rapido no mercado de acessorios para celular.',
+      primaryCta: 'Catalogo Unitario',
+      secondaryCta: 'Caixa Fechada',
+    },
+    oferta: {
+      badge: 'Oferta valida para atacado e reposicao',
+      titleTop: 'Compre rapido.',
+      titleBottom: 'Reponha melhor.',
+      description: 'Produtos com giro alto, envio agil e condicoes para aumentar sua margem desde o primeiro pedido.',
+      primaryCta: 'Comprar com oferta',
+      secondaryCta: 'Ver caixas fechadas',
+    },
+    urgencia: {
+      badge: 'Estoque com giro real e envio rapido',
+      titleTop: 'Reposicao pronta',
+      titleBottom: 'para vender.',
+      description: 'Mais vendidos, destaques e oportunidades de caixa fechada para acelerar sua decisao e seu ticket medio.',
+      primaryCta: 'Ver mais vendidos',
+      secondaryCta: 'Levar em caixa',
+    },
+  };
+
+  const copy = copyByVariant[variantKey] || copyByVariant.control;
+
   return (
     <section className="relative overflow-hidden min-h-[80vh] flex items-center">
       {/* Background Gradient */}
@@ -114,6 +184,10 @@ export function HeroSection() {
               transition={{ delay: 0.8 }}
               className="flex flex-wrap gap-4"
             >
+              <div className="w-full rounded-xl border border-neon-blue/20 bg-card/40 px-4 py-3 text-sm">
+                <p className="font-semibold text-neon-blue">{copy.badge}</p>
+                <p className="mt-1 text-muted-foreground">{copy.description}</p>
+              </div>
               <Link href="/catalogo/unitario">
                 <Button 
                   size="lg" 

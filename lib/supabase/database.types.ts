@@ -158,6 +158,7 @@ export interface Database {
           endereco: Json | null;
           checkout_token: string | null;
           user_id: string | null;
+          anonymous_id: string | null;
           original_total: number | null;
           coupon_code: string | null;
           coupon_discount_type: string | null;
@@ -195,6 +196,7 @@ export interface Database {
           endereco?: Json | null;
           checkout_token?: string | null;
           user_id?: string | null;
+          anonymous_id?: string | null;
           original_total?: number | null;
           coupon_code?: string | null;
           coupon_discount_type?: string | null;
@@ -232,6 +234,7 @@ export interface Database {
           endereco?: Json | null;
           checkout_token?: string | null;
           user_id?: string | null;
+          anonymous_id?: string | null;
           original_total?: number | null;
           coupon_code?: string | null;
           coupon_discount_type?: string | null;
@@ -655,6 +658,91 @@ export interface Database {
           sent_at?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      ab_tests: {
+        Row: {
+          id: string;
+          key: string;
+          name: string;
+          description: string | null;
+          status: string;
+          target_routes: string[];
+          variants: Json;
+          conversion_event: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          name: string;
+          description?: string | null;
+          status?: string;
+          target_routes?: string[];
+          variants?: Json;
+          conversion_event?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          name?: string;
+          description?: string | null;
+          status?: string;
+          target_routes?: string[];
+          variants?: Json;
+          conversion_event?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      ab_test_assignments: {
+        Row: {
+          id: string;
+          test_id: string;
+          test_key: string;
+          identity_key: string;
+          user_id: string | null;
+          email: string | null;
+          anonymous_id: string | null;
+          route: string | null;
+          variant_key: string;
+          exposure_count: number;
+          first_exposed_at: string;
+          last_exposed_at: string;
+          metadata: Json;
+        };
+        Insert: {
+          id?: string;
+          test_id: string;
+          test_key: string;
+          identity_key: string;
+          user_id?: string | null;
+          email?: string | null;
+          anonymous_id?: string | null;
+          route?: string | null;
+          variant_key: string;
+          exposure_count?: number;
+          first_exposed_at?: string;
+          last_exposed_at?: string;
+          metadata?: Json;
+        };
+        Update: {
+          id?: string;
+          test_id?: string;
+          test_key?: string;
+          identity_key?: string;
+          user_id?: string | null;
+          email?: string | null;
+          anonymous_id?: string | null;
+          route?: string | null;
+          variant_key?: string;
+          exposure_count?: number;
+          first_exposed_at?: string;
+          last_exposed_at?: string;
+          metadata?: Json;
         };
       };
       compradores_acesso: {
