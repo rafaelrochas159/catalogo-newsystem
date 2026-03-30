@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,7 @@ import { useCart } from '@/hooks/useCart';
 import { formatPrice, generateProfessionalOrderMessage, getWhatsAppLink, isValidEmail, maskPhone } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
+import { readJsonSafely } from '@/lib/http';
 import {
   ShoppingCart,
   Trash2,
@@ -55,9 +56,9 @@ interface CustomerData {
   telefone: string;
   email: string;
   /**
-   * CPF ou CNPJ do comprador. Não é obrigatório, mas ajuda no controle
-   * administrativo e na emissão de notas fiscais. Deve ser informado
-   * sem máscara ou com máscara (o backend removerá os caracteres não numéricos).
+   * CPF ou CNPJ do comprador. NÃ£o Ã© obrigatÃ³rio, mas ajuda no controle
+   * administrativo e na emissÃ£o de notas fiscais. Deve ser informado
+   * sem mÃ¡scara ou com mÃ¡scara (o backend removerÃ¡ os caracteres nÃ£o numÃ©ricos).
    */
   cpf_cnpj?: string;
 }
@@ -122,7 +123,7 @@ function playApprovedTone() {
     oscillator.start();
     oscillator.stop(audioCtx.currentTime + 0.5);
   } catch (error) {
-    console.warn('Não foi possível tocar o áudio de aprovação.', error);
+    console.warn('NÃ£o foi possÃ­vel tocar o Ã¡udio de aprovaÃ§Ã£o.', error);
   }
 }
 
@@ -161,19 +162,63 @@ export function CartDrawer() {
   const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null);
   const [cartSuggestions, setCartSuggestions] = useState<any[]>([]);
   const [postPurchaseSuggestions, setPostPurchaseSuggestions] = useState<any[]>([]);
-  // Sessão do cliente. Se null, o usuário não está autenticado. É usada
-  // para impedir o checkout de usuários não logados.
+  // SessÃ£o do cliente. Se null, o usuÃ¡rio nÃ£o estÃ¡ autenticado. Ã‰ usada
+  // para impedir o checkout de usuÃ¡rios nÃ£o logados.
   const [clientSession, setClientSession] = useState<any>(null);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Ao montar, se o usuário estiver logado via Supabase, busca seus dados
-  // na tabela de clientes para preencher automaticamente os campos de checkout.
+  // Ao montar, se o usuÃ¡rio estiver logado, busca os dados pela API de conta
+  // autenticada e usa a tabela legada apenas como fallback de compatibilidade.
   useEffect(() => {
     async function loadCustomerFromSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const userId = session?.user?.id;
         if (!userId) return;
+
+        const accountResponse = await authorizedFetch('/api/account', {
+          cache: 'no-store',
+        });
+        const accountJson = await readJsonSafely<{
+          data?: {
+            profile?: {
+              nome?: string | null;
+              email?: string | null;
+              telefone?: string | null;
+              cpf_cnpj?: string | null;
+            } | null;
+            addresses?: Array<Record<string, any>>;
+          };
+        }>(accountResponse);
+
+        if (accountResponse.ok && accountJson?.data) {
+          const profile = accountJson.data.profile;
+          const primaryAddress = accountJson.data.addresses?.[0];
+
+          setCustomer((prev) => ({
+            ...prev,
+            nome: profile?.nome || prev.nome,
+            email: profile?.email || prev.email,
+            telefone: profile?.telefone || prev.telefone,
+            cpf_cnpj: profile?.cpf_cnpj || prev.cpf_cnpj,
+          }));
+
+          if (primaryAddress) {
+            setAddress((prev) => ({
+              ...prev,
+              cep: primaryAddress.cep || prev.cep,
+              rua: primaryAddress.rua || prev.rua,
+              numero: primaryAddress.numero || prev.numero,
+              bairro: primaryAddress.bairro || prev.bairro,
+              cidade: primaryAddress.cidade || prev.cidade,
+              estado: primaryAddress.estado || prev.estado,
+              complemento: primaryAddress.complemento || prev.complemento,
+            }));
+          }
+
+          return;
+        }
+
         const { data: cliente, error } = await supabase
           .from('clientes')
           .select('nome, email, telefone, cpf_cnpj, endereco')
@@ -200,10 +245,10 @@ export function CartDrawer() {
     loadCustomerFromSession();
   }, []);
 
-  // Observa a sessão do usuário para atualizar o estado clientSession. Isso
-  // garante que o componente saiba se o cliente está logado e possa restringir
-  // o checkout para usuários autenticados. Tipamos explicitamente os
-  // retornos para evitar erros de compilação.
+  // Observa a sessÃ£o do usuÃ¡rio para atualizar o estado clientSession. Isso
+  // garante que o componente saiba se o cliente estÃ¡ logado e possa restringir
+  // o checkout para usuÃ¡rios autenticados. Tipamos explicitamente os
+  // retornos para evitar erros de compilaÃ§Ã£o.
   useEffect(() => {
     supabase.auth.getSession().then((res: any) => {
       const { data }: any = res;
@@ -216,21 +261,6 @@ export function CartDrawer() {
       listener?.subscription?.unsubscribe?.();
     };
   }, []);
-
-  // Persist customer email locally whenever a valid email is entered. This is used
-  // for customer recovery (prefilling the "Meus Pedidos" page and showing
-  // recommendations on the home page). Storing the email helps us link the
-  // customer across sessions without breaking existing flows. Errors are
-  // silently ignored to avoid impacting the checkout experience.
-  useEffect(() => {
-    if (customer.email && isValidEmail(customer.email)) {
-      try {
-        localStorage.setItem('ns_last_email', customer.email.trim().toLowerCase());
-      } catch (e) {
-        // ignore storage errors (e.g., private mode)
-      }
-    }
-  }, [customer.email]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -282,7 +312,7 @@ export function CartDrawer() {
           setAbandonedCartId(json.data.id);
         }
       } catch {
-        // não bloquear o carrinho por causa disso
+        // nÃ£o bloquear o carrinho por causa disso
       }
     };
 
@@ -361,7 +391,7 @@ export function CartDrawer() {
           email: customer.email || clientSession?.user?.email || null,
         });
       } catch {
-        // abandono não deve travar checkout
+        // abandono nÃ£o deve travar checkout
       }
     }, 1000 * 60 * 4);
 
@@ -380,8 +410,8 @@ export function CartDrawer() {
         const data: ViaCepResponse = await response.json();
 
         if (!response.ok || data.erro) {
-          setCepError('CEP não encontrado. Confira o número e preencha manualmente.');
-          toast.error('CEP não encontrado');
+          setCepError('CEP nÃ£o encontrado. Confira o nÃºmero e preencha manualmente.');
+          toast.error('CEP nÃ£o encontrado');
           return;
         }
 
@@ -394,11 +424,11 @@ export function CartDrawer() {
           complemento: prev.complemento || data.complemento || '',
         }));
         setLastFetchedCep(cepNumbers);
-        toast.success('Endereço preenchido automaticamente');
+        toast.success('EndereÃ§o preenchido automaticamente');
         setTimeout(() => numberInputRef.current?.focus(), 60);
       } catch (error) {
         console.error(error);
-        setCepError('Não foi possível consultar o CEP agora.');
+        setCepError('NÃ£o foi possÃ­vel consultar o CEP agora.');
         toast.error('Falha ao consultar o CEP');
       } finally {
         setIsFetchingCep(false);
@@ -493,7 +523,7 @@ export function CartDrawer() {
         }),
       });
     } catch {
-      // melhor esforço
+      // melhor esforÃ§o
     }
   };
 
@@ -584,11 +614,11 @@ export function CartDrawer() {
       return false;
     }
     if (!isValidEmail(customer.email)) {
-      toast.error('Digite um e-mail válido.');
+      toast.error('Digite um e-mail vÃ¡lido.');
       return false;
     }
     if (!address.cep || !address.rua || !address.numero || !address.bairro || !address.cidade || !address.estado) {
-      toast.error('Preencha todos os campos obrigatórios do endereço.');
+      toast.error('Preencha todos os campos obrigatÃ³rios do endereÃ§o.');
       return false;
     }
     return true;
@@ -604,9 +634,9 @@ export function CartDrawer() {
   };
 
   const handleWhatsAppCheckout = async () => {
-    // Impede checkout via WhatsApp se não houver sessão do cliente
+    // Impede checkout via WhatsApp se nÃ£o houver sessÃ£o do cliente
     if (!clientSession) {
-      toast.error('Você precisa estar logado para finalizar o pedido.');
+      toast.error('VocÃª precisa estar logado para finalizar o pedido.');
       return;
     }
     if (!canCheckout || !validateCheckoutData()) return;
@@ -693,11 +723,11 @@ export function CartDrawer() {
   };
 
   const handlePixCheckout = async () => {
-    // Impede checkout se o usuário não estiver autenticado. Esse check
-    // complementa a validação feita ao abrir o formulário, garantindo que
-    // requisições programáticas também sejam bloqueadas.
+    // Impede checkout se o usuÃ¡rio nÃ£o estiver autenticado. Esse check
+    // complementa a validaÃ§Ã£o feita ao abrir o formulÃ¡rio, garantindo que
+    // requisiÃ§Ãµes programÃ¡ticas tambÃ©m sejam bloqueadas.
     if (!clientSession) {
-      toast.error('Você precisa estar logado para finalizar o pedido.');
+      toast.error('VocÃª precisa estar logado para finalizar o pedido.');
       return;
     }
     if (!canCheckout || !validateCheckoutData()) return;
@@ -762,7 +792,7 @@ export function CartDrawer() {
         status_pagamento: data.status_pagamento,
       });
 
-      toast.success('Pix gerado com sucesso. Pague e aguarde a confirmação automática.');
+      toast.success('Pix gerado com sucesso. Pague e aguarde a confirmaÃ§Ã£o automÃ¡tica.');
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Erro ao gerar o Pix.');
@@ -790,7 +820,7 @@ export function CartDrawer() {
     const totalValue = pixOrderSnapshot.total;
     const discountValue = subtotalValue - totalValue;
 
-    // Gera mensagem estruturada utilizando utilidade padrão do projeto
+    // Gera mensagem estruturada utilizando utilidade padrÃ£o do projeto
     const message = generateProfessionalOrderMessage({
       orderNumber: pixPayment.numero_pedido,
       catalogType: catalogType!,
@@ -803,7 +833,7 @@ export function CartDrawer() {
       paymentMethod: 'Pix aprovado',
     });
 
-    // Usa o número de WhatsApp da empresa definido em constants para enviar a mensagem
+    // Usa o nÃºmero de WhatsApp da empresa definido em constants para enviar a mensagem
     return getWhatsAppLink(COMPANY_INFO.whatsapp, message);
   };
 
@@ -811,9 +841,9 @@ export function CartDrawer() {
     if (!pixPayment?.pix_copia_cola) return;
     try {
       await navigator.clipboard.writeText(pixPayment.pix_copia_cola);
-      toast.success('Código Pix copiado.');
+      toast.success('CÃ³digo Pix copiado.');
     } catch {
-      toast.error('Não foi possível copiar o código Pix.');
+      toast.error('NÃ£o foi possÃ­vel copiar o cÃ³digo Pix.');
     }
   };
 
@@ -909,15 +939,15 @@ export function CartDrawer() {
 
                   <div className="rounded-xl border p-4 space-y-3">
                     <p className="font-medium">Pix copia e cola</p>
-                    <div className="rounded-lg border p-3 text-xs break-all">{pixPayment.pix_copia_cola || 'Código indisponível.'}</div>
+                    <div className="rounded-lg border p-3 text-xs break-all">{pixPayment.pix_copia_cola || 'CÃ³digo indisponÃ­vel.'}</div>
                     <Button variant="outline" className="w-full" onClick={handleCopyPix} disabled={!pixPayment.pix_copia_cola}>
-                      <Copy className="h-4 w-4 mr-2" /> Copiar código Pix
+                      <Copy className="h-4 w-4 mr-2" /> Copiar cÃ³digo Pix
                     </Button>
                   </div>
 
                   <div className="rounded-xl border p-4 space-y-3 text-sm">
-                    <p className="font-medium">Status automático</p>
-                    <p className="text-muted-foreground">Após o pagamento, o Mercado Pago envia o webhook e o pedido é liberado automaticamente.</p>
+                    <p className="font-medium">Status automÃ¡tico</p>
+                    <p className="text-muted-foreground">ApÃ³s o pagamento, o Mercado Pago envia o webhook e o pedido Ã© liberado automaticamente.</p>
                     <Button variant="outline" className="w-full" onClick={async () => {
                       if (!pixPayment) return;
                       const reference = pixPayment.checkout_token || pixPayment.numero_pedido;
@@ -933,9 +963,9 @@ export function CartDrawer() {
                         setPostPurchaseSuggestions(cartSuggestions.slice(0, 3));
                         clearCart();
                         await clearAbandonedCart('converted');
-                        toast.success('Pagamento já aprovado.');
+                        toast.success('Pagamento jÃ¡ aprovado.');
                       } else {
-                        toast('Pagamento ainda não aprovado.');
+                        toast('Pagamento ainda nÃ£o aprovado.');
                       }
                     }}>
                       {isPollingPayment ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
@@ -949,7 +979,7 @@ export function CartDrawer() {
                           onClick={() => {
                             const whatsappLink = buildApprovedWhatsAppLink();
                             if (!whatsappLink) {
-                              toast.error('Telefone do cliente não encontrado para abrir o WhatsApp.');
+                              toast.error('Telefone do cliente nÃ£o encontrado para abrir o WhatsApp.');
                               return;
                             }
                             openWhatsApp(whatsappLink);
@@ -975,12 +1005,12 @@ export function CartDrawer() {
                             Compartilhe no WhatsApp, acompanhe o pedido e volte para aproveitar a proxima reposicao.
                           </p>
                         </div>
-                        {postPurchaseSuggestions.length > 0 && (
-                          <div className="rounded-xl border p-4 space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="h-4 w-4 text-neon-blue" />
-                              <p className="font-medium">Sugestoes para sua proxima compra</p>
-                            </div>
+                        <div className="rounded-xl border p-4 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Sparkles className="h-4 w-4 text-neon-blue" />
+                            <p className="font-medium">Sugestoes para sua proxima compra</p>
+                          </div>
+                          {postPurchaseSuggestions.length > 0 ? (
                             <div className="space-y-2">
                               {postPurchaseSuggestions.map((product) => (
                                 <div key={product.id} className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 p-3">
@@ -998,8 +1028,12 @@ export function CartDrawer() {
                                 </div>
                               ))}
                             </div>
-                          </div>
-                        )}
+                          ) : (
+                            <div className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                              Quando a IA tiver mais sinais do pedido aprovado, este bloco vai sugerir a recompra ideal automaticamente.
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1008,7 +1042,7 @@ export function CartDrawer() {
                 <>
                   <div>
                     <Badge variant={catalogType === 'UNITARIO' ? 'default' : 'secondary'}>
-                      {catalogType === 'UNITARIO' ? 'Catálogo Unitário' : 'Caixa Fechada'}
+                      {catalogType === 'UNITARIO' ? 'CatÃ¡logo UnitÃ¡rio' : 'Caixa Fechada'}
                     </Badge>
                   </div>
 
@@ -1016,8 +1050,8 @@ export function CartDrawer() {
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-start gap-2">
                       <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                       <div className="text-sm">
-                        <p className="font-medium text-yellow-500">Pedido mínimo não atingido</p>
-                        <p className="text-muted-foreground">Faltam {formatPrice(remainingForMinOrder)} para atingir o pedido mínimo de {formatPrice(BUSINESS_RULES.minOrderValue)}.</p>
+                        <p className="font-medium text-yellow-500">Pedido mÃ­nimo nÃ£o atingido</p>
+                        <p className="text-muted-foreground">Faltam {formatPrice(remainingForMinOrder)} para atingir o pedido mÃ­nimo de {formatPrice(BUSINESS_RULES.minOrderValue)}.</p>
                       </div>
                     </motion.div>
                   )}
@@ -1032,12 +1066,12 @@ export function CartDrawer() {
                     </AnimatePresence>
                   </div>
 
-                  {cartSuggestions.length > 0 && (
-                    <div className="rounded-xl border p-4 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-neon-blue" />
-                        <p className="font-medium">Leve mais por menos</p>
-                      </div>
+                  <div className="rounded-xl border p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-neon-blue" />
+                      <p className="font-medium">Leve mais por menos</p>
+                    </div>
+                    {cartSuggestions.length > 0 ? (
                       <div className="space-y-2">
                         {cartSuggestions.slice(0, 2).map((product) => (
                           <div key={product.id} className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 p-3">
@@ -1063,8 +1097,12 @@ export function CartDrawer() {
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                        As recomendacoes inteligentes aparecem aqui quando o carrinho ja tiver contexto suficiente de itens e comportamento.
+                      </div>
+                    )}
+                  </div>
 
                   <Separator />
 
@@ -1124,7 +1162,7 @@ export function CartDrawer() {
                   </div>
 
                   <div className="space-y-4 border-t pt-4">
-                    <h4 className="font-semibold">Endereço de entrega</h4>
+                    <h4 className="font-semibold">EndereÃ§o de entrega</h4>
                     <div className="grid gap-2">
                       <Label>CEP *</Label>
                       <Input
@@ -1138,7 +1176,7 @@ export function CartDrawer() {
                         placeholder="00000-000"
                         inputMode="numeric"
                       />
-                      {isFetchingCep && <p className="text-xs text-muted-foreground">Buscando endereço pelo CEP...</p>}
+                      {isFetchingCep && <p className="text-xs text-muted-foreground">Buscando endereÃ§o pelo CEP...</p>}
                       {cepError && <p className="text-xs text-red-500">{cepError}</p>}
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -1147,7 +1185,7 @@ export function CartDrawer() {
                         <Input value={address.rua} onChange={(e) => setAddress((prev) => ({ ...prev, rua: e.target.value }))} placeholder="Nome da rua" />
                       </div>
                       <div className="grid gap-2">
-                        <Label>Número *</Label>
+                        <Label>NÃºmero *</Label>
                         <Input ref={numberInputRef} value={address.numero} onChange={(e) => setAddress((prev) => ({ ...prev, numero: e.target.value }))} placeholder="123" inputMode="numeric" />
                       </div>
                     </div>
@@ -1158,7 +1196,7 @@ export function CartDrawer() {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="col-span-2 grid gap-2">
                         <Label>Cidade *</Label>
-                        <Input value={address.cidade} onChange={(e) => setAddress((prev) => ({ ...prev, cidade: e.target.value }))} placeholder="São Paulo" />
+                        <Input value={address.cidade} onChange={(e) => setAddress((prev) => ({ ...prev, cidade: e.target.value }))} placeholder="SÃ£o Paulo" />
                       </div>
                       <div className="grid gap-2">
                         <Label>Estado *</Label>
@@ -1167,7 +1205,7 @@ export function CartDrawer() {
                     </div>
                     <div className="grid gap-2">
                       <Label>Complemento</Label>
-                      <Input value={address.complemento} onChange={(e) => setAddress((prev) => ({ ...prev, complemento: e.target.value }))} placeholder="Apto, bloco, referência..." />
+                      <Input value={address.complemento} onChange={(e) => setAddress((prev) => ({ ...prev, complemento: e.target.value }))} placeholder="Apto, bloco, referÃªncia..." />
                     </div>
                   </div>
 
@@ -1219,7 +1257,7 @@ export function CartDrawer() {
                       </button>
                       <button type="button" onClick={() => setPaymentMethod('whatsapp')} className={`rounded-xl border p-4 text-left transition ${paymentMethod === 'whatsapp' ? 'border-neon-blue bg-neon-blue/10' : 'border-border'}`}>
                         <div className="flex items-center gap-2 font-medium"><MessageCircle className="h-4 w-4" /> WhatsApp</div>
-                        <p className="text-xs text-muted-foreground mt-1">Mantém o fluxo atual de pedido pelo WhatsApp.</p>
+                        <p className="text-xs text-muted-foreground mt-1">MantÃ©m o fluxo atual de pedido pelo WhatsApp.</p>
                       </button>
                     </div>
                   </div>
@@ -1239,12 +1277,12 @@ export function CartDrawer() {
                 }} className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
                 <Button
                   onClick={async () => {
-                    // Requer autenticação para prosseguir com o checkout. Se o
-                    // usuário não estiver logado, redireciona para a página de login
-                    // e mostra um aviso. Caso contrário, exibe o formulário de
+                    // Requer autenticaÃ§Ã£o para prosseguir com o checkout. Se o
+                    // usuÃ¡rio nÃ£o estiver logado, redireciona para a pÃ¡gina de login
+                    // e mostra um aviso. Caso contrÃ¡rio, exibe o formulÃ¡rio de
                     // checkout.
                     if (!clientSession) {
-                      toast.error('Para finalizar o pedido, faça login ou cadastro.');
+                      toast.error('Para finalizar o pedido, faÃ§a login ou cadastro.');
                       if (typeof window !== 'undefined') {
                         window.location.href = '/login';
                       }
@@ -1295,7 +1333,7 @@ export function CartDrawer() {
                 )}
                 {paymentMethod === 'pix' && (
                   <p className="text-xs text-muted-foreground text-center">
-                    O pagamento fica vinculado por <code>external_reference = numero_pedido</code> e confirmado só pelo webhook.
+                    O pagamento fica vinculado por <code>external_reference = numero_pedido</code> e confirmado sÃ³ pelo webhook.
                   </p>
                 )}
               </div>
@@ -1306,3 +1344,5 @@ export function CartDrawer() {
     </Sheet>
   );
 }
+
+

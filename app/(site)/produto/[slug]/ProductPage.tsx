@@ -427,20 +427,24 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           </Tabs>
         </div>
 
-        {crossSellProducts.length > 0 && (
-          <div className="mt-16">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold">Clientes tambem levam</h2>
-              <p className="text-sm text-muted-foreground">
-                Sugestoes automaticas com base no comportamento de compra, no tipo de catalogo e no historico real.
-              </p>
-            </div>
+        <div className="mt-16 rounded-[28px] border border-neon-blue/15 bg-card/70 p-6">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold">Clientes tambem levam</h2>
+            <p className="text-sm text-muted-foreground">
+              Sugestoes automaticas com base no comportamento de compra, no tipo de catalogo e no historico real.
+            </p>
+          </div>
+          {crossSellProducts.length > 0 ? (
             <ProductGrid
               products={crossSellProducts}
               catalogType={catalogType === 'CAIXA_FECHADA' ? 'UNITARIO' : 'CAIXA_FECHADA'}
             />
-          </div>
-        )}
+          ) : (
+            <div className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">
+              Ainda nao ha sinal suficiente para montar recomendacoes personalizadas deste produto. Quando houver mais interacao, este bloco passa a sugerir complementos automaticamente.
+            </div>
+          )}
+        </div>
 
         {relatedProducts.length > 0 && (
           <div className="mt-16">
@@ -452,4 +456,5 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
     </div>
   );
 }
+
 

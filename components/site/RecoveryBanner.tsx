@@ -7,27 +7,26 @@ import { Button } from '@/components/ui/button';
 /**
  * RecoveryBanner
  *
- * This client-side component displays a call-to-action for returning customers. If
- * an email was previously stored in localStorage (via the checkout flow), the
- * banner invites the user to revisit their order history. This helps with
- * customer recovery and improves the post-purchase experience. If no stored
- * email is found, nothing is rendered.
+ * This client-side component displays a call-to-action for returning customers.
+ * It no longer depends on an e-mail stored locally. Instead, it uses the last
+ * known order number to decide whether the user likely has recent purchase
+ * history and should see a shortcut back to the authenticated area.
  */
 export function RecoveryBanner() {
-  const [hasEmail, setHasEmail] = useState(false);
+  const [hasRecentOrder, setHasRecentOrder] = useState(false);
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('ns_last_email');
+      const stored = localStorage.getItem('ns_last_order_number');
       if (stored) {
-        setHasEmail(true);
+        setHasRecentOrder(true);
       }
     } catch (e) {
       // ignore storage errors (e.g., private mode)
     }
   }, []);
 
-  if (!hasEmail) return null;
+  if (!hasRecentOrder) return null;
 
   return (
     <div className="container py-6 flex flex-col items-center gap-3 bg-neon-blue/5 border-t border-border">

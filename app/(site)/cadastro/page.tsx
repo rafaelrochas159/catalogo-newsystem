@@ -1,20 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import toast from 'react-hot-toast';
-import Link from 'next/link';
+import { validateRegistrationPayload } from '@/lib/customer-validation';
+import { getResponseErrorMessage, readJsonSafely } from '@/lib/http';
+import { supabase } from '@/lib/supabase/client';
 
-/**
- * Página de cadastro de clientes.
- * Permite ao usuário criar uma conta com e-mail, senha e dados pessoais
- * como nome, CPF/CNPJ e endereço completo. Após o cadastro, o usuário
- * é autenticado automaticamente e redirecionado para a home.
- */
 export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -34,53 +30,64 @@ export default function RegisterPage() {
 
   async function handleRegister(event: React.FormEvent) {
     event.preventDefault();
-    if (!email || !password || !name) {
-      toast.error('Preencha nome, e-mail e senha.');
-      return;
-    }
-    setLoading(true);
-    // Cria usuário no Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
+
+    const validationError = validateRegistrationPayload({
+      nome: name,
+      email,
       password,
+      telefone: phone,
+      cpf_cnpj: cpfCnpj,
     });
-    if (error || !data?.user) {
-      setLoading(false);
-      toast.error(error?.message || 'Erro ao cadastrar usuário.');
+
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
-    const user = data.user;
-    // Tenta inserir o registro na tabela 'clientes' com os dados adicionais. Em
-    // ambientes onde a tabela ainda não existe, capturamos o erro e
-    // prosseguimos com o cadastro, mostrando um aviso para o administrador
-    // executar o script de criação.
+
+    setLoading(true);
+
     try {
-      const { error: dbError } = await supabase.from('clientes').insert({
-        id: user.id,
-        nome: name.trim(),
-        email: email.trim(),
-        cpf_cnpj: cpfCnpj.trim() || null,
-        telefone: phone.trim() || null,
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: name,
+          email,
+          password,
+          telefone: phone,
+          cpf_cnpj: cpfCnpj,
+        }),
       });
-      if (dbError) {
-        throw dbError;
+
+      const json = await readJsonSafely<{ data?: { user_id?: string }; error?: string }>(response);
+
+      if (!response.ok) {
+        throw new Error(
+          getResponseErrorMessage(response, json, 'Nao foi possivel concluir o cadastro.')
+        );
       }
-      toast.success('Cadastro realizado com sucesso!');
-    } catch (dbError: any) {
-      // Se a tabela 'clientes' não existir, ignoramos a inserção e
-      // continuamos; caso contrário, exibimos o erro para o usuário.
-      const message = dbError?.message || '';
-      if (message.includes('clientes') || message.includes('schema cache')) {
-        console.warn('Tabela clientes não encontrada. Execute o script SQL para criá-la.', message);
-        toast.success('Cadastro realizado, mas os dados extras não foram salvos.');
-      } else {
-        toast.error(message || 'Erro ao salvar dados do cliente.');
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (signInError) {
+        toast.success('Cadastro concluido. Entre com seu e-mail e senha para continuar.');
         setLoading(false);
+        router.replace('/login');
         return;
       }
+
+      toast.success('Cadastro realizado com sucesso!');
+      setLoading(false);
+      router.replace('/');
+    } catch (registerError: any) {
+      toast.error(registerError?.message || 'Erro ao cadastrar usuario.');
+      setLoading(false);
     }
-    setLoading(false);
-    router.replace('/');
   }
 
   return (
@@ -120,22 +127,24 @@ export default function RegisterPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="cpfCnpj">CPF ou CNPJ (opcional)</Label>
+          <Label htmlFor="cpfCnpj">CPF ou CNPJ</Label>
           <Input
             id="cpfCnpj"
             value={cpfCnpj}
             onChange={(e) => setCpfCnpj(e.target.value)}
             placeholder="000.000.000-00 ou 00.000.000/0000-00"
+            required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Telefone (opcional)</Label>
+          <Label htmlFor="phone">Telefone</Label>
           <Input
             id="phone"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="(00) 90000-0000"
+            required
           />
         </div>
         <Button type="submit" disabled={loading} className="w-full">
@@ -144,7 +153,7 @@ export default function RegisterPage() {
       </form>
       <div className="mt-4 text-sm text-center">
         <p>
-          Já tem conta?{' '}
+          Ja tem conta?{' '}
           <Link href="/login" className="text-neon-blue hover:underline">
             Entrar
           </Link>

@@ -1,14 +1,26 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfileTab } from './ProfileTab';
 import { AddressTab } from './AddressTab';
 import { OrdersTab } from './OrdersTab';
 import { FavoritesTab } from './FavoritesTab';
 
-export function AccountTabsEnhanced({ initialData }: { initialData: any }) {
+export function AccountTabsEnhanced({ initialData, onDataChange }: { initialData: any; onDataChange?: (data: any) => void }) {
   const [data, setData] = useState(initialData);
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
+  const updateData = (nextUpdater: any) => {
+    setData((current: any) => {
+      const nextData = typeof nextUpdater === 'function' ? nextUpdater(current) : nextUpdater;
+      onDataChange?.(nextData);
+      return nextData;
+    });
+  };
 
   return (
     <Tabs defaultValue="pedidos" className="space-y-6">
@@ -20,8 +32,8 @@ export function AccountTabsEnhanced({ initialData }: { initialData: any }) {
       </TabsList>
       <TabsContent value="pedidos"><OrdersTab orders={data.orders || []} profile={data.profile} addresses={data.addresses || []} /></TabsContent>
       <TabsContent value="favoritos"><FavoritesTab favorites={data.favorites || []} /></TabsContent>
-      <TabsContent value="dados"><ProfileTab profile={data.profile} onSaved={(profile) => setData((current: any) => ({ ...current, profile }))} /></TabsContent>
-      <TabsContent value="enderecos"><AddressTab addresses={data.addresses || []} onSaved={(address) => setData((current: any) => ({ ...current, addresses: [address] }))} /></TabsContent>
+      <TabsContent value="dados"><ProfileTab profile={data.profile} onSaved={(profile) => updateData((current: any) => ({ ...current, profile }))} /></TabsContent>
+      <TabsContent value="enderecos"><AddressTab addresses={data.addresses || []} onSaved={(address) => updateData((current: any) => ({ ...current, addresses: [address] }))} /></TabsContent>
     </Tabs>
   );
 }

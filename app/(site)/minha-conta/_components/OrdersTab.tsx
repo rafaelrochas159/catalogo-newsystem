@@ -80,7 +80,7 @@ export function OrdersTab({ orders }: { orders: any[]; profile: any; addresses: 
                   Copiar Pix
                 </Button>
               )}
-              <Button variant="outline" onClick={() => { window.location.href = `/meus-pedidos?email=${encodeURIComponent(order.cliente_email || '')}`; }}>
+              <Button variant="outline" onClick={() => { window.location.href = '/meus-pedidos'; }}>
                 Ver detalhes completos
               </Button>
             </div>

@@ -1,27 +1,35 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { supabase } from '@/lib/supabase/client';
 import { getResponseErrorMessage, readJsonSafely } from '@/lib/http';
-import toast from 'react-hot-toast';
+import { validateAddressPayload } from '@/lib/customer-validation';
+import { supabase } from '@/lib/supabase/client';
+
+function buildAddressForm(address: any) {
+  return {
+    cep: address?.cep || '',
+    rua: address?.rua || '',
+    numero: address?.numero || '',
+    complemento: address?.complemento || '',
+    bairro: address?.bairro || '',
+    cidade: address?.cidade || '',
+    estado: address?.estado || '',
+  };
+}
 
 export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: (v: any) => void }) {
-  const main = addresses?.[0] || {};
-  const [form, setForm] = useState({
-    cep: main.cep || '',
-    rua: main.rua || '',
-    numero: main.numero || '',
-    complemento: main.complemento || '',
-    bairro: main.bairro || '',
-    cidade: main.cidade || '',
-    estado: main.estado || '',
-  });
+  const [form, setForm] = useState(buildAddressForm(addresses?.[0] || {}));
   const [loadingCep, setLoadingCep] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setForm(buildAddressForm(addresses?.[0] || {}));
+  }, [addresses]);
 
   async function lookupCep(cep: string) {
     const clean = cep.replace(/\D/g, '');
@@ -46,6 +54,12 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
   }
 
   async function save() {
+    const validationError = validateAddressPayload(form);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
     setSaving(true);
     try {
       const {
@@ -56,15 +70,30 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
         throw new Error('Sessao expirada. Entre novamente para continuar.');
       }
 
+      const payload = {
+        ...form,
+        cep: form.cep.trim(),
+        rua: form.rua.trim(),
+        numero: form.numero.trim(),
+        complemento: form.complemento.trim(),
+        bairro: form.bairro.trim(),
+        cidade: form.cidade.trim(),
+        estado: form.estado.trim().toUpperCase(),
+      };
+
       const res = await fetch('/api/account/address', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const json = await readJsonSafely<{ data?: any; error?: string }>(res);
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.info('[address-tab] save response', { status: res.status, ok: res.ok });
+      }
 
       if (!res.ok) {
         throw new Error(getResponseErrorMessage(res, json, 'Erro ao salvar endereco.'));
@@ -74,6 +103,7 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
         throw new Error('Nao foi possivel atualizar seu endereco.');
       }
 
+      setForm(buildAddressForm(json.data));
       onSaved(json.data);
       toast.success('Endereco atualizado com sucesso.');
     } catch (error: any) {
@@ -128,7 +158,7 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
           </div>
           <div className="grid gap-2">
             <Label htmlFor="address-state">Estado</Label>
-            <Input id="address-state" value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} placeholder="UF" />
+            <Input id="address-state" value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })} placeholder="UF" maxLength={2} />
           </div>
         </div>
         <div className="flex justify-end">
@@ -140,4 +170,3 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
     </Card>
   );
 }
-

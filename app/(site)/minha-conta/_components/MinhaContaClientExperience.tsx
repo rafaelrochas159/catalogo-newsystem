@@ -36,6 +36,10 @@ export function MinhaContaClientExperience() {
         },
       });
 
+      if (process.env.NODE_ENV !== 'production') {
+        console.info('[minha-conta] load response', { status: response.status, ok: response.ok });
+      }
+
       const json = await readJsonSafely<{ data?: any; error?: string }>(response);
       if (!response.ok) {
         if (response.status === 401) {
@@ -173,7 +177,7 @@ export function MinhaContaClientExperience() {
       </section>
 
       <div className="mt-8">
-        <AccountTabsEnhanced initialData={account} />
+        <AccountTabsEnhanced initialData={account} onDataChange={setAccount} />
       </div>
     </div>
   );
