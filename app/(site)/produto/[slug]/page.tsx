@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { ProductPage } from './ProductPage';
 import { createServerClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ProductPageProps {
   params: {
     slug: string;

@@ -53,30 +53,53 @@ export const createRequiredServerClient = () => {
 
 // Cliente mock para quando o Supabase não está configurado
 function createMockClient() {
+  const listResult = Promise.resolve({ data: [], error: null, count: 0 });
+  const singleResult = Promise.resolve({ data: null, error: null, count: 0 });
+
+  const createQueryBuilder = (
+    result: Promise<{ data: any; error: any; count: number }>
+  ) => {
+    const builder: any = {
+      select: (_columns?: string, options?: { head?: boolean }) => (
+        options?.head
+          ? createQueryBuilder(Promise.resolve({ data: [], error: null, count: 0 }))
+          : createQueryBuilder(listResult)
+      ),
+      insert: () => createQueryBuilder(singleResult),
+      update: () => createQueryBuilder(singleResult),
+      upsert: () => createQueryBuilder(singleResult),
+      delete: () => createQueryBuilder(singleResult),
+      eq: () => builder,
+      neq: () => builder,
+      gt: () => builder,
+      gte: () => builder,
+      lt: () => builder,
+      lte: () => builder,
+      like: () => builder,
+      ilike: () => builder,
+      is: () => builder,
+      in: () => builder,
+      contains: () => builder,
+      overlap: () => builder,
+      overlaps: () => builder,
+      or: () => builder,
+      match: () => builder,
+      not: () => builder,
+      order: () => builder,
+      limit: () => builder,
+      range: () => builder,
+      single: () => singleResult,
+      maybeSingle: () => singleResult,
+      then: result.then.bind(result),
+      catch: result.catch.bind(result),
+      finally: result.finally.bind(result),
+    };
+
+    return builder;
+  };
+
   return {
-    from: (table: string) => ({
-      select: () => ({
-        eq: () => ({
-          order: () => ({
-            limit: () => Promise.resolve({ data: [], error: null }),
-            single: () => Promise.resolve({ data: null, error: null }),
-          }),
-          single: () => Promise.resolve({ data: null, error: null }),
-        }),
-        order: () => ({
-          limit: () => Promise.resolve({ data: [], error: null }),
-        }),
-        limit: () => Promise.resolve({ data: [], error: null }),
-        single: () => Promise.resolve({ data: null, error: null }),
-      }),
-      eq: () => ({
-        order: () => Promise.resolve({ data: [], error: null }),
-      }),
-      order: () => Promise.resolve({ data: [], error: null }),
-      insert: () => Promise.resolve({ data: null, error: null }),
-      update: () => Promise.resolve({ data: null, error: null }),
-      delete: () => Promise.resolve({ data: null, error: null }),
-    }),
+    from: (_table: string) => createQueryBuilder(listResult),
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       signInWithPassword: () => Promise.resolve({ data: null, error: { message: 'Supabase não configurado' } }),

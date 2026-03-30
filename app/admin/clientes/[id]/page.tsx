@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import { requireAdminPage } from '@/lib/auth/server';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AdminClienteDetalhePage({ params }: { params: { id: string } }) {
   await requireAdminPage();
   const db = createRequiredServerClient() as any;

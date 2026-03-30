@@ -13,6 +13,9 @@ import { RecoveryBanner } from '@/components/site/RecoveryBanner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'NEW SYSTEM DISTRIBUIDORA | Acessórios para Celular',
   description: 'Desde 2016 no mercado de acessórios para celular. Qualidade, preço competitivo e atendimento rápido. Pedido mínimo R$200. Entrega em São Paulo no mesmo dia.',

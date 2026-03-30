@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { CatalogPage } from '../components/CatalogPage';
 import { createServerClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Catálogo Caixa Fechada | NEW SYSTEM DISTRIBUIDORA',
   description: 'Catálogo de produtos em caixa fechada da NEW SYSTEM DISTRIBUIDORA. Acessórios para celular com preços especiais para revenda.',

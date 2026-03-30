@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { CategoryPage } from './CategoryPage';
 import { createServerClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface CategoryPageProps {
   params: {
     slug: string;

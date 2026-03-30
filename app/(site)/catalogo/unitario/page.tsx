@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { CatalogPage } from '../components/CatalogPage';
 import { createServerClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Catálogo Unitário | NEW SYSTEM DISTRIBUIDORA',
   description: 'Catálogo de produtos unitários da NEW SYSTEM DISTRIBUIDORA. Acessórios para celular com qualidade e preço competitivo. Pedido mínimo R$200.',

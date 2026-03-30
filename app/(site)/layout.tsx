@@ -1,8 +1,12 @@
+import { Suspense } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
 import { FunnelTracker } from '@/components/tracking/FunnelTracker';
 import { Toaster } from 'react-hot-toast';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function SiteLayout({
   children,
@@ -11,7 +15,9 @@ export default function SiteLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <FunnelTracker />
+      <Suspense fallback={null}>
+        <FunnelTracker />
+      </Suspense>
       <Header />
       <main className="flex-1">
         {children}
