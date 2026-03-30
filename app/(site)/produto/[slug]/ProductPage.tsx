@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -25,6 +25,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { Produto } from '@/types';
 import { formatPrice, getBoxSavings, getBoxUnitPrice, getWhatsAppLink } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
+import { trackClientEvent } from '@/lib/client-auth';
 import toast from 'react-hot-toast';
 
 interface ProductPageProps {
@@ -39,6 +40,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
     product.tipo_catalogo === 'CAIXA_FECHADA' ? 'CAIXA_FECHADA' : 'UNITARIO',
   );
   const [isAdding, setIsAdding] = useState(false);
+  const [crossSellProducts, setCrossSellProducts] = useState<Produto[]>([]);
   
   const addItem = useCart((state) => state.addItem);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -59,6 +61,37 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
   const supportsBox = product.tipo_catalogo === 'CAIXA_FECHADA' || product.tipo_catalogo === 'AMBOS';
   const boxPricing = getBoxSavings(product);
   const unitPriceInBox = getBoxUnitPrice(product);
+  const isLowStock = stock > 0 && stock <= 5;
+
+  useEffect(() => {
+    trackClientEvent({
+      eventName: 'product_view',
+      page: `/produto/${product.slug}`,
+      productId: product.id,
+      metadata: {
+        catalogType,
+        stock,
+      },
+    });
+  }, [product.id, product.slug, catalogType, stock]);
+
+  useEffect(() => {
+    const loadCrossSell = async () => {
+      try {
+        const response = await fetch(`/api/cross-sell?productId=${encodeURIComponent(product.id)}&catalogType=${encodeURIComponent(catalogType)}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) return;
+        const json = await response.json();
+        setCrossSellProducts(Array.isArray(json.data) ? json.data : []);
+      } catch {
+        setCrossSellProducts([]);
+      }
+    };
+
+    loadCrossSell();
+  }, [product.id, catalogType]);
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -278,6 +311,11 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
               <Badge variant="outline" className="border-neon-blue/40 text-neon-blue">
                 {stock > 0 ? 'Estoque disponivel' : 'Reposicao em breve'}
               </Badge>
+              {isLowStock && (
+                <Badge variant="outline" className="border-red-500/40 text-red-500">
+                  Ultimas {stock} unidades
+                </Badge>
+              )}
             </div>
 
             {/* Stock */}
@@ -339,7 +377,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                 variant="outline"
                 size="icon"
                 className={`h-12 w-12 ${isFavorite(product.id) ? 'text-red-500' : ''}`}
-                onClick={() => toggleFavorite(product.id)}
+                onClick={() => toggleFavorite(product.id, 'product-page')}
               >
                 <Heart className={`h-5 w-5 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
               </Button>
@@ -423,6 +461,21 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
             )}
           </Tabs>
         </div>
+
+        {crossSellProducts.length > 0 && (
+          <div className="mt-16">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold">Clientes tambem levam</h2>
+              <p className="text-sm text-muted-foreground">
+                Sugestoes automaticas baseadas em historico real e fallback definido no admin.
+              </p>
+            </div>
+            <ProductGrid
+              products={crossSellProducts}
+              catalogType={catalogType === 'CAIXA_FECHADA' ? 'UNITARIO' : 'CAIXA_FECHADA'}
+            />
+          </div>
+        )}
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (

@@ -58,6 +58,7 @@ export default function NovoProdutoPage() {
     is_new: false,
     is_bestseller: false,
     highlight_on_home: false,
+    related_product_ids_input: "",
   });
 
   useEffect(() => {
@@ -113,6 +114,10 @@ export default function NovoProdutoPage() {
         is_novo: formData.is_new,
         is_mais_vendido: formData.is_bestseller,
         destaque_home: formData.highlight_on_home,
+        related_product_ids: formData.related_product_ids_input
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean),
         is_active: true,
       };
 
@@ -320,6 +325,18 @@ export default function NovoProdutoPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Relacionados para cross-sell</Label>
+                  <Input
+                    value={formData.related_product_ids_input}
+                    onChange={(e) => setFormData({ ...formData, related_product_ids_input: e.target.value })}
+                    placeholder="IDs dos produtos separados por virgula"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use IDs dos produtos para fallback manual de upsell e cross-sell.
+                  </p>
                 </div>
               </CardContent>
             </Card>

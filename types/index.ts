@@ -57,6 +57,7 @@ export interface Produto {
   is_mais_vendido: boolean;
   is_destaque: boolean;
   destaque_home?: boolean;
+  related_product_ids?: string[];
 
   // Tipo de catálogo
   tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
@@ -96,6 +97,7 @@ export interface Produto {
   is_bestseller?: boolean;
   is_featured?: boolean;
   home_featured?: boolean;
+  related_products?: string[];
   catalog_type?: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
   views?: number;
 }
@@ -169,6 +171,12 @@ export interface Pedido {
     complemento?: string;
   } | null;
   checkout_token?: string | null;
+  user_id?: string | null;
+  original_total?: number | null;
+  coupon_code?: string | null;
+  coupon_discount_type?: string | null;
+  coupon_discount_value?: number | null;
+  abandoned_cart_id?: string | null;
   status: 'pending' | 'confirmed' | 'cancelled' | string;
   status_pedido?: string | null;
   status_pagamento?: string | null;
@@ -224,6 +232,54 @@ export interface Cliente {
   } | null;
   created_at?: string;
   updated_at?: string | null;
+}
+
+export interface FavoriteProduct {
+  id: string;
+  user_id: string;
+  product_id: string;
+  created_at: string;
+  produto?: Produto;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  type: 'FIRST_PURCHASE' | 'RECURRENT' | 'ABANDONED_CART' | 'MIN_TICKET' | 'GLOBAL';
+  discount_type: 'PERCENTAGE' | 'FIXED';
+  discount_value: number;
+  minimum_order_value?: number | null;
+  max_discount_value?: number | null;
+  usage_limit?: number | null;
+  usage_count?: number | null;
+  per_user_limit?: number | null;
+  product_ids?: string[] | null;
+  valid_from?: string | null;
+  valid_until?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+export interface AbandonedCart {
+  id: string;
+  user_id?: string | null;
+  email?: string | null;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  cart_items: unknown[];
+  cart_type?: string | null;
+  item_count: number;
+  subtotal: number;
+  total: number;
+  status: 'active' | 'abandoned' | 'recovered' | 'converted';
+  created_at: string;
+  updated_at?: string | null;
+  abandoned_at?: string | null;
+  recovered_at?: string | null;
+  converted_at?: string | null;
 }
 
 export interface UsuarioAdmin {

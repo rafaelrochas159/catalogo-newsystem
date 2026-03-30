@@ -1,4 +1,5 @@
 import { createRequiredServerClient } from '@/lib/supabase/client';
+import { getFavoriteProducts } from '@/lib/favorites';
 
 export type AddressInput = {
   cep: string;
@@ -47,16 +48,18 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
     ? db.from('pedidos').select('*').eq('cliente_email', normalizedEmail).order('created_at', { ascending: false })
     : Promise.resolve({ data: [] });
 
-  const [{ data: profile }, { data: addresses }, { data: orders }] = await Promise.all([
+  const [{ data: profile }, { data: addresses }, { data: orders }, favorites] = await Promise.all([
     db.from('customer_profiles').select('*').eq('id', userId).maybeSingle(),
     db.from('customer_addresses').select('*').eq('user_id', userId).order('principal', { ascending: false }),
     ordersQuery,
+    getFavoriteProducts(userId),
   ]);
 
   return {
     profile: profile || null,
     addresses: addresses || [],
     orders: orders || [],
+    favorites: favorites || [],
   };
 }
 

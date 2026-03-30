@@ -16,10 +16,12 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { CartItem } from './CartItem';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice, generateProfessionalOrderMessage, getWhatsAppLink, isValidEmail, maskPhone } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
+import { authorizedFetch, trackClientEvent } from '@/lib/client-auth';
 import {
   ShoppingCart,
   Trash2,
@@ -32,6 +34,8 @@ import {
   QrCode,
   Loader2,
   CreditCard,
+  TicketPercent,
+  Sparkles,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
@@ -89,6 +93,13 @@ interface PixOrderSnapshot {
   total: number;
 }
 
+interface AppliedCouponState {
+  code: string;
+  discountValue: number;
+  discountType: string;
+  label: string;
+}
+
 function playApprovedTone() {
   if (typeof window === 'undefined') return;
 
@@ -143,6 +154,12 @@ export function CartDrawer() {
   const [pixOrderSnapshot, setPixOrderSnapshot] = useState<PixOrderSnapshot | null>(null);
   const [isPollingPayment, setIsPollingPayment] = useState(false);
   const [pixApproved, setPixApproved] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCouponState | null>(null);
+  const [couponFeedback, setCouponFeedback] = useState<string | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null);
+  const [cartSuggestions, setCartSuggestions] = useState<any[]>([]);
   // Sessão do cliente. Se null, o usuário não está autenticado. É usada
   // para impedir o checkout de usuários não logados.
   const [clientSession, setClientSession] = useState<any>(null);
@@ -234,6 +251,9 @@ export function CartDrawer() {
   const itemCount = getItemCount();
   const canCheckout = hasMinOrder();
   const remainingForMinOrder = getRemainingForMinOrder();
+  const couponDiscount = appliedCoupon?.discountValue || 0;
+  const finalTotal = Math.max(total - couponDiscount, 0);
+  const checkoutProgress = pixApproved ? 100 : pixPayment ? 80 : showCheckoutForm ? 45 : itemCount > 0 ? 20 : 0;
 
   const orderItems = useMemo(
     () =>
@@ -248,6 +268,97 @@ export function CartDrawer() {
       })),
     [items]
   );
+
+  useEffect(() => {
+    if (!clientSession?.access_token) return;
+
+    const loadAbandonedCart = async () => {
+      try {
+        const response = await authorizedFetch('/api/cart/abandoned', { cache: 'no-store' });
+        if (!response.ok) return;
+        const json = await response.json();
+        if (json.data?.id) {
+          setAbandonedCartId(json.data.id);
+        }
+      } catch {
+        // não bloquear o carrinho por causa disso
+      }
+    };
+
+    loadAbandonedCart();
+  }, [clientSession?.access_token]);
+
+  useEffect(() => {
+    const loadCartSuggestions = async () => {
+      if (!items.length) {
+        setCartSuggestions([]);
+        return;
+      }
+
+      try {
+        const productIds = items.map((item) => item.productId).join(',');
+        const response = await fetch(`/api/cross-sell?mode=cart&productIds=${encodeURIComponent(productIds)}&catalogType=${encodeURIComponent(catalogType || 'UNITARIO')}`, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) return;
+        const json = await response.json();
+        setCartSuggestions(Array.isArray(json.data) ? json.data : []);
+      } catch {
+        setCartSuggestions([]);
+      }
+    };
+
+    loadCartSuggestions();
+  }, [items, catalogType]);
+
+  useEffect(() => {
+    if (!clientSession?.access_token || !items.length || pixPayment) return;
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const response = await authorizedFetch('/api/cart/abandoned', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cartId: abandonedCartId,
+            email: customer.email || clientSession?.user?.email || null,
+            customerName: customer.nome || null,
+            customerPhone: customer.telefone || null,
+            items: orderItems,
+            cartType: catalogType,
+            itemCount,
+            subtotal,
+            total: finalTotal,
+            status: 'abandoned',
+          }),
+        });
+
+        if (!response.ok) return;
+        const json = await response.json();
+        if (json.data?.id) {
+          setAbandonedCartId(json.data.id);
+        }
+
+        await trackClientEvent({
+          eventName: 'cart_abandoned',
+          page: '/checkout',
+          metadata: {
+            itemCount,
+            total: finalTotal,
+            cartType: catalogType,
+          },
+          email: customer.email || clientSession?.user?.email || null,
+        });
+      } catch {
+        // abandono não deve travar checkout
+      }
+    }, 1000 * 60 * 4);
+
+    return () => window.clearTimeout(timer);
+  }, [clientSession?.access_token, items, orderItems, customer.email, customer.nome, customer.telefone, catalogType, itemCount, subtotal, finalTotal, pixPayment, abandonedCartId]);
 
   useEffect(() => {
     const cepNumbers = address.cep.replace(/\D/g, '');
@@ -317,6 +428,17 @@ export function CartDrawer() {
           setIsPollingPayment(false);
           playApprovedTone();
           clearCart();
+          clearAbandonedCart('converted');
+          trackClientEvent({
+            eventName: 'order_completed',
+            page: '/checkout',
+            metadata: {
+              numeroPedido: pixPayment.numero_pedido,
+              paymentMethod: 'pix',
+              total: pixPayment.valor,
+            },
+            email: customer.email || clientSession?.user?.email || null,
+          });
           toast.success('Pagamento aprovado! Acesso liberado para o comprador.');
         }
       } catch (error) {
@@ -339,7 +461,112 @@ export function CartDrawer() {
     setPixApproved(false);
     setPaymentMethod('pix');
     setShowCheckoutForm(false);
+    setCouponCode('');
+    setAppliedCoupon(null);
+    setCouponFeedback(null);
   };
+
+  const clearAbandonedCart = async (status: 'recovered' | 'converted') => {
+    if (!clientSession?.access_token || !abandonedCartId) return;
+
+    try {
+      await authorizedFetch('/api/cart/abandoned', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cartId: abandonedCartId,
+          status,
+          customerName: customer.nome || null,
+          customerPhone: customer.telefone || null,
+        }),
+      });
+    } catch {
+      // melhor esforço
+    }
+  };
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponFeedback('Digite um cupom para aplicar.');
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    setCouponFeedback(null);
+
+    try {
+      const response = await authorizedFetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: couponCode,
+          items: orderItems,
+          subtotal,
+          total,
+          abandonedCartId,
+        }),
+      });
+
+      const json = await response.json();
+      if (!response.ok) {
+        setAppliedCoupon(null);
+        setCouponFeedback(json.error || 'Nao foi possivel aplicar o cupom.');
+        return;
+      }
+
+      setAppliedCoupon({
+        code: json.data.coupon.code,
+        discountValue: Number(json.data.discountValue || 0),
+        discountType: json.data.coupon.discount_type,
+        label: json.data.coupon.name,
+      });
+      setCouponCode(json.data.coupon.code);
+      setCouponFeedback(json.data.message || 'Cupom aplicado.');
+
+      await trackClientEvent({
+        eventName: 'coupon_applied',
+        page: '/checkout',
+        metadata: {
+          code: json.data.coupon.code,
+          discountValue: Number(json.data.discountValue || 0),
+        },
+        email: customer.email || clientSession?.user?.email || null,
+      });
+    } catch {
+      setAppliedCoupon(null);
+      setCouponFeedback('Nao foi possivel aplicar o cupom agora.');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const removeCoupon = async () => {
+    const removedCode = appliedCoupon?.code || couponCode;
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponFeedback('Cupom removido do pedido.');
+
+    await trackClientEvent({
+      eventName: 'coupon_removed',
+      page: '/checkout',
+      metadata: {
+        code: removedCode || null,
+      },
+      email: customer.email || clientSession?.user?.email || null,
+    });
+  };
+
+  useEffect(() => {
+    if (!appliedCoupon || !items.length) return;
+    if (couponCode.trim().toUpperCase() !== appliedCoupon.code) return;
+
+    applyCoupon();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, subtotal, total]);
 
   const validateCheckoutData = () => {
     if (!customer.nome || !customer.telefone || !customer.email) {
@@ -388,8 +615,8 @@ export function CartDrawer() {
           totalPrice: item.total_price,
         })),
         subtotal,
-        discount,
-        total,
+        discount: discount + couponDiscount,
+        total: finalTotal,
         address,
         customer,
         paymentMethod: 'WhatsApp',
@@ -399,15 +626,21 @@ export function CartDrawer() {
         .from('pedidos')
         .insert({
           numero_pedido: orderNumber,
+          user_id: clientSession.user.id,
           cliente_nome: customer.nome,
           cliente_telefone: customer.telefone,
           cliente_email: customer.email,
           cliente_cpf_cnpj: customer.cpf_cnpj || null,
           tipo_catalogo: catalogType,
           subtotal,
-          desconto_valor: discount,
+          desconto_valor: discount + couponDiscount,
           desconto_percentual: discount > 0 ? BUSINESS_RULES.discountPercentage : 0,
-          total,
+          total: finalTotal,
+          original_total: total,
+          coupon_code: appliedCoupon?.code || null,
+          coupon_discount_type: appliedCoupon?.discountType || null,
+          coupon_discount_value: couponDiscount,
+          abandoned_cart_id: abandonedCartId,
           itens: orderItems,
           endereco: address,
           status: 'pending',
@@ -424,9 +657,22 @@ export function CartDrawer() {
 
       const whatsappLink = getWhatsAppLink(COMPANY_INFO.whatsapp, message);
       clearCart();
+      await clearAbandonedCart('converted');
       resetCheckout();
       setIsOpen(false);
       toast.success(`Pedido ${order?.numero_pedido || orderNumber} enviado com sucesso!`);
+      await trackClientEvent({
+        eventName: 'order_completed',
+        page: '/checkout',
+        orderId: order?.id || null,
+        metadata: {
+          numeroPedido: order?.numero_pedido || orderNumber,
+          paymentMethod: 'whatsapp',
+          total: finalTotal,
+          couponCode: appliedCoupon?.code || null,
+        },
+        email: customer.email,
+      });
       openWhatsApp(whatsappLink);
     } catch (error: any) {
       console.error(error);
@@ -448,7 +694,18 @@ export function CartDrawer() {
 
     setIsCheckingOut(true);
     try {
-      const response = await fetch('/api/payments/pix', {
+      await trackClientEvent({
+        eventName: 'checkout_started',
+        page: '/checkout',
+        metadata: {
+          paymentMethod: 'pix',
+          total: finalTotal,
+          itemCount,
+        },
+        email: customer.email,
+      });
+
+      const response = await authorizedFetch('/api/payments/pix', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -456,11 +713,16 @@ export function CartDrawer() {
           endereco: address,
           itens: orderItems,
           subtotal,
-          desconto_valor: discount,
+          desconto_valor: discount + couponDiscount,
           desconto_percentual: discount > 0 ? BUSINESS_RULES.discountPercentage : 0,
-          total,
+          total: finalTotal,
+          original_total: total,
           tipo_catalogo: catalogType,
           cpf_cnpj: customer.cpf_cnpj || null,
+          coupon_code: appliedCoupon?.code || null,
+          coupon_discount_type: appliedCoupon?.discountType || null,
+          coupon_discount_value: couponDiscount,
+          abandoned_cart_id: abandonedCartId,
         }),
       });
 
@@ -476,7 +738,7 @@ export function CartDrawer() {
           unit_price: item.unit_price,
           total_price: item.total_price,
         })),
-        total,
+        total: finalTotal,
       });
 
       setPixPayment({
@@ -595,6 +857,13 @@ export function CartDrawer() {
             <ShoppingCart className="h-5 w-5" />
             {pixPayment ? 'Pagamento Pix' : `Carrinho (${itemCount})`}
           </SheetTitle>
+          <div className="pt-3">
+            <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              <span>Progresso</span>
+              <span>{checkoutProgress}%</span>
+            </div>
+            <Progress value={checkoutProgress} className="h-2" />
+          </div>
         </SheetHeader>
 
         <div className="flex-1 min-h-0 overflow-hidden relative">
@@ -682,6 +951,17 @@ export function CartDrawer() {
                         }}>
                           Pedido pago. Fechar checkout
                         </Button>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          window.location.href = '/meus-pedidos';
+                        }}>
+                          Ver meus pedidos
+                        </Button>
+                        <div className="rounded-lg border p-3 text-sm">
+                          <p className="font-medium">Pos-compra forte</p>
+                          <p className="mt-1 text-muted-foreground">
+                            Compartilhe no WhatsApp, acompanhe o pedido e volte para aproveitar a proxima reposicao.
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -714,6 +994,40 @@ export function CartDrawer() {
                     </AnimatePresence>
                   </div>
 
+                  {cartSuggestions.length > 0 && (
+                    <div className="rounded-xl border p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-neon-blue" />
+                        <p className="font-medium">Leve mais por menos</p>
+                      </div>
+                      <div className="space-y-2">
+                        {cartSuggestions.slice(0, 2).map((product) => (
+                          <div key={product.id} className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 p-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium line-clamp-1">{product.nome}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {product.tipo_catalogo === 'CAIXA_FECHADA' ? 'Caixa fechada' : 'Unitario'} • {formatPrice(product.preco_promocional_unitario || product.preco_promocional_caixa || product.preco_unitario || product.preco_caixa || 0)}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const type = product.tipo_catalogo === 'CAIXA_FECHADA' ? 'CAIXA_FECHADA' : 'UNITARIO';
+                                const result = useCart.getState().addItem(product, 1, type);
+                                if (!result.success) {
+                                  toast.error(result.message || 'Nao foi possivel adicionar o upsell.');
+                                }
+                              }}
+                            >
+                              Adicionar
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <Separator />
 
                   <div className="space-y-3">
@@ -727,9 +1041,15 @@ export function CartDrawer() {
                         <span className="text-green-500">-{formatPrice(discount)}</span>
                       </div>
                     )}
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Cupom {appliedCoupon?.code}</span>
+                        <span className="text-green-500">-{formatPrice(couponDiscount)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-neon-blue">{formatPrice(total)}</span>
+                      <span className="text-neon-blue">{formatPrice(finalTotal)}</span>
                     </div>
                   </div>
                 </>
@@ -814,6 +1134,45 @@ export function CartDrawer() {
                   </div>
 
                   <div className="space-y-3 border-t pt-4">
+                    <div className="flex items-center gap-2">
+                      <TicketPercent className="h-4 w-4 text-neon-blue" />
+                      <h4 className="font-semibold">Cupom</h4>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Digite seu cupom"
+                      />
+                      {appliedCoupon ? (
+                        <Button type="button" variant="outline" onClick={removeCoupon}>
+                          Remover
+                        </Button>
+                      ) : (
+                        <Button type="button" variant="outline" onClick={applyCoupon} disabled={isApplyingCoupon}>
+                          {isApplyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Aplicar'}
+                        </Button>
+                      )}
+                    </div>
+                    <div className="rounded-lg border p-3 text-sm">
+                      {appliedCoupon ? (
+                        <p className="text-green-500">
+                          {appliedCoupon.label}: desconto de {formatPrice(couponDiscount)} aplicado no total.
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground">
+                          Cupons inteligentes cobrem primeira compra, recompra, ticket minimo e recuperacao de carrinho.
+                        </p>
+                      )}
+                      {couponFeedback && (
+                        <p className={`mt-2 ${appliedCoupon ? 'text-green-500' : 'text-muted-foreground'}`}>
+                          {couponFeedback}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 border-t pt-4">
                     <h4 className="font-semibold">Forma de pagamento</h4>
                     <div className="grid grid-cols-2 gap-3">
                       <button type="button" onClick={() => setPaymentMethod('pix')} className={`rounded-xl border p-4 text-left transition ${paymentMethod === 'pix' ? 'border-neon-blue bg-neon-blue/10' : 'border-border'}`}>
@@ -836,9 +1195,12 @@ export function CartDrawer() {
           <SheetFooter className="px-6 py-4 border-t shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             {!showCheckoutForm ? (
               <div className="w-full flex gap-2">
-                <Button variant="outline" onClick={clearCart} className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
+                <Button variant="outline" onClick={async () => {
+                  clearCart();
+                  await clearAbandonedCart('recovered');
+                }} className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
                     // Requer autenticação para prosseguir com o checkout. Se o
                     // usuário não estiver logado, redireciona para a página de login
                     // e mostra um aviso. Caso contrário, exibe o formulário de
@@ -850,6 +1212,16 @@ export function CartDrawer() {
                       }
                       return;
                     }
+                    await trackClientEvent({
+                      eventName: 'checkout_started',
+                      page: '/checkout',
+                      metadata: {
+                        phase: 'form_opened',
+                        total: finalTotal,
+                        itemCount,
+                      },
+                      email: customer.email || clientSession.user?.email || null,
+                    });
                     setShowCheckoutForm(true);
                   }}
                   disabled={!canCheckout}
@@ -860,6 +1232,18 @@ export function CartDrawer() {
               </div>
             ) : (
               <div className="w-full flex flex-col gap-2">
+                <div className="rounded-lg border px-3 py-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Total do pedido</span>
+                    <span className="font-semibold text-neon-blue">{formatPrice(finalTotal)}</span>
+                  </div>
+                  {couponDiscount > 0 && (
+                    <div className="mt-1 flex items-center justify-between text-xs text-green-500">
+                      <span>Cupom {appliedCoupon?.code}</span>
+                      <span>-{formatPrice(couponDiscount)}</span>
+                    </div>
+                  )}
+                </div>
                 {paymentMethod === 'pix' ? (
                   <Button onClick={handlePixCheckout} disabled={isCheckingOut} className="w-full bg-neon-blue text-black hover:bg-neon-blue/90">
                     {isCheckingOut ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <QrCode className="h-4 w-4 mr-2" />}

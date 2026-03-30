@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { AccountTabs } from './AccountTabs';
+import { AccountTabsEnhanced } from './AccountTabsEnhanced';
 
 export function MinhaContaClientPage() {
   const router = useRouter();
@@ -78,7 +78,7 @@ export function MinhaContaClientPage() {
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-6">Minha conta</h1>
-      <AccountTabs initialData={account} />
+      <AccountTabsEnhanced initialData={account} />
     </div>
   );
 }

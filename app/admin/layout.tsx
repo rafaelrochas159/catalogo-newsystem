@@ -8,6 +8,7 @@ import {
   Package,
   Grid3X3,
   ShoppingCart,
+  TicketPercent,
   Upload,
   LogOut,
   Menu,
@@ -23,6 +24,7 @@ const navItems = [
   { href: '/admin/produtos', label: 'Produtos', icon: Package },
   { href: '/admin/categorias', label: 'Categorias', icon: Grid3X3 },
   { href: '/admin/pedidos', label: 'Pedidos', icon: ShoppingCart },
+  { href: '/admin/cupons', label: 'Cupons', icon: TicketPercent },
   { href: '/admin/importar', label: 'Importar Excel', icon: Upload },
   { href: '/admin/clientes', label: 'Clientes', icon: Users },
 ];

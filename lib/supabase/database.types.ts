@@ -66,6 +66,7 @@ export interface Database {
           is_mais_vendido: boolean;
           is_destaque: boolean;
           destaque_home: boolean | null;
+          related_product_ids: string[] | null;
           tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
           meta_title: string | null;
           meta_description: string | null;
@@ -98,6 +99,7 @@ export interface Database {
           is_mais_vendido?: boolean;
           is_destaque?: boolean;
           destaque_home?: boolean | null;
+          related_product_ids?: string[] | null;
           tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
           meta_title?: string | null;
           meta_description?: string | null;
@@ -130,6 +132,7 @@ export interface Database {
           is_mais_vendido?: boolean;
           is_destaque?: boolean;
           destaque_home?: boolean | null;
+          related_product_ids?: string[] | null;
           tipo_catalogo?: 'UNITARIO' | 'CAIXA_FECHADA' | 'AMBOS';
           meta_title?: string | null;
           meta_description?: string | null;
@@ -154,6 +157,12 @@ export interface Database {
           itens: Json;
           endereco: Json | null;
           checkout_token: string | null;
+          user_id: string | null;
+          original_total: number | null;
+          coupon_code: string | null;
+          coupon_discount_type: string | null;
+          coupon_discount_value: number | null;
+          abandoned_cart_id: string | null;
           status: string;
           status_pedido: string | null;
           status_pagamento: string | null;
@@ -185,6 +194,12 @@ export interface Database {
           itens: Json;
           endereco?: Json | null;
           checkout_token?: string | null;
+          user_id?: string | null;
+          original_total?: number | null;
+          coupon_code?: string | null;
+          coupon_discount_type?: string | null;
+          coupon_discount_value?: number | null;
+          abandoned_cart_id?: string | null;
           status?: string;
           status_pedido?: string | null;
           status_pagamento?: string | null;
@@ -216,6 +231,12 @@ export interface Database {
           itens?: Json;
           endereco?: Json | null;
           checkout_token?: string | null;
+          user_id?: string | null;
+          original_total?: number | null;
+          coupon_code?: string | null;
+          coupon_discount_type?: string | null;
+          coupon_discount_value?: number | null;
+          abandoned_cart_id?: string | null;
           status?: string;
           status_pedido?: string | null;
           status_pagamento?: string | null;
@@ -285,6 +306,223 @@ export interface Database {
           created_at?: string;
           updated_at?: string | null;
           paid_at?: string | null;
+        };
+      };
+      abandoned_carts: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string | null;
+          customer_name: string | null;
+          customer_phone: string | null;
+          cart_items: Json;
+          cart_type: string | null;
+          item_count: number;
+          subtotal: number;
+          total: number;
+          status: string;
+          source: string;
+          whatsapp_payload: Json | null;
+          email_payload: Json | null;
+          last_activity_at: string;
+          abandoned_at: string | null;
+          recovered_at: string | null;
+          converted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          customer_name?: string | null;
+          customer_phone?: string | null;
+          cart_items?: Json;
+          cart_type?: string | null;
+          item_count?: number;
+          subtotal?: number;
+          total?: number;
+          status?: string;
+          source?: string;
+          whatsapp_payload?: Json | null;
+          email_payload?: Json | null;
+          last_activity_at?: string;
+          abandoned_at?: string | null;
+          recovered_at?: string | null;
+          converted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          customer_name?: string | null;
+          customer_phone?: string | null;
+          cart_items?: Json;
+          cart_type?: string | null;
+          item_count?: number;
+          subtotal?: number;
+          total?: number;
+          status?: string;
+          source?: string;
+          whatsapp_payload?: Json | null;
+          email_payload?: Json | null;
+          last_activity_at?: string;
+          abandoned_at?: string | null;
+          recovered_at?: string | null;
+          converted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      coupons: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          description: string | null;
+          type: string;
+          discount_type: string;
+          discount_value: number;
+          minimum_order_value: number;
+          max_discount_value: number | null;
+          usage_limit: number | null;
+          usage_count: number;
+          per_user_limit: number;
+          product_ids: string[];
+          valid_from: string | null;
+          valid_until: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          description?: string | null;
+          type: string;
+          discount_type: string;
+          discount_value: number;
+          minimum_order_value?: number;
+          max_discount_value?: number | null;
+          usage_limit?: number | null;
+          usage_count?: number;
+          per_user_limit?: number;
+          product_ids?: string[];
+          valid_from?: string | null;
+          valid_until?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          description?: string | null;
+          type?: string;
+          discount_type?: string;
+          discount_value?: number;
+          minimum_order_value?: number;
+          max_discount_value?: number | null;
+          usage_limit?: number | null;
+          usage_count?: number;
+          per_user_limit?: number;
+          product_ids?: string[];
+          valid_from?: string | null;
+          valid_until?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      coupon_redemptions: {
+        Row: {
+          id: string;
+          coupon_id: string;
+          order_id: string | null;
+          user_id: string | null;
+          email: string | null;
+          coupon_code: string;
+          discount_value: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          coupon_id: string;
+          order_id?: string | null;
+          user_id?: string | null;
+          email?: string | null;
+          coupon_code: string;
+          discount_value?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          coupon_id?: string;
+          order_id?: string | null;
+          user_id?: string | null;
+          email?: string | null;
+          coupon_code?: string;
+          discount_value?: number;
+          created_at?: string;
+        };
+      };
+      favorite_products: {
+        Row: {
+          id: string;
+          user_id: string;
+          product_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          product_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          product_id?: string;
+          created_at?: string;
+        };
+      };
+      user_events: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string | null;
+          event_name: string;
+          page: string | null;
+          product_id: string | null;
+          order_id: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          event_name: string;
+          page?: string | null;
+          product_id?: string | null;
+          order_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          event_name?: string;
+          page?: string | null;
+          product_id?: string | null;
+          order_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
         };
       };
       compradores_acesso: {

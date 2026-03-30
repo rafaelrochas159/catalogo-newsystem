@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getAuthenticatedUserFromRequest } from '@/lib/auth/server';
+import { registerCouponRedemption } from '@/lib/coupons';
+import { upsertAbandonedCart, trackUserEvent } from '@/lib/marketing';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 import {
   createPixPayment,
@@ -37,9 +40,14 @@ interface CheckoutBody {
   desconto_valor: number;
   desconto_percentual: number;
   total: number;
+  original_total?: number;
   tipo_catalogo: 'UNITARIO' | 'CAIXA_FECHADA';
   /** CPF ou CNPJ informado pelo cliente, enviado separadamente para conveniência */
   cpf_cnpj?: string | null;
+  coupon_code?: string | null;
+  coupon_discount_type?: string | null;
+  coupon_discount_value?: number | null;
+  abandoned_cart_id?: string | null;
 }
 
 function getBaseUrl(request: Request) {
@@ -94,6 +102,7 @@ function validateBody(body: CheckoutBody) {
 
 export async function POST(request: Request) {
   try {
+    const { user } = await getAuthenticatedUserFromRequest(request);
     const body = (await request.json()) as CheckoutBody;
     const errorMessage = validateBody(body);
     if (errorMessage) {
@@ -110,6 +119,7 @@ export async function POST(request: Request) {
     const pedidoInsert = {
       numero_pedido: numeroPedido,
       checkout_token: checkoutToken,
+      user_id: user?.id || null,
       cliente_nome: body.cliente.nome,
       cliente_telefone: body.cliente.telefone,
       cliente_email: body.cliente.email,
@@ -119,6 +129,11 @@ export async function POST(request: Request) {
       desconto_valor: Number(body.desconto_valor || 0),
       desconto_percentual: Number(body.desconto_percentual || 0),
       total: Number(body.total),
+      original_total: Number(body.original_total || body.total),
+      coupon_code: body.coupon_code || null,
+      coupon_discount_type: body.coupon_discount_type || null,
+      coupon_discount_value: Number(body.coupon_discount_value || 0),
+      abandoned_cart_id: body.abandoned_cart_id || null,
       itens,
       endereco: body.endereco,
       status: 'pending',
@@ -138,6 +153,22 @@ export async function POST(request: Request) {
 
     if (pedidoError || !pedido) {
       throw new Error(pedidoError?.message || 'Não foi possível criar o pedido.');
+    }
+
+    if (body.abandoned_cart_id) {
+      await upsertAbandonedCart({
+        cartId: body.abandoned_cart_id,
+        userId: user?.id || null,
+        email: body.cliente.email,
+        customerName: body.cliente.nome,
+        customerPhone: body.cliente.telefone,
+        items: [],
+        cartType: body.tipo_catalogo,
+        itemCount: 0,
+        subtotal: 0,
+        total: 0,
+        status: 'converted',
+      });
     }
 
     await db.from('compradores_acesso').upsert({
@@ -216,6 +247,28 @@ export async function POST(request: Request) {
       payment_gateway_response: payment,
       updated_at: new Date().toISOString(),
     }).eq('id', pedido.id);
+
+    if (body.coupon_code && Number(body.coupon_discount_value || 0) > 0) {
+      await registerCouponRedemption({
+        couponCode: body.coupon_code,
+        orderId: pedido.id,
+        userId: user?.id || null,
+        email: body.cliente.email,
+        discountValue: Number(body.coupon_discount_value || 0),
+      });
+    }
+
+    await trackUserEvent({
+      userId: user?.id || null,
+      email: body.cliente.email,
+      eventName: 'pix_generated',
+      orderId: pedido.id,
+      metadata: {
+        numeroPedido,
+        total: Number(body.total),
+        couponCode: body.coupon_code || null,
+      },
+    });
 
     return NextResponse.json({
       success: true,

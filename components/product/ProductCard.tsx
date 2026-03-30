@@ -120,7 +120,7 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
             <button
               onClick={(e) => {
                 e.preventDefault();
-                toggleFavorite(product.id);
+                toggleFavorite(product.id, 'product-card');
               }}
               className={`
                 absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm
@@ -232,7 +232,7 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
                 stock > 0 ? 'text-green-500' : 'text-muted-foreground'
               }`}>
                 <PackageCheck className="h-3 w-3" />
-                {stock > 0 ? 'Estoque disponivel' : 'Sem estoque'}
+                {stock > 0 ? (stock <= 5 ? `Ultimas ${stock}` : 'Estoque disponivel') : 'Sem estoque'}
               </span>
             </div>
 

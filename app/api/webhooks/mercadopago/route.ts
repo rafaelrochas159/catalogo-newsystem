@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { trackUserEvent } from '@/lib/marketing';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 import {
   getApprovedAt,
@@ -102,6 +103,18 @@ export async function POST(request: Request) {
         liberado_em: approvedAt,
         atualizado_em: new Date().toISOString(),
       }, { onConflict: 'email' });
+
+      await trackUserEvent({
+        userId: pedido.user_id || null,
+        email: pedido.cliente_email,
+        eventName: 'order_completed',
+        orderId: pedido.id,
+        metadata: {
+          numeroPedido,
+          paymentMethod: 'pix',
+          total: pedido.total,
+        },
+      });
     }
 
     return NextResponse.json({ received: true, payment_id: String(payment.id), numero_pedido: numeroPedido });

@@ -63,6 +63,7 @@ export default function EditarProdutoPage() {
     is_new: false,
     is_bestseller: false,
     highlight_on_home: false,
+    related_product_ids_input: "",
     is_active: true,
   });
 
@@ -119,6 +120,7 @@ export default function EditarProdutoPage() {
         is_new: product.is_novo,
         is_bestseller: product.is_mais_vendido,
         highlight_on_home: product.destaque_home || false,
+        related_product_ids_input: (product.related_product_ids || []).join(', '),
         is_active: product.is_active,
       });
 
@@ -173,6 +175,10 @@ export default function EditarProdutoPage() {
         is_novo: formData.is_new,
         is_mais_vendido: formData.is_bestseller,
         destaque_home: formData.highlight_on_home,
+        related_product_ids: formData.related_product_ids_input
+          .split(',')
+          .map((value) => value.trim())
+          .filter(Boolean),
         is_active: formData.is_active,
       };
 
@@ -343,6 +349,18 @@ export default function EditarProdutoPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Relacionados para cross-sell</Label>
+                  <Input
+                    value={formData.related_product_ids_input}
+                    onChange={(e) => setFormData({ ...formData, related_product_ids_input: e.target.value })}
+                    placeholder="IDs dos produtos separados por virgula"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use IDs dos produtos para fallback manual de upsell e cross-sell.
+                  </p>
                 </div>
               </CardContent>
             </Card>
