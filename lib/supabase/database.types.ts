@@ -525,6 +525,138 @@ export interface Database {
           created_at?: string;
         };
       };
+      marketing_events: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string | null;
+          anonymous_id: string | null;
+          event_name: string;
+          standard_event: string | null;
+          funnel_stage: string | null;
+          page: string | null;
+          product_id: string | null;
+          order_id: string | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          anonymous_id?: string | null;
+          event_name: string;
+          standard_event?: string | null;
+          funnel_stage?: string | null;
+          page?: string | null;
+          product_id?: string | null;
+          order_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          anonymous_id?: string | null;
+          event_name?: string;
+          standard_event?: string | null;
+          funnel_stage?: string | null;
+          page?: string | null;
+          product_id?: string | null;
+          order_id?: string | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+      };
+      user_funnel_progress: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          email: string | null;
+          anonymous_id: string | null;
+          current_stage: string;
+          last_event_name: string;
+          first_seen_at: string;
+          last_seen_at: string;
+          metadata: Json;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          anonymous_id?: string | null;
+          current_stage: string;
+          last_event_name: string;
+          first_seen_at?: string;
+          last_seen_at?: string;
+          metadata?: Json;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          email?: string | null;
+          anonymous_id?: string | null;
+          current_stage?: string;
+          last_event_name?: string;
+          first_seen_at?: string;
+          last_seen_at?: string;
+          metadata?: Json;
+        };
+      };
+      whatsapp_message_logs: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          order_id: string | null;
+          phone: string;
+          template_key: string;
+          dedupe_key: string;
+          provider: string;
+          direction: string;
+          status: string;
+          provider_message_id: string | null;
+          payload: Json;
+          response: Json | null;
+          sent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          order_id?: string | null;
+          phone: string;
+          template_key: string;
+          dedupe_key: string;
+          provider: string;
+          direction?: string;
+          status?: string;
+          provider_message_id?: string | null;
+          payload?: Json;
+          response?: Json | null;
+          sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          order_id?: string | null;
+          phone?: string;
+          template_key?: string;
+          dedupe_key?: string;
+          provider?: string;
+          direction?: string;
+          status?: string;
+          provider_message_id?: string | null;
+          payload?: Json;
+          response?: Json | null;
+          sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       compradores_acesso: {
         Row: {
           id: string;

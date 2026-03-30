@@ -328,7 +328,7 @@ export default function MyOrdersPage() {
       try {
         setLoadingRecommended(true);
         const accessToken = await getAccessToken();
-        const res = await fetch('/api/recommendations', {
+        const res = await fetch('/api/recommendations/ai?context=orders&limit=8', {
           headers: accessToken
             ? { Authorization: `Bearer ${accessToken}` }
             : undefined,

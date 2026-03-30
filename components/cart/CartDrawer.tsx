@@ -21,7 +21,7 @@ import { CartItem } from './CartItem';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice, generateProfessionalOrderMessage, getWhatsAppLink, isValidEmail, maskPhone } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
-import { authorizedFetch, trackClientEvent } from '@/lib/client-auth';
+import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
 import {
   ShoppingCart,
   Trash2,
@@ -160,6 +160,7 @@ export function CartDrawer() {
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null);
   const [cartSuggestions, setCartSuggestions] = useState<any[]>([]);
+  const [postPurchaseSuggestions, setPostPurchaseSuggestions] = useState<any[]>([]);
   // Sessão do cliente. Se null, o usuário não está autenticado. É usada
   // para impedir o checkout de usuários não logados.
   const [clientSession, setClientSession] = useState<any>(null);
@@ -297,7 +298,14 @@ export function CartDrawer() {
 
       try {
         const productIds = items.map((item) => item.productId).join(',');
-        const response = await fetch(`/api/cross-sell?mode=cart&productIds=${encodeURIComponent(productIds)}&catalogType=${encodeURIComponent(catalogType || 'UNITARIO')}`, {
+        const searchParams = new URLSearchParams({
+          context: 'cart',
+          productIds,
+          catalogType: catalogType || 'UNITARIO',
+          anonymousId: getAnonymousVisitorId(),
+          limit: '6',
+        });
+        const response = await authorizedFetch(`/api/recommendations/ai?${searchParams.toString()}`, {
           cache: 'no-store',
         });
 
@@ -427,6 +435,7 @@ export function CartDrawer() {
           setPixApproved(true);
           setIsPollingPayment(false);
           playApprovedTone();
+          setPostPurchaseSuggestions(cartSuggestions.slice(0, 3));
           clearCart();
           clearAbandonedCart('converted');
           trackClientEvent({
@@ -449,7 +458,7 @@ export function CartDrawer() {
     }, 5000);
 
     return () => window.clearInterval(interval);
-  }, [pixPayment, pixApproved, clearCart]);
+  }, [pixPayment, pixApproved, clearCart, cartSuggestions]);
 
   const resetCheckout = () => {
     setAddress({ cep: '', rua: '', numero: '', bairro: '', cidade: '', estado: '', complemento: '' });
@@ -464,6 +473,7 @@ export function CartDrawer() {
     setCouponCode('');
     setAppliedCoupon(null);
     setCouponFeedback(null);
+    setPostPurchaseSuggestions([]);
   };
 
   const clearAbandonedCart = async (status: 'recovered' | 'converted') => {
@@ -919,7 +929,9 @@ export function CartDrawer() {
                       setPixPayment((prev) => prev ? { ...prev, status_pagamento: data.status_pagamento, qr_code_base64: data.qr_code_base64 || prev.qr_code_base64, pix_copia_cola: data.pix_copia_cola || prev.pix_copia_cola } : prev);
                       if (data.status_pagamento === 'approved') {
                         setPixApproved(true);
+                        setPostPurchaseSuggestions(cartSuggestions.slice(0, 3));
                         clearCart();
+                        await clearAbandonedCart('converted');
                         toast.success('Pagamento já aprovado.');
                       } else {
                         toast('Pagamento ainda não aprovado.');
@@ -962,6 +974,31 @@ export function CartDrawer() {
                             Compartilhe no WhatsApp, acompanhe o pedido e volte para aproveitar a proxima reposicao.
                           </p>
                         </div>
+                        {postPurchaseSuggestions.length > 0 && (
+                          <div className="rounded-xl border p-4 space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="h-4 w-4 text-neon-blue" />
+                              <p className="font-medium">Sugestoes para sua proxima compra</p>
+                            </div>
+                            <div className="space-y-2">
+                              {postPurchaseSuggestions.map((product) => (
+                                <div key={product.id} className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 p-3">
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-medium line-clamp-1">{product.nome}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {formatPrice(product.preco_promocional_unitario || product.preco_promocional_caixa || product.preco_unitario || product.preco_caixa || 0)}
+                                    </p>
+                                  </div>
+                                  <Button size="sm" variant="outline" onClick={() => {
+                                    window.location.href = `/produto/${product.slug}`;
+                                  }}>
+                                    Ver produto
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

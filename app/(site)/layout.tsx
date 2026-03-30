@@ -1,6 +1,7 @@
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
+import { FunnelTracker } from '@/components/tracking/FunnelTracker';
 import { Toaster } from 'react-hot-toast';
 
 export default function SiteLayout({
@@ -10,6 +11,7 @@ export default function SiteLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <FunnelTracker />
       <Header />
       <main className="flex-1">
         {children}

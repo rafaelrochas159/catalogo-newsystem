@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Produto } from '@/types';
+import { trackClientEvent } from '@/lib/client-auth';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
 import { ShoppingCart, Minus, Plus, Check } from 'lucide-react';
@@ -32,6 +33,21 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
   const stock = catalogType === 'UNITARIO'
     ? (product.estoque_unitario || 0)
     : (product.estoque_caixa || 0);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    void trackClientEvent({
+      eventName: 'view_item',
+      page: `/produto/${product.slug}`,
+      productId: product.id,
+      metadata: {
+        source: 'quick-view',
+        catalogType,
+        stock,
+      },
+    });
+  }, [catalogType, isOpen, product.id, product.slug, stock]);
 
   const handleAddToCart = async () => {
     setIsAdding(true);

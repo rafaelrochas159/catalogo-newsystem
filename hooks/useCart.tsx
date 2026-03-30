@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Produto, CartItem } from '@/types';
+import { trackClientEvent } from '@/lib/client-auth';
 import { BUSINESS_RULES, STORAGE_KEYS } from '@/lib/constants';
 
 interface CartState {
@@ -131,6 +132,19 @@ export const useCart = create<CartState & CartActions>()(
         set({ 
           items: newItems, 
           catalogType: type 
+        });
+
+        void trackClientEvent({
+          eventName: 'add_to_cart',
+          page: typeof window !== 'undefined' ? window.location.pathname : '/catalogo',
+          productId: product.id,
+          metadata: {
+            quantity,
+            price,
+            total: price * quantity,
+            catalogType: type,
+            productIds: newItems.map((item) => item.productId),
+          },
         });
 
         return { success: true };

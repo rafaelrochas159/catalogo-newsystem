@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { trackUserEvent } from '@/lib/marketing';
 import { createRequiredServerClient } from '@/lib/supabase/client';
+import { sendPostPurchaseWhatsAppNotifications } from '@/lib/whatsapp';
 import {
   getApprovedAt,
   getPaymentById,
@@ -115,6 +116,8 @@ export async function POST(request: Request) {
           total: pedido.total,
         },
       });
+
+      await sendPostPurchaseWhatsAppNotifications(pedido);
     }
 
     return NextResponse.json({ received: true, payment_id: String(payment.id), numero_pedido: numeroPedido });

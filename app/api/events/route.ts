@@ -3,7 +3,11 @@ import { getAuthenticatedUserFromRequest } from '@/lib/auth/server';
 import { trackUserEvent } from '@/lib/marketing';
 
 const allowedEvents = new Set([
+  'visit',
   'product_view',
+  'view_item',
+  'add_to_cart',
+  'purchase',
   'cart_abandoned',
   'coupon_applied',
   'coupon_removed',
@@ -26,6 +30,7 @@ export async function POST(request: Request) {
   await trackUserEvent({
     userId: user?.id || null,
     email: user?.email?.trim().toLowerCase() || body.email || null,
+    anonymousId: body.anonymousId || null,
     eventName,
     page: body.page || null,
     productId: body.productId || null,

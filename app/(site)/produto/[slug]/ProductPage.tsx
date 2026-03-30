@@ -25,7 +25,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { Produto } from '@/types';
 import { formatPrice, getBoxSavings, getBoxUnitPrice, getWhatsAppLink } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
-import { trackClientEvent } from '@/lib/client-auth';
+import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
 import toast from 'react-hot-toast';
 
 interface ProductPageProps {
@@ -65,7 +65,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
 
   useEffect(() => {
     trackClientEvent({
-      eventName: 'product_view',
+      eventName: 'view_item',
       page: `/produto/${product.slug}`,
       productId: product.id,
       metadata: {
@@ -78,9 +78,14 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
   useEffect(() => {
     const loadCrossSell = async () => {
       try {
-        const response = await fetch(`/api/cross-sell?productId=${encodeURIComponent(product.id)}&catalogType=${encodeURIComponent(catalogType)}`, {
-          cache: 'no-store',
+        const searchParams = new URLSearchParams({
+          context: 'product',
+          productId: product.id,
+          catalogType,
+          anonymousId: getAnonymousVisitorId(),
+          limit: '8',
         });
+        const response = await authorizedFetch(`/api/recommendations/ai?${searchParams.toString()}`, { cache: 'no-store' });
 
         if (!response.ok) return;
         const json = await response.json();
@@ -467,7 +472,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
             <div className="mb-8">
               <h2 className="text-2xl font-bold">Clientes tambem levam</h2>
               <p className="text-sm text-muted-foreground">
-                Sugestoes automaticas baseadas em historico real e fallback definido no admin.
+                Sugestoes automaticas com base no comportamento de compra, no tipo de catalogo e no historico real.
               </p>
             </div>
             <ProductGrid
