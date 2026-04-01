@@ -42,6 +42,51 @@ function normalizeAddressRecord(address?: Record<string, unknown> | null): Check
   };
 }
 
+function getAddressCompleteness(address?: Record<string, unknown> | null) {
+  if (!address) {
+    return 0;
+  }
+
+  return [
+    address.cep,
+    address.rua || address.street,
+    address.numero || address.number,
+    address.bairro || address.neighborhood,
+    address.cidade || address.city,
+    address.estado || address.state,
+    address.complemento || address.complement,
+  ].filter((value) => typeof value === 'string' && value.trim()).length;
+}
+
+function getAddressUpdatedAt(address?: Record<string, unknown> | null) {
+  if (!address) {
+    return 0;
+  }
+
+  const value = address.updated_at || address.created_at;
+  return typeof value === 'string' ? new Date(value).getTime() || 0 : 0;
+}
+
+function pickBestAddressRecord(addresses?: Array<Record<string, unknown>> | null) {
+  if (!Array.isArray(addresses) || addresses.length === 0) {
+    return null;
+  }
+
+  return [...addresses].sort((a, b) => {
+    const principalDiff = Number(Boolean((b as any)?.principal)) - Number(Boolean((a as any)?.principal));
+    if (principalDiff !== 0) {
+      return principalDiff;
+    }
+
+    const completenessDiff = getAddressCompleteness(b) - getAddressCompleteness(a);
+    if (completenessDiff !== 0) {
+      return completenessDiff;
+    }
+
+    return getAddressUpdatedAt(b) - getAddressUpdatedAt(a);
+  })[0];
+}
+
 function mergeString(currentValue: string | undefined, nextValue: string | undefined, force?: boolean) {
   if (force) {
     return nextValue || '';
@@ -58,7 +103,7 @@ export function buildCheckoutPrefill(args: {
   } | null;
 }) {
   const profile = args.account?.profile || null;
-  const primaryAddress = args.account?.addresses?.[0] || null;
+  const primaryAddress = pickBestAddressRecord(args.account?.addresses) || null;
   const sessionMetadata = args.sessionUser?.user_metadata || {};
 
   const customer: CheckoutCustomerForm = {

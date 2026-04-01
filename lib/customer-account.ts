@@ -74,6 +74,70 @@ function normalizeStoredAddress(address: any, userId?: string) {
   };
 }
 
+function getAddressCompletenessScore(address?: any) {
+  if (!address || typeof address !== 'object') {
+    return 0;
+  }
+
+  return [
+    address.cep,
+    address.rua || address.street,
+    address.numero || address.number,
+    address.bairro || address.neighborhood,
+    address.cidade || address.city,
+    address.estado || address.state,
+    address.complemento || address.complement,
+  ].filter((value) => typeof value === 'string' && value.trim()).length;
+}
+
+function getAddressFreshnessScore(address?: any) {
+  if (!address || typeof address !== 'object') {
+    return 0;
+  }
+
+  return new Date(address.updated_at || address.created_at || 0).getTime() || 0;
+}
+
+function sortAddressesByPriority(addresses: any[]) {
+  return [...addresses].sort((a: any, b: any) => {
+    const principalDiff = Number(Boolean(b?.principal)) - Number(Boolean(a?.principal));
+    if (principalDiff !== 0) {
+      return principalDiff;
+    }
+
+    const completenessDiff = getAddressCompletenessScore(b) - getAddressCompletenessScore(a);
+    if (completenessDiff !== 0) {
+      return completenessDiff;
+    }
+
+    return getAddressFreshnessScore(b) - getAddressFreshnessScore(a);
+  });
+}
+
+function mergeAddressRecords(primary?: any, fallback?: any, userId?: string) {
+  const normalizedPrimary = normalizeStoredAddress(primary, userId);
+  const normalizedFallback = normalizeStoredAddress(fallback, userId);
+
+  if (!normalizedPrimary) return normalizedFallback;
+  if (!normalizedFallback) return normalizedPrimary;
+
+  return normalizeStoredAddress(
+    {
+      ...normalizedFallback,
+      ...normalizedPrimary,
+      cep: normalizedPrimary.cep || normalizedFallback.cep,
+      rua: normalizedPrimary.rua || normalizedFallback.rua,
+      numero: normalizedPrimary.numero || normalizedFallback.numero,
+      complemento: normalizedPrimary.complemento || normalizedFallback.complemento,
+      bairro: normalizedPrimary.bairro || normalizedFallback.bairro,
+      cidade: normalizedPrimary.cidade || normalizedFallback.cidade,
+      estado: normalizedPrimary.estado || normalizedFallback.estado,
+      principal: normalizedPrimary.principal ?? normalizedFallback.principal,
+    },
+    userId,
+  );
+}
+
 function buildAddressPayloadVariants(input: AddressInput) {
   const basePt = {
     cep: input.cep,
@@ -340,15 +404,20 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
       : null);
 
   const normalizedAddresses = Array.isArray(addresses)
-    ? addresses
-        .map((address: any) => normalizeStoredAddress(address, userId))
-        .filter(Boolean)
+    ? sortAddressesByPriority(
+        addresses
+          .map((address: any) => normalizeStoredAddress(address, userId))
+          .filter(Boolean)
+      )
     : [];
+
+  const preferredAddress = mergeAddressRecords(normalizedAddresses[0], legacyAddress, userId);
+  const remainingAddresses = normalizedAddresses.slice(1);
 
   return {
     profile: fallbackProfile,
-    addresses: normalizedAddresses.length > 0
-      ? normalizedAddresses
+    addresses: preferredAddress
+      ? [preferredAddress, ...remainingAddresses]
       : (legacyAddress ? [{ id: 'legacy-address', user_id: userId, ...legacyAddress }] : []),
     orders: mergedOrders,
     favorites: favorites || [],

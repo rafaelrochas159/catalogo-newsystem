@@ -914,8 +914,8 @@ export function CartDrawer() {
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="w-full sm:max-w-md flex flex-col h-[100dvh] p-0 overflow-hidden">
-        <SheetHeader className="px-6 pt-6 pb-2 shrink-0 border-b">
+      <SheetContent className="w-full sm:max-w-md flex flex-col h-[100svh] max-h-[100svh] sm:h-[100dvh] sm:max-h-[100dvh] p-0 overflow-hidden">
+        <SheetHeader className="px-4 pt-6 pb-2 shrink-0 border-b sm:px-6">
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
             {pixPayment ? 'Pagamento Pix' : `Carrinho (${itemCount})`}
@@ -931,7 +931,7 @@ export function CartDrawer() {
 
         <div className="flex-1 min-h-0 overflow-hidden relative">
           <ScrollArea className="h-full w-full">
-            <div className="px-6 py-4 space-y-4">
+            <div className="px-4 py-4 pb-6 space-y-4 sm:px-6">
               {pixPayment ? (
                 <div className="space-y-4">
                   <div className="rounded-xl border p-4 space-y-3">
@@ -1224,7 +1224,7 @@ export function CartDrawer() {
                       {isFetchingCep && <p className="text-xs text-muted-foreground">Buscando endereÃ§o pelo CEP...</p>}
                       {cepError && <p className="text-xs text-red-500">{cepError}</p>}
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="col-span-2 grid gap-2">
                         <Label>Rua *</Label>
                         <Input value={address.rua} onChange={(e) => setAddress((prev) => ({ ...prev, rua: e.target.value }))} placeholder="Nome da rua" />
@@ -1238,7 +1238,7 @@ export function CartDrawer() {
                       <Label>Bairro *</Label>
                       <Input value={address.bairro} onChange={(e) => setAddress((prev) => ({ ...prev, bairro: e.target.value }))} placeholder="Nome do bairro" />
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="col-span-2 grid gap-2">
                         <Label>Cidade *</Label>
                         <Input value={address.cidade} onChange={(e) => setAddress((prev) => ({ ...prev, cidade: e.target.value }))} placeholder="SÃ£o Paulo" />
@@ -1313,7 +1313,7 @@ export function CartDrawer() {
         </div>
 
         {!pixPayment && (
-          <SheetFooter className="px-6 py-4 border-t shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <SheetFooter className="sticky bottom-0 z-10 border-t shrink-0 bg-background/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
             {!showCheckoutForm ? (
               <div className="w-full flex gap-2">
                 <Button variant="outline" onClick={async () => {
