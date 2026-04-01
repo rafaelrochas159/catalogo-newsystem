@@ -71,6 +71,7 @@ export default async function AdminClienteDetalhePage({ params }: { params: { id
           status={customer.status}
           canDeletePermanently={customer.deletionPolicy.canDeletePermanently}
           canDeactivate={!customer.isLegacyOnly && customer.deletionPolicy.canDeactivate}
+          deleteReason={customer.deletionPolicy.reason}
         />
       </div>
 

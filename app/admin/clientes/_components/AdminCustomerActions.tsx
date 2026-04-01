@@ -11,6 +11,7 @@ type Props = {
   status: string;
   canDeletePermanently: boolean;
   canDeactivate: boolean;
+  deleteReason: string;
 };
 
 async function readJsonSafely(response: Response) {
@@ -24,7 +25,13 @@ async function readJsonSafely(response: Response) {
   }
 }
 
-export function AdminCustomerActions({ userId, status, canDeletePermanently, canDeactivate }: Props) {
+export function AdminCustomerActions({
+  userId,
+  status,
+  canDeletePermanently,
+  canDeactivate,
+  deleteReason,
+}: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -88,25 +95,33 @@ export function AdminCustomerActions({ userId, status, canDeletePermanently, can
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button
-        type="button"
-        variant={isInactive ? 'outline' : 'secondary'}
-        onClick={handleStatusChange}
-        disabled={!canDeactivate || isPending || isDeleting}
-      >
-        {isInactive ? <UserCheck className="mr-2 h-4 w-4" /> : <UserX className="mr-2 h-4 w-4" />}
-        {isInactive ? 'Reativar' : 'Inativar'}
-      </Button>
-      <Button
-        type="button"
-        variant="destructive"
-        onClick={handleDelete}
-        disabled={!canDeletePermanently || isDeleting || isPending}
-      >
-        <Trash2 className="mr-2 h-4 w-4" />
-        {isDeleting ? 'Excluindo...' : 'Excluir permanente'}
-      </Button>
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant={isInactive ? 'outline' : 'secondary'}
+          onClick={handleStatusChange}
+          disabled={!canDeactivate || isPending || isDeleting}
+        >
+          {isInactive ? <UserCheck className="mr-2 h-4 w-4" /> : <UserX className="mr-2 h-4 w-4" />}
+          {isInactive ? 'Reativar' : 'Inativar'}
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={!canDeletePermanently || isDeleting || isPending}
+          title={!canDeletePermanently ? deleteReason : 'Excluir permanentemente este cadastro'}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {isDeleting ? 'Excluindo...' : 'Excluir permanente'}
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {canDeletePermanently
+          ? 'Exclusao permanente disponivel porque este cliente nao possui historico comercial bloqueante.'
+          : deleteReason}
+      </p>
     </div>
   );
 }

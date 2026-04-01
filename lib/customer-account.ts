@@ -453,6 +453,23 @@ export async function upsertCustomerProfile(userId: string, input: { nome: strin
   return data;
 }
 
+export async function touchCustomerActivity(userId: string) {
+  const db = createRequiredServerClient() as any;
+  const timestamp = new Date().toISOString();
+  const { data, error } = await db
+    .from('customer_profiles')
+    .update({
+      last_activity: timestamp,
+      updated_at: timestamp,
+    })
+    .eq('user_id', userId)
+    .select('id,user_id,last_activity')
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
+}
+
 export async function upsertPrimaryAddress(userId: string, input: AddressInput) {
   const db = createRequiredServerClient() as any;
   const payloadVariants = buildAddressPayloadVariants(input);

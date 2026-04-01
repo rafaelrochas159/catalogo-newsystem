@@ -96,6 +96,9 @@ export type AdminCustomerListItem = {
   lastOrderAt: string | null;
   isLegacyOnly: boolean;
   deletionPolicy: AdminCustomerDeletionPolicy;
+  presenceStatus: 'online' | 'recent' | 'offline';
+  presenceLabel: string;
+  presenceSortOrder: number;
 };
 
 export type AdminCustomerDetail = AdminCustomerListItem & {
@@ -103,6 +106,59 @@ export type AdminCustomerDetail = AdminCustomerListItem & {
   orders: AdminCustomerOrder[];
   payments: AdminCustomerPayment[];
 };
+
+function getMinutesAgoLabel(value?: string | null) {
+  if (!value) return 'Offline';
+  const diffMs = Date.now() - getDateValue(value);
+  if (diffMs <= 0) return 'Online agora';
+
+  const minutes = Math.max(1, Math.floor(diffMs / (60 * 1000)));
+  if (minutes < 60) {
+    return `Ativo ha ${minutes} min`;
+  }
+
+  const hours = Math.max(1, Math.floor(minutes / 60));
+  if (hours < 24) {
+    return `Ativo ha ${hours} h`;
+  }
+
+  const days = Math.max(1, Math.floor(hours / 24));
+  return `Ativo ha ${days} d`;
+}
+
+export function getCustomerPresence(lastActivity?: string | null) {
+  const timestamp = getDateValue(lastActivity);
+  if (!timestamp) {
+    return {
+      status: 'offline' as const,
+      label: 'Offline',
+      sortOrder: 2,
+    };
+  }
+
+  const diffMs = Date.now() - timestamp;
+  if (diffMs <= 60 * 1000) {
+    return {
+      status: 'online' as const,
+      label: 'Online agora',
+      sortOrder: 0,
+    };
+  }
+
+  if (diffMs <= 5 * 60 * 1000) {
+    return {
+      status: 'recent' as const,
+      label: getMinutesAgoLabel(lastActivity),
+      sortOrder: 1,
+    };
+  }
+
+  return {
+    status: 'offline' as const,
+    label: getMinutesAgoLabel(lastActivity),
+    sortOrder: 2,
+  };
+}
 
 export type AdminCustomerListResult = {
   customers: AdminCustomerListItem[];
@@ -204,6 +260,8 @@ function buildDeletionPolicy(args: {
   status?: string | null;
 }) {
   const recentlyActive = isRecentActivity(args.lastActivity);
+  const isInactive = String(args.status || '').trim().toLowerCase() === 'inativo';
+
   if (args.hasOrders || args.hasPayments) {
     return {
       canDeactivate: true,
@@ -215,26 +273,26 @@ function buildDeletionPolicy(args: {
     } satisfies AdminCustomerDeletionPolicy;
   }
 
-  if (recentlyActive) {
+  if (recentlyActive && !isInactive) {
     return {
       canDeactivate: true,
       canDeletePermanently: false,
       isRecentlyActive: true,
       hasOrders: false,
       hasPayments: false,
-      reason: 'Cliente com atividade recente deve ser apenas inativado para evitar impacto em conta ativa.',
+      reason: 'Cliente ativo com atividade recente deve ser inativado antes da exclusao permanente.',
     } satisfies AdminCustomerDeletionPolicy;
   }
 
   return {
     canDeactivate: true,
     canDeletePermanently: true,
-    isRecentlyActive: false,
+    isRecentlyActive: recentlyActive,
     hasOrders: false,
     hasPayments: false,
-    reason: args.status === 'inativo'
-      ? 'Cliente sem historico pode ser excluido permanentemente.'
-      : 'Cliente sem historico pode ser inativado ou excluido permanentemente com seguranca.',
+    reason: isInactive
+      ? 'Cliente inativo e sem historico comercial pode ser excluido permanentemente.'
+      : 'Cliente sem historico comercial pode ser excluido permanentemente com seguranca.',
   } satisfies AdminCustomerDeletionPolicy;
 }
 
@@ -402,6 +460,7 @@ export async function listAdminCustomers(params?: { query?: string; status?: str
       .sort((a, b) => getDateValue(b) - getDateValue(a))[0] || null;
 
     const lastActivity = customer.profile?.last_activity || lastOrderAt || customer.profile?.updated_at || customer.legacy?.updated_at || null;
+    const presence = getCustomerPresence(lastActivity);
     const totalSpent = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
     const hasPayments = orders.some((order) => Boolean(order.status_pagamento || order.paid_at));
 
@@ -421,6 +480,9 @@ export async function listAdminCustomers(params?: { query?: string; status?: str
       totalSpent,
       lastOrderAt,
       isLegacyOnly: !customer.profile,
+      presenceStatus: presence.status,
+      presenceLabel: presence.label,
+      presenceSortOrder: presence.sortOrder,
       deletionPolicy: buildDeletionPolicy({
         hasOrders: orders.length > 0,
         hasPayments,
@@ -454,6 +516,9 @@ export async function listAdminCustomers(params?: { query?: string; status?: str
   }
 
   rows.sort((a, b) => {
+    const presenceDiff = a.presenceSortOrder - b.presenceSortOrder;
+    if (presenceDiff !== 0) return presenceDiff;
+
     const activityDiff = getDateValue(b.lastActivity || b.createdAt) - getDateValue(a.lastActivity || a.createdAt);
     if (activityDiff !== 0) return activityDiff;
     return getDateValue(b.createdAt) - getDateValue(a.createdAt);
@@ -517,6 +582,7 @@ export async function getAdminCustomerDetail(customerId: string) {
     .filter(Boolean)
     .sort((a, b) => getDateValue(b) - getDateValue(a))[0] || null;
   const lastActivity = (account.profile as any)?.last_activity || profile?.last_activity || lastOrderAt || profile?.updated_at || legacyCustomer?.updated_at || null;
+  const presence = getCustomerPresence(lastActivity);
   const hasPayments = (payments || []).length > 0;
 
   return {
@@ -536,6 +602,9 @@ export async function getAdminCustomerDetail(customerId: string) {
       totalSpent: orders.reduce((sum, order) => sum + Number(order.total || 0), 0),
       lastOrderAt,
       isLegacyOnly: !(account.profile || profile),
+      presenceStatus: presence.status,
+      presenceLabel: presence.label,
+      presenceSortOrder: presence.sortOrder,
       addresses: sortAddresses(
         ((account.addresses || []) as AdminCustomerAddress[])
           .map((address) => normalizeAddress(address, resolvedUserId))

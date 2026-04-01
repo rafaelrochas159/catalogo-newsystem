@@ -24,6 +24,12 @@ function statusVariant(status: string) {
   return 'default';
 }
 
+function presenceVariant(status: 'online' | 'recent' | 'offline') {
+  if (status === 'online') return 'success';
+  if (status === 'recent') return 'warning';
+  return 'outline';
+}
+
 export default async function AdminClientesPage({
   searchParams,
 }: {
@@ -121,6 +127,7 @@ export default async function AdminClientesPage({
                   <TableHead>Endereco</TableHead>
                   <TableHead>Pedidos</TableHead>
                   <TableHead>Total comprado</TableHead>
+                  <TableHead>Presenca</TableHead>
                   <TableHead>Ultima atividade</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Acao</TableHead>
@@ -156,6 +163,11 @@ export default async function AdminClientesPage({
                     </TableCell>
                     <TableCell>{customer.orderCount}</TableCell>
                     <TableCell className="font-medium">{formatPrice(customer.totalSpent)}</TableCell>
+                    <TableCell>
+                      <Badge variant={presenceVariant(customer.presenceStatus) as any}>
+                        {customer.presenceLabel}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{formatDate(customer.lastActivity)}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(customer.status) as any}>{customer.status || 'ativo'}</Badge>

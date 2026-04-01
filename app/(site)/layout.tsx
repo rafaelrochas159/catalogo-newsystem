@@ -3,6 +3,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton';
 import { FunnelTracker } from '@/components/tracking/FunnelTracker';
+import { PresenceHeartbeat } from '@/components/tracking/PresenceHeartbeat';
 import { Toaster } from 'react-hot-toast';
 
 export const dynamic = 'force-dynamic';
@@ -17,6 +18,9 @@ export default function SiteLayout({
     <div className="min-h-screen flex flex-col">
       <Suspense fallback={null}>
         <FunnelTracker />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PresenceHeartbeat />
       </Suspense>
       <Header />
       <main className="flex-1">
