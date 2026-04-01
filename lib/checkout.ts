@@ -20,6 +20,20 @@ type CheckoutAccountLike = {
   addresses?: Array<Record<string, unknown>> | null;
 };
 
+export function normalizeCepForCheckout(value: unknown) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 8);
+
+  if (!digits) {
+    return '';
+  }
+
+  if (digits.length <= 5) {
+    return digits;
+  }
+
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 function pickFirstString(...values: unknown[]) {
   for (const value of values) {
     if (typeof value === 'string' && value.trim()) {
@@ -32,7 +46,7 @@ function pickFirstString(...values: unknown[]) {
 
 function normalizeAddressRecord(address?: Record<string, unknown> | null): CheckoutAddressForm {
   return {
-    cep: pickFirstString(address?.cep),
+    cep: normalizeCepForCheckout(address?.cep),
     rua: pickFirstString(address?.rua, address?.street),
     numero: pickFirstString(address?.numero, address?.number),
     bairro: pickFirstString(address?.bairro, address?.neighborhood),
@@ -183,7 +197,7 @@ export function mergeCheckoutAddressForm(
   force = false,
 ) {
   return {
-    cep: mergeString(currentAddress.cep, nextAddress.cep, force),
+    cep: normalizeCepForCheckout(mergeString(currentAddress.cep, nextAddress.cep, force)),
     rua: mergeString(currentAddress.rua, nextAddress.rua, force),
     numero: mergeString(currentAddress.numero, nextAddress.numero, force),
     bairro: mergeString(currentAddress.bairro, nextAddress.bairro, force),
@@ -208,7 +222,7 @@ export function applyCheckoutPrefillToPayload<T extends {
     },
     endereco: {
       ...(payload.endereco || {}),
-      cep: pickFirstString(payload.endereco?.cep, prefill.address.cep),
+      cep: normalizeCepForCheckout(pickFirstString(payload.endereco?.cep, prefill.address.cep)),
       rua: pickFirstString(payload.endereco?.rua, prefill.address.rua),
       numero: pickFirstString(payload.endereco?.numero, prefill.address.numero),
       complemento: pickFirstString(payload.endereco?.complemento, prefill.address.complemento) || '',

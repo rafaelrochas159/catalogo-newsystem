@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sheet,
@@ -192,6 +192,40 @@ export function CartDrawer() {
     hasUserEditedAddressRef.current = true;
   };
 
+  const applyCheckoutPrefillState = useCallback((args: {
+    accountData?: Record<string, unknown> | null;
+    sessionUser?: any;
+  }) => {
+    const sessionUserId = args.sessionUser?.id || null;
+    if (!sessionUserId || !args.accountData) {
+      return;
+    }
+
+    if (
+      lastLoadedAccountUserIdRef.current &&
+      lastLoadedAccountUserIdRef.current !== sessionUserId
+    ) {
+      return;
+    }
+
+    const prefill = buildCheckoutPrefill({
+      account: args.accountData as any,
+      sessionUser: args.sessionUser || null,
+    });
+    const shouldForce = lastHydratedUserIdRef.current !== sessionUserId;
+    const allowAddressPrefill = shouldForce || !hasUserEditedAddressRef.current;
+    const cepDigits = prefill.address.cep.replace(/\D/g, '');
+
+    if (allowAddressPrefill && cepDigits.length === 8) {
+      setCepError('');
+      setLastFetchedCep('');
+    }
+
+    setCustomer((prev) => mergeCheckoutCustomerForm(prev, prefill.customer, shouldForce));
+    setAddress((prev) => mergeCheckoutAddressForm(prev, prefill.address, allowAddressPrefill));
+    lastHydratedUserIdRef.current = sessionUserId;
+  }, []);
+
   const loadCheckoutAccountData = async ({
     showLoading = false,
   }: {
@@ -222,9 +256,17 @@ export function CartDrawer() {
           cache: 'no-store',
         });
         const accountJson = await readJsonSafely<{ data?: Record<string, unknown> }>(accountResponse);
+        const nextAccountData = accountResponse.ok ? (accountJson?.data as any) : null;
 
         lastLoadedAccountUserIdRef.current = session.user.id;
-        setCheckoutAccountData(accountResponse.ok ? (accountJson?.data as any) : null);
+        setCheckoutAccountData(nextAccountData);
+
+        if (nextAccountData) {
+          applyCheckoutPrefillState({
+            accountData: nextAccountData,
+            sessionUser: session.user,
+          });
+        }
 
         return true;
       } catch (error) {
@@ -272,34 +314,14 @@ export function CartDrawer() {
       listener?.subscription?.unsubscribe?.();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [applyCheckoutPrefillState]);
 
   useEffect(() => {
-    const sessionUserId = clientSession?.user?.id || null;
-    if (!sessionUserId || !checkoutAccountData) {
-      return;
-    }
-
-    if (lastLoadedAccountUserIdRef.current !== sessionUserId) {
-      return;
-    }
-
-    const prefill = buildCheckoutPrefill({
-      account: checkoutAccountData as any,
+    applyCheckoutPrefillState({
+      accountData: checkoutAccountData,
       sessionUser: clientSession?.user || null,
     });
-    const shouldForce = lastHydratedUserIdRef.current !== sessionUserId;
-
-    setCustomer((prev) => mergeCheckoutCustomerForm(prev, prefill.customer, shouldForce));
-    setAddress((prev) =>
-      mergeCheckoutAddressForm(
-        prev,
-        prefill.address,
-        shouldForce || !hasUserEditedAddressRef.current,
-      )
-    );
-    lastHydratedUserIdRef.current = sessionUserId;
-  }, [checkoutAccountData, clientSession]);
+  }, [applyCheckoutPrefillState, checkoutAccountData, clientSession]);
 
   useEffect(() => {
     setIsMounted(true);

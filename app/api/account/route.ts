@@ -2,6 +2,9 @@
 import { getAuthenticatedUserFromRequest } from '@/lib/auth/server';
 import { ensureCustomerProfile, getCustomerAccount } from '@/lib/customer-account';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function debugAccount(message: string, details: Record<string, unknown>) {
   if (process.env.NODE_ENV === 'production') {
     return;

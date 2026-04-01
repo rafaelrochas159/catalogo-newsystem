@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedUserFromRequest } from '@/lib/auth/server';
 import { createRequiredServerClient, createServerClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * API Route: GET /api/recommendations
  *
