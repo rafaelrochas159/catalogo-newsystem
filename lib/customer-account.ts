@@ -271,23 +271,48 @@ export async function upsertCustomerProfile(userId: string, input: { nome: strin
 
 export async function upsertPrimaryAddress(userId: string, input: AddressInput) {
   const db = createRequiredServerClient() as any;
+  const normalizedAddress = {
+    cep: input.cep,
+    rua: input.rua,
+    numero: input.numero,
+    complemento: input.complemento || null,
+    bairro: input.bairro,
+    cidade: input.cidade,
+    estado: input.estado,
+    principal: true,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data: existingAddress } = await db
+    .from('customer_addresses')
+    .select('*')
+    .eq('user_id', userId)
+    .order('principal', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   await db.from('customer_addresses').update({ principal: false }).eq('user_id', userId);
 
-  const { data, error } = await db
-    .from('customer_addresses')
-    .insert({
-      user_id: userId,
-      cep: input.cep,
-      rua: input.rua,
-      numero: input.numero,
-      complemento: input.complemento || null,
-      bairro: input.bairro,
-      cidade: input.cidade,
-      estado: input.estado,
-      principal: true,
-    })
-    .select('*')
-    .single();
+  const addressMutation = existingAddress?.id
+    ? db
+        .from('customer_addresses')
+        .update(normalizedAddress)
+        .eq('id', existingAddress.id)
+        .eq('user_id', userId)
+        .select('*')
+        .single()
+    : db
+        .from('customer_addresses')
+        .insert({
+          id: crypto.randomUUID(),
+          user_id: userId,
+          ...normalizedAddress,
+        })
+        .select('*')
+        .single();
+
+  const { data, error } = await addressMutation;
 
   if (error) throw error;
 

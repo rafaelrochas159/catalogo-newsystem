@@ -47,8 +47,14 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ data });
-  } catch (error) {
+  } catch (error: any) {
     console.error('POST /api/account/address failed', error);
-    return NextResponse.json({ error: 'Nao foi possivel salvar seu endereco.' }, { status: 500 });
+
+    const message =
+      process.env.NODE_ENV !== 'production'
+        ? error?.message || 'Nao foi possivel salvar seu endereco.'
+        : 'Nao foi possivel salvar seu endereco.';
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
