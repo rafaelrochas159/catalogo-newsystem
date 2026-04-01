@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
     debugProfile('profile saved', {
       userId: user.id,
-      profileId: data?.id || null,
+      profileId: data?.user_id || data?.id || null,
     });
 
     return NextResponse.json({ data });

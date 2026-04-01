@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
     debugRegistration('user persisted', {
       userId: authData.user.id,
-      profileSaved: Boolean(profile?.id),
+      profileSaved: Boolean(profile?.user_id || profile?.id),
     });
 
     return NextResponse.json({

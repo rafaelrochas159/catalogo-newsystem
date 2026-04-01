@@ -112,11 +112,11 @@ export async function ensureCustomerProfile(user: { id: string; email?: string |
     const { data: existing } = await db
       .from('customer_profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     const payload = {
-      id: user.id,
+      user_id: user.id,
       email: existing?.email || email,
       nome:
         existing?.nome ||
@@ -149,7 +149,7 @@ export async function ensureCustomerProfile(user: { id: string; email?: string |
 
     const { data, error } = await db
       .from('customer_profiles')
-      .upsert(payload, { onConflict: 'id' })
+      .upsert(payload, { onConflict: 'user_id' })
       .select('*')
       .single();
 
@@ -161,7 +161,7 @@ export async function ensureCustomerProfile(user: { id: string; email?: string |
     }
 
     return {
-      id: user.id,
+      user_id: user.id,
       email,
       nome: user.user_metadata?.name || user.user_metadata?.full_name || null,
       telefone: user.user_metadata?.phone || null,
@@ -186,7 +186,7 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
   };
 
   const [profile, addresses, ordersByUser, ordersByEmail, favorites, legacyCustomer] = await Promise.all([
-    safeQuery(() => db.from('customer_profiles').select('*').eq('id', userId).maybeSingle(), null),
+    safeQuery(() => db.from('customer_profiles').select('*').eq('user_id', userId).maybeSingle(), null),
     safeQuery(() => db.from('customer_addresses').select('*').eq('user_id', userId).order('principal', { ascending: false }), []),
     safeQuery(() => db.from('pedidos').select('*').eq('user_id', userId).order('created_at', { ascending: false }), []),
     normalizedEmail
@@ -218,7 +218,7 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
       }
     : (legacyCustomer
       ? {
-          id: userId,
+          user_id: userId,
           email: normalizedEmail || legacyCustomer.email || null,
           nome: legacyCustomer.nome || null,
           telefone: legacyCustomer.telefone || null,
@@ -241,13 +241,13 @@ export async function upsertCustomerProfile(userId: string, input: { nome: strin
   const { data, error } = await db
     .from('customer_profiles')
     .upsert({
-      id: userId,
+      user_id: userId,
       nome: input.nome,
       telefone: input.telefone,
       email: normalizedEmail,
       cpf_cnpj: input.cpf_cnpj || null,
       last_activity: new Date().toISOString(),
-    }, { onConflict: 'id' })
+    }, { onConflict: 'user_id' })
     .select('*')
     .single();
 
@@ -288,7 +288,7 @@ export async function upsertPrimaryAddress(userId: string, input: AddressInput) 
   const { data: profile } = await db
     .from('customer_profiles')
     .select('nome, email, telefone, cpf_cnpj')
-    .eq('id', userId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   await syncLegacyCustomerRecord(db, userId, {

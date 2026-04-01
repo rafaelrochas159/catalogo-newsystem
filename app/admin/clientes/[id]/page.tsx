@@ -8,7 +8,7 @@ export const revalidate = 0;
 export default async function AdminClienteDetalhePage({ params }: { params: { id: string } }) {
   await requireAdminPage();
   const db = createRequiredServerClient() as any;
-  const { data } = await db.from('customer_profiles').select('*, customer_addresses(*), pedidos(*)').eq('id', params.id).maybeSingle();
+  const { data } = await db.from('customer_profiles').select('*, customer_addresses(*), pedidos(*)').eq('user_id', params.id).maybeSingle();
   if (!data) return notFound();
 
   return (
