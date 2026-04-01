@@ -24,6 +24,7 @@ import { ProductGrid } from '@/components/product/ProductGrid';
 import { ProductBadges } from '@/components/product/ProductBadges';
 import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
+import { openCartDrawer } from '@/lib/cart-ui';
 import { Produto } from '@/types';
 import { formatPrice, getBoxSavings, getBoxUnitPrice, getWhatsAppLink } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
@@ -111,7 +112,10 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
     const result = addItem(product, quantity, catalogType);
 
     if (result.success) {
-      toast.success('Produto adicionado ao carrinho!');
+      openCartDrawer({
+        productName: product.nome,
+        source: 'product-page',
+      });
       setTimeout(() => setIsAdding(false), 1000);
     } else {
       toast.error(result.message || 'Erro ao adicionar ao carrinho');

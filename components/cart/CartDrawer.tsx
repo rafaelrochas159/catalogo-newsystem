@@ -22,6 +22,7 @@ import { useCart } from '@/hooks/useCart';
 import { formatPrice, isValidEmail, maskPhone } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
+import { CART_DRAWER_OPEN_EVENT } from '@/lib/cart-ui';
 import {
   buildCheckoutPrefill,
   mergeCheckoutAddressForm,
@@ -116,6 +117,11 @@ interface AppliedCouponState {
   label: string;
 }
 
+interface CartOpenEventDetail {
+  productName?: string | null;
+  source?: 'product-card' | 'product-page' | 'quick-view' | 'unknown';
+}
+
 function playApprovedTone() {
   if (typeof window === 'undefined') return;
 
@@ -179,6 +185,7 @@ export function CartDrawer() {
   const [postPurchaseSuggestions, setPostPurchaseSuggestions] = useState<any[]>([]);
   const [checkoutAccountData, setCheckoutAccountData] = useState<Record<string, unknown> | null>(null);
   const [isHydratingCheckout, setIsHydratingCheckout] = useState(false);
+  const [recentlyAddedProductName, setRecentlyAddedProductName] = useState<string | null>(null);
   // SessÃ£o do cliente. Se null, o usuÃ¡rio nÃ£o estÃ¡ autenticado. Ã‰ usada
   // para impedir o checkout de usuÃ¡rios nÃ£o logados.
   const [clientSession, setClientSession] = useState<any>(null);
@@ -290,6 +297,23 @@ export function CartDrawer() {
   };
 
   useEffect(() => {
+    const handleCartOpen = (event: Event) => {
+      const detail = (event as CustomEvent<CartOpenEventDetail>).detail;
+      setIsOpen(true);
+      setPixPayment(null);
+      setPixApproved(false);
+      setShowCheckoutForm(false);
+      setRecentlyAddedProductName(detail?.productName?.trim() || 'Produto');
+    };
+
+    window.addEventListener(CART_DRAWER_OPEN_EVENT, handleCartOpen as EventListener);
+
+    return () => {
+      window.removeEventListener(CART_DRAWER_OPEN_EVENT, handleCartOpen as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getSession().then((res: any) => {
       const { data }: any = res;
       setClientSession(data?.session ?? null);
@@ -333,6 +357,18 @@ export function CartDrawer() {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!recentlyAddedProductName || !isOpen || showCheckoutForm || pixPayment) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setRecentlyAddedProductName(null);
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [isOpen, pixPayment, recentlyAddedProductName, showCheckoutForm]);
+
   const items = useCart((state) => state.items);
   const catalogType = useCart((state) => state.catalogType);
   const clearCart = useCart((state) => state.clearCart);
@@ -352,6 +388,30 @@ export function CartDrawer() {
   const couponDiscount = appliedCoupon?.discountValue || 0;
   const finalTotal = Math.max(total - couponDiscount, 0);
   const checkoutProgress = pixApproved ? 100 : pixPayment ? 80 : showCheckoutForm ? 45 : itemCount > 0 ? 20 : 0;
+
+  const openCheckoutStep = useCallback(async () => {
+    if (!clientSession) {
+      toast.error('Para finalizar o pedido, faca login ou cadastro.');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      return;
+    }
+
+    hasUserEditedAddressRef.current = false;
+    await loadCheckoutAccountData({ showLoading: true, forcePrefill: true });
+    await trackClientEvent({
+      eventName: 'initiate_checkout',
+      page: '/checkout',
+      metadata: {
+        phase: 'form_opened',
+        total: finalTotal,
+        itemCount,
+      },
+      email: customer.email || clientSession.user?.email || null,
+    });
+    setShowCheckoutForm(true);
+  }, [clientSession, customer.email, finalTotal, itemCount]);
 
   const orderItems = useMemo(
     () =>
@@ -1137,6 +1197,22 @@ export function CartDrawer() {
                 </div>
               ) : !showCheckoutForm ? (
                 <>
+                  <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-emerald-500 p-2 text-black">
+                        <Check className="h-4 w-4" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-foreground">
+                          {recentlyAddedProductName ? `${recentlyAddedProductName} foi adicionado ao carrinho.` : 'Seu carrinho esta pronto para o proximo passo.'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Continue navegando pelo catalogo ou siga direto para o checkout sem perder os itens ja adicionados.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <Badge variant={catalogType === 'UNITARIO' ? 'default' : 'secondary'}>
                       {catalogType === 'UNITARIO' ? 'CatÃ¡logo UnitÃ¡rio' : 'Caixa Fechada'}
@@ -1395,43 +1471,43 @@ export function CartDrawer() {
         {!pixPayment && (
           <SheetFooter className="sticky bottom-0 z-10 border-t shrink-0 bg-background/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
             {!showCheckoutForm ? (
-              <div className="w-full flex gap-2">
-                <Button variant="outline" onClick={async () => {
-                  clearCart();
-                  await clearAbandonedCart('recovered');
-                }} className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
+              <div className="w-full space-y-3">
+                <div className="rounded-lg border border-neon-blue/15 bg-neon-blue/5 px-3 py-2 text-sm">
+                  <p className="font-medium text-foreground">Escolha o proximo passo</p>
+                  <p className="mt-1 text-muted-foreground">
+                    Continue comprando para voltar ao catalogo ou siga agora para finalizar seu pedido.
+                  </p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full"
+                  >
+                    Continuar comprando
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={openCheckoutStep}
+                    disabled={!canCheckout || isHydratingCheckout}
+                    className="w-full bg-neon-blue text-black hover:bg-neon-blue/90"
+                  >
+                    {isHydratingCheckout ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+                    {isHydratingCheckout ? 'Carregando seus dados' : 'Finalizar compra'}
+                  </Button>
+                </div>
                 <Button
+                  type="button"
+                  variant="ghost"
                   onClick={async () => {
-                    // Requer autenticaÃ§Ã£o para prosseguir com o checkout. Se o
-                    // usuÃ¡rio nÃ£o estiver logado, redireciona para a pÃ¡gina de login
-                    // e mostra um aviso. Caso contrÃ¡rio, exibe o formulÃ¡rio de
-                    // checkout.
-                    if (!clientSession) {
-                      toast.error('Para finalizar o pedido, faÃ§a login ou cadastro.');
-                      if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
-                      }
-                      return;
-                    }
-                    hasUserEditedAddressRef.current = false;
-                    await loadCheckoutAccountData({ showLoading: true, forcePrefill: true });
-                    await trackClientEvent({
-                      eventName: 'initiate_checkout',
-                      page: '/checkout',
-                      metadata: {
-                        phase: 'form_opened',
-                        total: finalTotal,
-                        itemCount,
-                      },
-                      email: customer.email || clientSession.user?.email || null,
-                    });
-                    setShowCheckoutForm(true);
+                    clearCart();
+                    await clearAbandonedCart('recovered');
                   }}
-                  disabled={!canCheckout || isHydratingCheckout}
-                  className="flex-1 bg-neon-blue text-black hover:bg-neon-blue/90"
+                  className="w-full text-muted-foreground hover:text-foreground"
                 >
-                  {isHydratingCheckout ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
-                  {isHydratingCheckout ? 'Carregando seus dados' : 'Continuar checkout'}
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Limpar carrinho
                 </Button>
               </div>
             ) : (

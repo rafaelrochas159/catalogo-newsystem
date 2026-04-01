@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Produto } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
+import { openCartDrawer } from '@/lib/cart-ui';
 import { formatPrice, getBoxSavings, getBoxUnitPrice } from '@/lib/utils';
 import { PRODUCT_BADGES } from '@/lib/constants';
 import { QuickView } from './QuickView';
@@ -45,6 +46,10 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
     const result = addItem(product, 1, catalogType);
 
     if (result.success) {
+      openCartDrawer({
+        productName: product.nome,
+        source: 'product-card',
+      });
       setTimeout(() => setIsAdding(false), 1000);
       return;
     }

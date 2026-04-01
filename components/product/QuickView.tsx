@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Produto } from '@/types';
 import { trackClientEvent } from '@/lib/client-auth';
+import { openCartDrawer } from '@/lib/cart-ui';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
 import { ShoppingCart, Minus, Plus, Check } from 'lucide-react';
@@ -58,6 +59,10 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
         setIsAdding(false);
         setQuantity(1);
         onClose();
+        openCartDrawer({
+          productName: product.nome,
+          source: 'quick-view',
+        });
       }, 500);
     } else {
       setIsAdding(false);
