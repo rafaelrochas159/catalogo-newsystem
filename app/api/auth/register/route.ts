@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { createRequiredServerClient } from '@/lib/supabase/client';
-import { upsertCustomerProfile } from '@/lib/customer-account';
+import { upsertCustomerProfile, upsertPrimaryAddress } from '@/lib/customer-account';
 import {
+  hasAddressPayload,
   normalizeCpfCnpj,
   normalizeEmail,
   normalizeName,
   normalizePhone,
+  validateAddressPayload,
   validateRegistrationPayload,
 } from '@/lib/customer-validation';
 
@@ -15,6 +17,13 @@ type RegisterBody = {
   password?: string;
   telefone?: string;
   cpf_cnpj?: string;
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
 };
 
 function debugRegistration(message: string, details: Record<string, unknown>) {
@@ -30,7 +39,9 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as RegisterBody;
-    const validationError = validateRegistrationPayload(body);
+    const validationError =
+      validateRegistrationPayload(body) ||
+      (hasAddressPayload(body) ? validateAddressPayload(body) : null);
 
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
@@ -41,12 +52,24 @@ export async function POST(request: Request) {
     const telefone = normalizePhone(body.telefone);
     const cpfCnpj = normalizeCpfCnpj(body.cpf_cnpj);
     const password = String(body.password || '');
+    const addressPayload = hasAddressPayload(body)
+      ? {
+          cep: String(body.cep || '').trim(),
+          rua: String(body.rua || '').trim(),
+          numero: String(body.numero || '').trim(),
+          complemento: String(body.complemento || '').trim(),
+          bairro: String(body.bairro || '').trim(),
+          cidade: String(body.cidade || '').trim(),
+          estado: String(body.estado || '').trim().toUpperCase(),
+        }
+      : null;
     const db = createRequiredServerClient() as any;
 
     debugRegistration('validated payload', {
       email,
       hasPhone: Boolean(telefone),
       cpfLength: cpfCnpj.length,
+      hasAddress: Boolean(addressPayload),
     });
 
     const { data: authData, error: authError } = await db.auth.admin.createUser({
@@ -79,9 +102,14 @@ export async function POST(request: Request) {
       cpf_cnpj: cpfCnpj,
     });
 
+    const address = addressPayload
+      ? await upsertPrimaryAddress(authData.user.id, addressPayload)
+      : null;
+
     debugRegistration('user persisted', {
       userId: authData.user.id,
       profileSaved: Boolean(profile?.user_id || profile?.id),
+      addressSaved: Boolean(address?.id),
     });
 
     return NextResponse.json({

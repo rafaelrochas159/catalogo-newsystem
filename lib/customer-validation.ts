@@ -53,6 +53,26 @@ export function validateRegistrationPayload(input: {
   return null;
 }
 
+export function hasAddressPayload(input: {
+  cep?: string | null;
+  rua?: string | null;
+  numero?: string | null;
+  complemento?: string | null;
+  bairro?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
+}) {
+  return Boolean(
+    String(input.cep || '').trim() ||
+    String(input.rua || '').trim() ||
+    String(input.numero || '').trim() ||
+    String(input.complemento || '').trim() ||
+    String(input.bairro || '').trim() ||
+    String(input.cidade || '').trim() ||
+    String(input.estado || '').trim()
+  );
+}
+
 export function validateProfilePayload(input: {
   nome?: string | null;
   telefone?: string | null;
