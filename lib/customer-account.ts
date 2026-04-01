@@ -116,6 +116,7 @@ export async function ensureCustomerProfile(user: { id: string; email?: string |
       .maybeSingle();
 
     const payload = {
+      id: existing?.id || user.id,
       user_id: user.id,
       email: existing?.email || email,
       nome:
@@ -161,6 +162,7 @@ export async function ensureCustomerProfile(user: { id: string; email?: string |
     }
 
     return {
+      id: user.id,
       user_id: user.id,
       email,
       nome: user.user_metadata?.name || user.user_metadata?.full_name || null,
@@ -209,8 +211,10 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
 
   const legacyAddress = normalizeLegacyAddress(legacyCustomer?.endereco);
   const fallbackProfile = (profile as any)
-    ? {
+      ? {
         ...(profile as any),
+        id: (profile as any).id || userId,
+        user_id: (profile as any).user_id || userId,
         email: (profile as any).email || normalizedEmail || legacyCustomer?.email || null,
         nome: (profile as any).nome || legacyCustomer?.nome || null,
         telefone: (profile as any).telefone || legacyCustomer?.telefone || null,
@@ -218,6 +222,7 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
       }
     : (legacyCustomer
       ? {
+          id: userId,
           user_id: userId,
           email: normalizedEmail || legacyCustomer.email || null,
           nome: legacyCustomer.nome || null,
@@ -241,6 +246,7 @@ export async function upsertCustomerProfile(userId: string, input: { nome: strin
   const { data, error } = await db
     .from('customer_profiles')
     .upsert({
+      id: userId,
       user_id: userId,
       nome: input.nome,
       telefone: input.telefone,
