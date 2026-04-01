@@ -26,6 +26,20 @@ type RegisterBody = {
   estado?: string;
 };
 
+function isEmailAlreadyRegisteredError(error: any) {
+  const code = String(error?.code || '').trim().toLowerCase();
+  const message = String(error?.message || '').trim().toLowerCase();
+
+  return (
+    code === 'email_exists' ||
+    code === 'user_already_exists' ||
+    message.includes('already been registered') ||
+    message.includes('user already registered') ||
+    message.includes('already registered') ||
+    message.includes('already exists')
+  );
+}
+
 function debugRegistration(message: string, details: Record<string, unknown>) {
   if (process.env.NODE_ENV === 'production') {
     return;
@@ -85,10 +99,19 @@ export async function POST(request: Request) {
     });
 
     if (authError || !authData?.user) {
-      const message = String(authError?.message || '');
-      const status = message.toLowerCase().includes('already') ? 409 : 400;
+      const duplicateEmail = isEmailAlreadyRegisteredError(authError);
+      const status = duplicateEmail ? 409 : 400;
+
       return NextResponse.json(
-        { error: authError?.message || 'Nao foi possivel criar sua conta.' },
+        duplicateEmail
+          ? {
+              error: 'Este e-mail ja esta cadastrado. Faca login ou recupere sua senha.',
+              error_code: 'email_already_registered',
+            }
+          : {
+              error: authError?.message || 'Nao foi possivel criar sua conta.',
+              error_code: String(authError?.code || 'register_failed'),
+            },
         { status }
       );
     }

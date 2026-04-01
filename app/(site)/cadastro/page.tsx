@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AlertTriangle, ArrowRight, KeyRound, LogIn } from 'lucide-react';
 import {
   validateAddressPayload,
   validateRegistrationPayload,
@@ -22,6 +23,11 @@ type RegisterAddressForm = {
   bairro: string;
   cidade: string;
   estado: string;
+};
+
+type RegisterErrorState = {
+  message: string;
+  code?: string | null;
 };
 
 function formatCep(value: string) {
@@ -52,6 +58,7 @@ export default function RegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [registerError, setRegisterError] = useState<RegisterErrorState | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }: any) => {
@@ -103,11 +110,13 @@ export default function RegisterPage() {
       validateAddressPayload(address);
 
     if (validationError) {
+      setRegisterError(null);
       toast.error(validationError);
       return;
     }
 
     setLoading(true);
+    setRegisterError(null);
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -131,12 +140,21 @@ export default function RegisterPage() {
         }),
       });
 
-      const json = await readJsonSafely<{ data?: { user_id?: string }; error?: string }>(response);
+      const json = await readJsonSafely<{ data?: { user_id?: string }; error?: string; error_code?: string }>(response);
 
       if (!response.ok) {
-        throw new Error(
-          getResponseErrorMessage(response, json, 'Nao foi possivel concluir o cadastro.')
+        const message = getResponseErrorMessage(
+          response,
+          json,
+          'Nao foi possivel concluir o cadastro.'
         );
+
+        setRegisterError({
+          message,
+          code: json?.error_code || null,
+        });
+
+        throw new Error(message);
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -172,6 +190,38 @@ export default function RegisterPage() {
             Criamos sua conta com dados pessoais e endereco principal para reduzir friccao no checkout e na recompra.
           </p>
         </div>
+
+        {registerError?.code === 'email_already_registered' && (
+          <div className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-amber-500/15 p-2 text-amber-500">
+                <AlertTriangle className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1 space-y-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{registerError.message}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Se esta conta ja e sua, o caminho mais rapido agora e entrar ou redefinir a senha para continuar.
+                  </p>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Button asChild className="bg-neon-blue text-black hover:bg-neon-blue/90">
+                    <Link href="/login">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Entrar
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/esqueci-senha">
+                      <KeyRound className="mr-2 h-4 w-4" />
+                      Recuperar senha
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleRegister} className="space-y-8">
           <section className="space-y-4">
@@ -350,10 +400,14 @@ export default function RegisterPage() {
       </div>
 
       <div className="mt-4 text-sm text-center">
-        <p>
+        <p className="inline-flex flex-wrap items-center justify-center gap-1">
           Ja tem conta?{' '}
           <Link href="/login" className="text-neon-blue hover:underline">
             Entrar
+          </Link>
+          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+          <Link href="/esqueci-senha" className="text-neon-blue hover:underline">
+            Esqueci minha senha
           </Link>
         </p>
       </div>
