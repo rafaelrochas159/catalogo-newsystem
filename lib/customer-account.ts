@@ -32,14 +32,75 @@ function normalizeLegacyAddress(address: any) {
 
   return {
     cep: String(address.cep || ''),
-    rua: String(address.rua || ''),
-    numero: String(address.numero || ''),
-    complemento: address.complemento ? String(address.complemento) : null,
-    bairro: String(address.bairro || ''),
-    cidade: String(address.cidade || ''),
-    estado: String(address.estado || ''),
+    rua: String(address.rua || address.street || ''),
+    numero: String(address.numero || address.number || ''),
+    complemento: address.complemento ? String(address.complemento) : address.complement ? String(address.complement) : null,
+    bairro: String(address.bairro || address.neighborhood || ''),
+    cidade: String(address.cidade || address.city || ''),
+    estado: String(address.estado || address.state || ''),
     principal: true,
   };
+}
+
+function isMissingColumnError(error: any) {
+  const message = String(error?.message || '').toLowerCase();
+  return (
+    message.includes('column') &&
+    (
+      message.includes('does not exist') ||
+      message.includes('schema cache') ||
+      message.includes('could not find')
+    )
+  );
+}
+
+function normalizeStoredAddress(address: any, userId?: string) {
+  if (!address || typeof address !== 'object') {
+    return null;
+  }
+
+  return {
+    ...address,
+    id: address.id || null,
+    user_id: address.user_id || userId || null,
+    cep: String(address.cep || ''),
+    rua: String(address.rua || address.street || ''),
+    numero: String(address.numero || address.number || ''),
+    complemento: address.complemento ? String(address.complemento) : address.complement ? String(address.complement) : null,
+    bairro: String(address.bairro || address.neighborhood || ''),
+    cidade: String(address.cidade || address.city || ''),
+    estado: String(address.estado || address.state || ''),
+    principal: typeof address.principal === 'boolean' ? address.principal : true,
+  };
+}
+
+function buildAddressPayloadVariants(input: AddressInput) {
+  const basePt = {
+    cep: input.cep,
+    rua: input.rua,
+    numero: input.numero,
+    complemento: input.complemento || null,
+    bairro: input.bairro,
+    cidade: input.cidade,
+    estado: input.estado,
+  };
+
+  const baseEn = {
+    cep: input.cep,
+    street: input.rua,
+    number: input.numero,
+    complement: input.complemento || null,
+    neighborhood: input.bairro,
+    city: input.cidade,
+    state: input.estado,
+  };
+
+  return [
+    { ...basePt, principal: true, updated_at: new Date().toISOString() },
+    basePt,
+    { ...baseEn, updated_at: new Date().toISOString() },
+    baseEn,
+  ];
 }
 
 async function getLegacyCustomer(db: any, userId: string) {
@@ -232,9 +293,17 @@ export async function getCustomerAccount(userId: string, email?: string | null) 
         }
       : null);
 
+  const normalizedAddresses = Array.isArray(addresses)
+    ? addresses
+        .map((address: any) => normalizeStoredAddress(address, userId))
+        .filter(Boolean)
+    : [];
+
   return {
     profile: fallbackProfile,
-    addresses: (addresses && addresses.length > 0) ? addresses : (legacyAddress ? [{ id: 'legacy-address', user_id: userId, ...legacyAddress }] : []),
+    addresses: normalizedAddresses.length > 0
+      ? normalizedAddresses
+      : (legacyAddress ? [{ id: 'legacy-address', user_id: userId, ...legacyAddress }] : []),
     orders: mergedOrders,
     favorites: favorites || [],
   };
@@ -271,48 +340,71 @@ export async function upsertCustomerProfile(userId: string, input: { nome: strin
 
 export async function upsertPrimaryAddress(userId: string, input: AddressInput) {
   const db = createRequiredServerClient() as any;
-  const normalizedAddress = {
-    cep: input.cep,
-    rua: input.rua,
-    numero: input.numero,
-    complemento: input.complemento || null,
-    bairro: input.bairro,
-    cidade: input.cidade,
-    estado: input.estado,
-    principal: true,
-    updated_at: new Date().toISOString(),
-  };
+  const payloadVariants = buildAddressPayloadVariants(input);
 
-  const { data: existingAddress } = await db
+  const { data: existingAddresses, error: existingAddressesError } = await db
     .from('customer_addresses')
     .select('*')
     .eq('user_id', userId)
-    .order('principal', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(20);
 
-  await db.from('customer_addresses').update({ principal: false }).eq('user_id', userId);
+  if (existingAddressesError) {
+    throw existingAddressesError;
+  }
 
-  const addressMutation = existingAddress?.id
-    ? db
-        .from('customer_addresses')
-        .update(normalizedAddress)
-        .eq('id', existingAddress.id)
-        .eq('user_id', userId)
-        .select('*')
-        .single()
-    : db
-        .from('customer_addresses')
-        .insert({
-          id: crypto.randomUUID(),
-          user_id: userId,
-          ...normalizedAddress,
-        })
-        .select('*')
-        .single();
+  const existingAddress = Array.isArray(existingAddresses)
+    ? [...existingAddresses]
+        .sort((a: any, b: any) => {
+          const principalDiff = Number(Boolean(b?.principal)) - Number(Boolean(a?.principal));
+          if (principalDiff !== 0) {
+            return principalDiff;
+          }
 
-  const { data, error } = await addressMutation;
+          const createdA = a?.created_at ? new Date(a.created_at).getTime() : 0;
+          const createdB = b?.created_at ? new Date(b.created_at).getTime() : 0;
+          return createdB - createdA;
+        })[0]
+    : null;
+
+  const clearPrimaryResult = await db.from('customer_addresses').update({ principal: false }).eq('user_id', userId);
+  if (clearPrimaryResult.error && !isMissingColumnError(clearPrimaryResult.error)) {
+    throw clearPrimaryResult.error;
+  }
+
+  let data: any = null;
+  let error: any = null;
+
+  for (const payload of payloadVariants) {
+    const addressMutation = existingAddress?.id
+      ? db
+          .from('customer_addresses')
+          .update(payload)
+          .eq('id', existingAddress.id)
+          .eq('user_id', userId)
+          .select('*')
+          .single()
+      : db
+          .from('customer_addresses')
+          .insert({
+            id: crypto.randomUUID(),
+            user_id: userId,
+            ...payload,
+          })
+          .select('*')
+          .single();
+
+    const result = await addressMutation;
+    data = result.data;
+    error = result.error;
+
+    if (!error) {
+      break;
+    }
+
+    if (!isMissingColumnError(error)) {
+      break;
+    }
+  }
 
   if (error) throw error;
 
@@ -338,5 +430,5 @@ export async function upsertPrimaryAddress(userId: string, input: AddressInput) 
     },
   });
 
-  return data;
+  return normalizeStoredAddress(data, userId);
 }

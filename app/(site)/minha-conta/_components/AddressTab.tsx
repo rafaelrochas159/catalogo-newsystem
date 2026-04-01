@@ -13,12 +13,12 @@ import { supabase } from '@/lib/supabase/client';
 function buildAddressForm(address: any) {
   return {
     cep: address?.cep || '',
-    rua: address?.rua || '',
-    numero: address?.numero || '',
-    complemento: address?.complemento || '',
-    bairro: address?.bairro || '',
-    cidade: address?.cidade || '',
-    estado: address?.estado || '',
+    rua: address?.rua || address?.street || '',
+    numero: address?.numero || address?.number || '',
+    complemento: address?.complemento || address?.complement || '',
+    bairro: address?.bairro || address?.neighborhood || '',
+    cidade: address?.cidade || address?.city || '',
+    estado: address?.estado || address?.state || '',
   };
 }
 
@@ -89,13 +89,16 @@ export function AddressTab({ addresses, onSaved }: { addresses: any[]; onSaved: 
         },
         body: JSON.stringify(payload),
       });
-      const json = await readJsonSafely<{ data?: any; error?: string }>(res);
+      const json = await readJsonSafely<{ data?: any; error?: string; details?: unknown; hint?: string | null; code?: string | null }>(res);
 
       if (process.env.NODE_ENV !== 'production') {
         console.info('[address-tab] save response', { status: res.status, ok: res.ok });
       }
 
       if (!res.ok) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('[address-tab] save failed', json);
+        }
         throw new Error(getResponseErrorMessage(res, json, 'Erro ao salvar endereco.'));
       }
 
