@@ -195,6 +195,7 @@ export function CartDrawer() {
   const applyCheckoutPrefillState = useCallback((args: {
     accountData?: Record<string, unknown> | null;
     sessionUser?: any;
+    forcePrefill?: boolean;
   }) => {
     const sessionUserId = args.sessionUser?.id || null;
     if (!sessionUserId || !args.accountData) {
@@ -212,8 +213,9 @@ export function CartDrawer() {
       account: args.accountData as any,
       sessionUser: args.sessionUser || null,
     });
-    const shouldForce = lastHydratedUserIdRef.current !== sessionUserId;
-    const allowAddressPrefill = shouldForce || !hasUserEditedAddressRef.current;
+    const shouldForce = args.forcePrefill || lastHydratedUserIdRef.current !== sessionUserId;
+    const allowAddressPrefill =
+      args.forcePrefill || shouldForce || !hasUserEditedAddressRef.current;
     const cepDigits = prefill.address.cep.replace(/\D/g, '');
 
     if (allowAddressPrefill && cepDigits.length === 8) {
@@ -228,8 +230,10 @@ export function CartDrawer() {
 
   const loadCheckoutAccountData = async ({
     showLoading = false,
+    forcePrefill = false,
   }: {
     showLoading?: boolean;
+    forcePrefill?: boolean;
   } = {}) => {
     if (checkoutHydrationPromiseRef.current) {
       return checkoutHydrationPromiseRef.current;
@@ -265,6 +269,7 @@ export function CartDrawer() {
           applyCheckoutPrefillState({
             accountData: nextAccountData,
             sessionUser: session.user,
+            forcePrefill,
           });
         }
 
@@ -320,6 +325,7 @@ export function CartDrawer() {
     applyCheckoutPrefillState({
       accountData: checkoutAccountData,
       sessionUser: clientSession?.user || null,
+      forcePrefill: false,
     });
   }, [applyCheckoutPrefillState, checkoutAccountData, clientSession]);
 
@@ -1408,7 +1414,7 @@ export function CartDrawer() {
                       return;
                     }
                     hasUserEditedAddressRef.current = false;
-                    await loadCheckoutAccountData({ showLoading: true });
+                    await loadCheckoutAccountData({ showLoading: true, forcePrefill: true });
                     await trackClientEvent({
                       eventName: 'initiate_checkout',
                       page: '/checkout',
