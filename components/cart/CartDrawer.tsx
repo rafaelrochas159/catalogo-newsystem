@@ -177,26 +177,31 @@ export function CartDrawer() {
   const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null);
   const [cartSuggestions, setCartSuggestions] = useState<any[]>([]);
   const [postPurchaseSuggestions, setPostPurchaseSuggestions] = useState<any[]>([]);
+  const [checkoutAccountData, setCheckoutAccountData] = useState<Record<string, unknown> | null>(null);
   const [isHydratingCheckout, setIsHydratingCheckout] = useState(false);
   // SessÃ£o do cliente. Se null, o usuÃ¡rio nÃ£o estÃ¡ autenticado. Ã‰ usada
   // para impedir o checkout de usuÃ¡rios nÃ£o logados.
   const [clientSession, setClientSession] = useState<any>(null);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
   const lastHydratedUserIdRef = useRef<string | null>(null);
+  const lastLoadedAccountUserIdRef = useRef<string | null>(null);
   const checkoutHydrationPromiseRef = useRef<Promise<boolean> | null>(null);
+  const hasUserEditedAddressRef = useRef(false);
 
-  const hydrateCheckoutFromAccount = async ({
-    force = false,
+  const markAddressAsEdited = () => {
+    hasUserEditedAddressRef.current = true;
+  };
+
+  const loadCheckoutAccountData = async ({
     showLoading = false,
   }: {
-    force?: boolean;
     showLoading?: boolean;
   } = {}) => {
     if (checkoutHydrationPromiseRef.current) {
       return checkoutHydrationPromiseRef.current;
     }
 
-    const hydrationPromise = (async () => {
+    const accountPromise = (async () => {
       try {
         if (showLoading) {
           setIsHydratingCheckout(true);
@@ -209,6 +214,7 @@ export function CartDrawer() {
         setClientSession(session ?? null);
 
         if (!session?.access_token || !session.user) {
+          setCheckoutAccountData(null);
           return false;
         }
 
@@ -217,15 +223,8 @@ export function CartDrawer() {
         });
         const accountJson = await readJsonSafely<{ data?: Record<string, unknown> }>(accountResponse);
 
-        const prefill = buildCheckoutPrefill({
-          account: accountResponse.ok ? (accountJson?.data as any) : null,
-          sessionUser: session.user,
-        });
-        const shouldForce = force || lastHydratedUserIdRef.current !== session.user.id;
-
-        setCustomer((prev) => mergeCheckoutCustomerForm(prev, prefill.customer, shouldForce));
-        setAddress((prev) => mergeCheckoutAddressForm(prev, prefill.address, shouldForce));
-        lastHydratedUserIdRef.current = session.user.id;
+        lastLoadedAccountUserIdRef.current = session.user.id;
+        setCheckoutAccountData(accountResponse.ok ? (accountJson?.data as any) : null);
 
         return true;
       } catch (error) {
@@ -239,8 +238,8 @@ export function CartDrawer() {
       }
     })();
 
-    checkoutHydrationPromiseRef.current = hydrationPromise;
-    return hydrationPromise;
+    checkoutHydrationPromiseRef.current = accountPromise;
+    return accountPromise;
   };
 
   useEffect(() => {
@@ -249,7 +248,7 @@ export function CartDrawer() {
       setClientSession(data?.session ?? null);
 
       if (data?.session?.user?.id) {
-        void hydrateCheckoutFromAccount({ force: true });
+        void loadCheckoutAccountData();
       }
     });
 
@@ -257,9 +256,15 @@ export function CartDrawer() {
       setClientSession(session ?? null);
 
       if (session?.user?.id) {
-        void hydrateCheckoutFromAccount({ force: lastHydratedUserIdRef.current !== session.user.id });
+        if (lastHydratedUserIdRef.current !== session.user.id) {
+          hasUserEditedAddressRef.current = false;
+        }
+        void loadCheckoutAccountData();
       } else {
         lastHydratedUserIdRef.current = null;
+        lastLoadedAccountUserIdRef.current = null;
+        hasUserEditedAddressRef.current = false;
+        setCheckoutAccountData(null);
       }
     });
 
@@ -268,6 +273,33 @@ export function CartDrawer() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const sessionUserId = clientSession?.user?.id || null;
+    if (!sessionUserId || !checkoutAccountData) {
+      return;
+    }
+
+    if (lastLoadedAccountUserIdRef.current !== sessionUserId) {
+      return;
+    }
+
+    const prefill = buildCheckoutPrefill({
+      account: checkoutAccountData as any,
+      sessionUser: clientSession?.user || null,
+    });
+    const shouldForce = lastHydratedUserIdRef.current !== sessionUserId;
+
+    setCustomer((prev) => mergeCheckoutCustomerForm(prev, prefill.customer, shouldForce));
+    setAddress((prev) =>
+      mergeCheckoutAddressForm(
+        prev,
+        prefill.address,
+        shouldForce || !hasUserEditedAddressRef.current,
+      )
+    );
+    lastHydratedUserIdRef.current = sessionUserId;
+  }, [checkoutAccountData, clientSession]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -511,6 +543,7 @@ export function CartDrawer() {
     setAppliedCoupon(null);
     setCouponFeedback(null);
     setPostPurchaseSuggestions([]);
+    hasUserEditedAddressRef.current = false;
   };
 
   const clearAbandonedCart = async (status: 'recovered' | 'converted') => {
@@ -1215,6 +1248,7 @@ export function CartDrawer() {
                         onChange={(e) => {
                           let value = e.target.value.replace(/\D/g, '');
                           if (value.length > 5) value = `${value.slice(0, 5)}-${value.slice(5, 8)}`;
+                          markAddressAsEdited();
                           setAddress((prev) => ({ ...prev, cep: value }));
                           if (value.replace(/\D/g, '').length < 8) setLastFetchedCep('');
                         }}
@@ -1227,30 +1261,48 @@ export function CartDrawer() {
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="col-span-2 grid gap-2">
                         <Label>Rua *</Label>
-                        <Input value={address.rua} onChange={(e) => setAddress((prev) => ({ ...prev, rua: e.target.value }))} placeholder="Nome da rua" />
+                        <Input value={address.rua} onChange={(e) => {
+                          markAddressAsEdited();
+                          setAddress((prev) => ({ ...prev, rua: e.target.value }));
+                        }} placeholder="Nome da rua" />
                       </div>
                       <div className="grid gap-2">
                         <Label>NÃºmero *</Label>
-                        <Input ref={numberInputRef} value={address.numero} onChange={(e) => setAddress((prev) => ({ ...prev, numero: e.target.value }))} placeholder="123" inputMode="numeric" />
+                        <Input ref={numberInputRef} value={address.numero} onChange={(e) => {
+                          markAddressAsEdited();
+                          setAddress((prev) => ({ ...prev, numero: e.target.value }));
+                        }} placeholder="123" inputMode="numeric" />
                       </div>
                     </div>
                     <div className="grid gap-2">
                       <Label>Bairro *</Label>
-                      <Input value={address.bairro} onChange={(e) => setAddress((prev) => ({ ...prev, bairro: e.target.value }))} placeholder="Nome do bairro" />
+                      <Input value={address.bairro} onChange={(e) => {
+                        markAddressAsEdited();
+                        setAddress((prev) => ({ ...prev, bairro: e.target.value }));
+                      }} placeholder="Nome do bairro" />
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="col-span-2 grid gap-2">
                         <Label>Cidade *</Label>
-                        <Input value={address.cidade} onChange={(e) => setAddress((prev) => ({ ...prev, cidade: e.target.value }))} placeholder="SÃ£o Paulo" />
+                        <Input value={address.cidade} onChange={(e) => {
+                          markAddressAsEdited();
+                          setAddress((prev) => ({ ...prev, cidade: e.target.value }));
+                        }} placeholder="SÃ£o Paulo" />
                       </div>
                       <div className="grid gap-2">
                         <Label>Estado *</Label>
-                        <Input value={address.estado} onChange={(e) => setAddress((prev) => ({ ...prev, estado: e.target.value.toUpperCase().slice(0, 2) }))} placeholder="SP" maxLength={2} />
+                        <Input value={address.estado} onChange={(e) => {
+                          markAddressAsEdited();
+                          setAddress((prev) => ({ ...prev, estado: e.target.value.toUpperCase().slice(0, 2) }));
+                        }} placeholder="SP" maxLength={2} />
                       </div>
                     </div>
                     <div className="grid gap-2">
                       <Label>Complemento</Label>
-                      <Input value={address.complemento} onChange={(e) => setAddress((prev) => ({ ...prev, complemento: e.target.value }))} placeholder="Apto, bloco, referÃªncia..." />
+                      <Input value={address.complemento} onChange={(e) => {
+                        markAddressAsEdited();
+                        setAddress((prev) => ({ ...prev, complemento: e.target.value }));
+                      }} placeholder="Apto, bloco, referÃªncia..." />
                     </div>
                   </div>
 
@@ -1333,7 +1385,8 @@ export function CartDrawer() {
                       }
                       return;
                     }
-                    await hydrateCheckoutFromAccount({ showLoading: true });
+                    hasUserEditedAddressRef.current = false;
+                    await loadCheckoutAccountData({ showLoading: true });
                     await trackClientEvent({
                       eventName: 'initiate_checkout',
                       page: '/checkout',
