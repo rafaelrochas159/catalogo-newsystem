@@ -103,6 +103,52 @@ function buildAddressPayloadVariants(input: AddressInput) {
   ];
 }
 
+async function getCustomerProfileSnapshot(db: any, userId: string) {
+  const { data } = await db
+    .from('customer_profiles')
+    .select('nome, email, telefone, cpf_cnpj')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  return data || null;
+}
+
+async function syncAddressToLegacyOnly(db: any, userId: string, input: AddressInput) {
+  const profile = await getCustomerProfileSnapshot(db, userId);
+
+  await syncLegacyCustomerRecord(db, userId, {
+    nome: profile?.nome || null,
+    email: profile?.email || null,
+    telefone: profile?.telefone || null,
+    cpf_cnpj: profile?.cpf_cnpj || null,
+    endereco: {
+      cep: input.cep,
+      rua: input.rua,
+      numero: input.numero,
+      complemento: input.complemento || null,
+      bairro: input.bairro,
+      cidade: input.cidade,
+      estado: input.estado,
+    },
+  });
+
+  return normalizeStoredAddress(
+    {
+      id: `legacy-address-${userId}`,
+      user_id: userId,
+      cep: input.cep,
+      rua: input.rua,
+      numero: input.numero,
+      complemento: input.complemento || null,
+      bairro: input.bairro,
+      cidade: input.cidade,
+      estado: input.estado,
+      principal: true,
+    },
+    userId
+  );
+}
+
 async function getLegacyCustomer(db: any, userId: string) {
   try {
     const { data, error } = await db
@@ -341,94 +387,98 @@ export async function upsertCustomerProfile(userId: string, input: { nome: strin
 export async function upsertPrimaryAddress(userId: string, input: AddressInput) {
   const db = createRequiredServerClient() as any;
   const payloadVariants = buildAddressPayloadVariants(input);
+  try {
+    const { data: existingAddresses, error: existingAddressesError } = await db
+      .from('customer_addresses')
+      .select('*')
+      .eq('user_id', userId)
+      .limit(20);
 
-  const { data: existingAddresses, error: existingAddressesError } = await db
-    .from('customer_addresses')
-    .select('*')
-    .eq('user_id', userId)
-    .limit(20);
-
-  if (existingAddressesError) {
-    throw existingAddressesError;
-  }
-
-  const existingAddress = Array.isArray(existingAddresses)
-    ? [...existingAddresses]
-        .sort((a: any, b: any) => {
-          const principalDiff = Number(Boolean(b?.principal)) - Number(Boolean(a?.principal));
-          if (principalDiff !== 0) {
-            return principalDiff;
-          }
-
-          const createdA = a?.created_at ? new Date(a.created_at).getTime() : 0;
-          const createdB = b?.created_at ? new Date(b.created_at).getTime() : 0;
-          return createdB - createdA;
-        })[0]
-    : null;
-
-  const clearPrimaryResult = await db.from('customer_addresses').update({ principal: false }).eq('user_id', userId);
-  if (clearPrimaryResult.error && !isMissingColumnError(clearPrimaryResult.error)) {
-    throw clearPrimaryResult.error;
-  }
-
-  let data: any = null;
-  let error: any = null;
-
-  for (const payload of payloadVariants) {
-    const addressMutation = existingAddress?.id
-      ? db
-          .from('customer_addresses')
-          .update(payload)
-          .eq('id', existingAddress.id)
-          .eq('user_id', userId)
-          .select('*')
-          .single()
-      : db
-          .from('customer_addresses')
-          .insert({
-            id: crypto.randomUUID(),
-            user_id: userId,
-            ...payload,
-          })
-          .select('*')
-          .single();
-
-    const result = await addressMutation;
-    data = result.data;
-    error = result.error;
-
-    if (!error) {
-      break;
+    if (existingAddressesError) {
+      throw existingAddressesError;
     }
 
-    if (!isMissingColumnError(error)) {
-      break;
+    const existingAddress = Array.isArray(existingAddresses)
+      ? [...existingAddresses]
+          .sort((a: any, b: any) => {
+            const principalDiff = Number(Boolean(b?.principal)) - Number(Boolean(a?.principal));
+            if (principalDiff !== 0) {
+              return principalDiff;
+            }
+
+            const createdA = a?.created_at ? new Date(a.created_at).getTime() : 0;
+            const createdB = b?.created_at ? new Date(b.created_at).getTime() : 0;
+            return createdB - createdA;
+          })[0]
+      : null;
+
+    const clearPrimaryResult = await db.from('customer_addresses').update({ principal: false }).eq('user_id', userId);
+    if (clearPrimaryResult.error && !isMissingColumnError(clearPrimaryResult.error)) {
+      throw clearPrimaryResult.error;
     }
+
+    let data: any = null;
+    let error: any = null;
+
+    for (const payload of payloadVariants) {
+      const addressMutation = existingAddress?.id
+        ? db
+            .from('customer_addresses')
+            .update(payload)
+            .eq('id', existingAddress.id)
+            .eq('user_id', userId)
+            .select('*')
+            .single()
+        : db
+            .from('customer_addresses')
+            .insert({
+              id: crypto.randomUUID(),
+              user_id: userId,
+              ...payload,
+            })
+            .select('*')
+            .single();
+
+      const result = await addressMutation;
+      data = result.data;
+      error = result.error;
+
+      if (!error) {
+        break;
+      }
+
+      if (!isMissingColumnError(error)) {
+        break;
+      }
+    }
+
+    if (error) throw error;
+
+    const profile = await getCustomerProfileSnapshot(db, userId);
+
+    await syncLegacyCustomerRecord(db, userId, {
+      nome: profile?.nome || null,
+      email: profile?.email || null,
+      telefone: profile?.telefone || null,
+      cpf_cnpj: profile?.cpf_cnpj || null,
+      endereco: {
+        cep: input.cep,
+        rua: input.rua,
+        numero: input.numero,
+        complemento: input.complemento || null,
+        bairro: input.bairro,
+        cidade: input.cidade,
+        estado: input.estado,
+      },
+    });
+
+    return normalizeStoredAddress(data, userId);
+  } catch (error) {
+    if (isMissingTableError(error) || isMissingColumnError(error)) {
+      console.warn('upsertPrimaryAddress fallback to clientes.endereco', error);
+      return syncAddressToLegacyOnly(db, userId, input);
+    }
+
+    throw error;
   }
-
-  if (error) throw error;
-
-  const { data: profile } = await db
-    .from('customer_profiles')
-    .select('nome, email, telefone, cpf_cnpj')
-    .eq('user_id', userId)
-    .maybeSingle();
-
-  await syncLegacyCustomerRecord(db, userId, {
-    nome: profile?.nome || null,
-    email: profile?.email || null,
-    telefone: profile?.telefone || null,
-    cpf_cnpj: profile?.cpf_cnpj || null,
-    endereco: {
-      cep: input.cep,
-      rua: input.rua,
-      numero: input.numero,
-      complemento: input.complemento || null,
-      bairro: input.bairro,
-      cidade: input.cidade,
-      estado: input.estado,
-    },
-  });
-
-  return normalizeStoredAddress(data, userId);
 }
