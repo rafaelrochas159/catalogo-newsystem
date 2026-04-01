@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedUserFromRequest } from '@/lib/auth/server';
+import { applyCheckoutPrefillToPayload, buildCheckoutPrefill } from '@/lib/checkout';
 import { registerCouponRedemption } from '@/lib/coupons';
+import { getCustomerAccount } from '@/lib/customer-account';
 import { upsertAbandonedCart, trackUserEvent } from '@/lib/marketing';
 import { createRequiredServerClient } from '@/lib/supabase/client';
 import {
@@ -104,8 +106,18 @@ function validateBody(body: CheckoutBody) {
 export async function POST(request: Request) {
   try {
     const { user } = await getAuthenticatedUserFromRequest(request);
-    const body = (await request.json()) as CheckoutBody;
-    const errorMessage = validateBody(body);
+    const requestBody = (await request.json()) as CheckoutBody;
+    const account = user ? await getCustomerAccount(user.id, user.email || null) : null;
+    const body = user
+      ? applyCheckoutPrefillToPayload(
+          requestBody,
+          buildCheckoutPrefill({
+            account,
+            sessionUser: user,
+          }),
+        )
+      : requestBody;
+    const errorMessage = validateBody(body as CheckoutBody);
     if (errorMessage) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }

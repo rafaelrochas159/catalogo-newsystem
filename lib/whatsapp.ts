@@ -1,6 +1,6 @@
 import { COMPANY_INFO } from '@/lib/constants';
+import { buildOrderWhatsAppMessage, buildOrderWhatsAppPayloadFromOrder } from '@/lib/order-whatsapp';
 import { createRequiredServerClient } from '@/lib/supabase/client';
-import { generateProfessionalOrderMessage } from '@/lib/utils';
 
 type SendWhatsAppMessageInput = {
   phone: string;
@@ -201,21 +201,9 @@ function normalizeOrderItems(order: any) {
 }
 
 export function buildApprovedOrderNotificationMessage(order: any) {
-  return generateProfessionalOrderMessage({
-    orderNumber: order.numero_pedido,
-    catalogType: order.tipo_catalogo || 'UNITARIO',
+  return buildOrderWhatsAppMessage({
+    ...buildOrderWhatsAppPayloadFromOrder(order),
     items: normalizeOrderItems(order),
-    subtotal: Number(order.subtotal || order.total || 0),
-    discount: Number(order.desconto_valor || order.coupon_discount_value || 0),
-    total: Number(order.total || 0),
-    address: order.endereco || undefined,
-    customer: {
-      nome: order.cliente_nome || '',
-      telefone: order.cliente_telefone || '',
-      email: order.cliente_email || '',
-      cpf_cnpj: order.cliente_cpf_cnpj || null,
-    },
-    paymentMethod: 'Pix aprovado',
   });
 }
 

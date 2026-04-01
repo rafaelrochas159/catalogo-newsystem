@@ -8,10 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ProductCard } from '@/components/product/ProductCard';
 import { authorizedFetch } from '@/lib/client-auth';
-import { COMPANY_INFO } from '@/lib/constants';
 import { getResponseErrorMessage, readJsonSafely } from '@/lib/http';
+import {
+  getOrderWhatsAppActionLabel,
+  getOrderWhatsAppLinkFromOrder,
+  getOrderWhatsAppStatusText,
+  isOrderPaymentConfirmed,
+} from '@/lib/order-whatsapp';
 import { supabase } from '@/lib/supabase/client';
-import { formatPrice, generateProfessionalOrderMessage, getWhatsAppLink } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 import { Produto } from '@/types';
 import { Loader2, PackageSearch, RefreshCcw, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -115,32 +120,12 @@ export default function MyOrdersPage() {
 
   const sendOrderToWhatsApp = useCallback((order: OrderData) => {
     try {
-      const itemsForMessage = order.itens.map((item) => ({
-        name: (item.product_name || item.nome || 'Produto') as string,
-        sku: item.sku || '',
-        quantity: Number(item.quantity ?? item.quantidade ?? 0),
-        unitPrice: Number(item.unit_price ?? item.preco_unitario ?? 0),
-        totalPrice: Number(item.total_price ?? item.preco_total ?? 0),
-      }));
+      const whatsappLink = getOrderWhatsAppLinkFromOrder(order);
+      if (!whatsappLink) {
+        throw new Error('Nao foi possivel montar a mensagem deste pedido.');
+      }
 
-      const message = generateProfessionalOrderMessage({
-        orderNumber: order.numero_pedido,
-        catalogType: (order.tipo_catalogo ?? 'UNITARIO') as any,
-        items: itemsForMessage,
-        subtotal: order.subtotal ?? order.total,
-        discount: order.desconto_valor || 0,
-        total: order.total,
-        address: order.endereco as any,
-        customer: {
-          nome: order.cliente_nome || '',
-          email: order.cliente_email || '',
-          telefone: order.cliente_telefone || '',
-          cpf_cnpj: order.cliente_cpf_cnpj || undefined,
-        },
-        paymentMethod: order.forma_pagamento || 'Pix',
-      });
-
-      window.location.href = getWhatsAppLink(COMPANY_INFO.whatsapp, message);
+      window.location.href = whatsappLink;
     } catch (error) {
       console.error(error);
       toast.error('Nao foi possivel gerar o link do WhatsApp.');
@@ -420,10 +405,8 @@ export default function MyOrdersPage() {
         <div className="mt-6 space-y-4">
           {orders.map((order) => {
             const createdAt = new Date(order.created_at);
-            const isApproved =
-              order.status_pagamento === 'approved' ||
-              order.status_pedido === 'pago' ||
-              order.status_pedido === 'confirmado';
+            const isApproved = isOrderPaymentConfirmed(order);
+            const canSendToWhatsApp = Boolean(getOrderWhatsAppLinkFromOrder(order));
 
             return (
               <Card key={order.id} className="border">
@@ -498,6 +481,11 @@ export default function MyOrdersPage() {
                     </p>
                   </div>
 
+                  <div className="rounded-xl border border-neon-blue/15 bg-neon-blue/5 p-4 text-sm">
+                    <p className="font-medium text-neon-blue">Status para envio</p>
+                    <p className="mt-1 text-muted-foreground">{getOrderWhatsAppStatusText(order)}</p>
+                  </div>
+
                   {order.endereco && (
                     <div className="space-y-1 border-t pt-2 text-sm">
                       <p className="font-medium">Endereco de entrega</p>
@@ -513,10 +501,10 @@ export default function MyOrdersPage() {
                     </div>
                   )}
 
-                  {isApproved && (
+                  {canSendToWhatsApp && (
                     <div className="pt-3">
                       <Button variant="outline" onClick={() => sendOrderToWhatsApp(order)}>
-                        Enviar pedido para WhatsApp
+                        {getOrderWhatsAppActionLabel(order)}
                       </Button>
                     </div>
                   )}

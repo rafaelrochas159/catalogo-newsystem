@@ -19,10 +19,21 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CartItem } from './CartItem';
 import { useCart } from '@/hooks/useCart';
-import { formatPrice, generateProfessionalOrderMessage, getWhatsAppLink, isValidEmail, maskPhone } from '@/lib/utils';
+import { formatPrice, isValidEmail, maskPhone } from '@/lib/utils';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
+import {
+  buildCheckoutPrefill,
+  mergeCheckoutAddressForm,
+  mergeCheckoutCustomerForm,
+} from '@/lib/checkout';
 import { readJsonSafely } from '@/lib/http';
+import {
+  buildOrderWhatsAppMessage,
+  getOrderWhatsAppActionLabel,
+  getOrderWhatsAppLink,
+  getOrderWhatsAppStatusText,
+} from '@/lib/order-whatsapp';
 import {
   ShoppingCart,
   Trash2,
@@ -84,6 +95,7 @@ interface PixPaymentData {
 
 interface PixOrderSnapshot {
   customer: CustomerData;
+  address: AddressData;
   items: Array<{
     product_name: string;
     sku: string;
@@ -91,6 +103,9 @@ interface PixOrderSnapshot {
     unit_price: number;
     total_price: number;
   }>;
+  catalogType: 'UNITARIO' | 'CAIXA_FECHADA';
+  subtotal: number;
+  discount: number;
   total: number;
 }
 
@@ -162,104 +177,96 @@ export function CartDrawer() {
   const [abandonedCartId, setAbandonedCartId] = useState<string | null>(null);
   const [cartSuggestions, setCartSuggestions] = useState<any[]>([]);
   const [postPurchaseSuggestions, setPostPurchaseSuggestions] = useState<any[]>([]);
+  const [isHydratingCheckout, setIsHydratingCheckout] = useState(false);
   // SessÃ£o do cliente. Se null, o usuÃ¡rio nÃ£o estÃ¡ autenticado. Ã‰ usada
   // para impedir o checkout de usuÃ¡rios nÃ£o logados.
   const [clientSession, setClientSession] = useState<any>(null);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
+  const lastHydratedUserIdRef = useRef<string | null>(null);
+  const checkoutHydrationPromiseRef = useRef<Promise<boolean> | null>(null);
 
-  // Ao montar, se o usuÃ¡rio estiver logado, busca os dados pela API de conta
-  // autenticada e usa a tabela legada apenas como fallback de compatibilidade.
-  useEffect(() => {
-    async function loadCustomerFromSession() {
+  const hydrateCheckoutFromAccount = async ({
+    force = false,
+    showLoading = false,
+  }: {
+    force?: boolean;
+    showLoading?: boolean;
+  } = {}) => {
+    if (checkoutHydrationPromiseRef.current) {
+      return checkoutHydrationPromiseRef.current;
+    }
+
+    const hydrationPromise = (async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id;
-        if (!userId) return;
+        if (showLoading) {
+          setIsHydratingCheckout(true);
+        }
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        setClientSession(session ?? null);
+
+        if (!session?.access_token || !session.user) {
+          return false;
+        }
 
         const accountResponse = await authorizedFetch('/api/account', {
           cache: 'no-store',
         });
-        const accountJson = await readJsonSafely<{
-          data?: {
-            profile?: {
-              nome?: string | null;
-              email?: string | null;
-              telefone?: string | null;
-              cpf_cnpj?: string | null;
-            } | null;
-            addresses?: Array<Record<string, any>>;
-          };
-        }>(accountResponse);
+        const accountJson = await readJsonSafely<{ data?: Record<string, unknown> }>(accountResponse);
 
-        if (accountResponse.ok && accountJson?.data) {
-          const profile = accountJson.data.profile;
-          const primaryAddress = accountJson.data.addresses?.[0];
+        const prefill = buildCheckoutPrefill({
+          account: accountResponse.ok ? (accountJson?.data as any) : null,
+          sessionUser: session.user,
+        });
+        const shouldForce = force || lastHydratedUserIdRef.current !== session.user.id;
 
-          setCustomer((prev) => ({
-            ...prev,
-            nome: profile?.nome || prev.nome,
-            email: profile?.email || prev.email,
-            telefone: profile?.telefone || prev.telefone,
-            cpf_cnpj: profile?.cpf_cnpj || prev.cpf_cnpj,
-          }));
+        setCustomer((prev) => mergeCheckoutCustomerForm(prev, prefill.customer, shouldForce));
+        setAddress((prev) => mergeCheckoutAddressForm(prev, prefill.address, shouldForce));
+        lastHydratedUserIdRef.current = session.user.id;
 
-          if (primaryAddress) {
-            setAddress((prev) => ({
-              ...prev,
-              cep: primaryAddress.cep || prev.cep,
-              rua: primaryAddress.rua || prev.rua,
-              numero: primaryAddress.numero || prev.numero,
-              bairro: primaryAddress.bairro || prev.bairro,
-              cidade: primaryAddress.cidade || prev.cidade,
-              estado: primaryAddress.estado || prev.estado,
-              complemento: primaryAddress.complemento || prev.complemento,
-            }));
-          }
-
-          return;
+        return true;
+      } catch (error) {
+        console.error('Erro ao hidratar checkout com a conta autenticada', error);
+        return false;
+      } finally {
+        checkoutHydrationPromiseRef.current = null;
+        if (showLoading) {
+          setIsHydratingCheckout(false);
         }
-
-        const { data: cliente, error } = await supabase
-          .from('clientes')
-          .select('nome, email, telefone, cpf_cnpj, endereco')
-          .eq('id', userId)
-          .single();
-        if (error || !cliente) return;
-        setCustomer((prev) => ({
-          ...prev,
-          nome: cliente.nome || prev.nome,
-          email: cliente.email || prev.email,
-          telefone: cliente.telefone || prev.telefone,
-          cpf_cnpj: cliente.cpf_cnpj || prev.cpf_cnpj,
-        }));
-        if (cliente.endereco) {
-          setAddress((prev) => ({
-            ...prev,
-            ...cliente.endereco,
-          }));
-        }
-      } catch (e) {
-        console.error('Erro ao carregar dados do cliente logado', e);
       }
-    }
-    loadCustomerFromSession();
-  }, []);
+    })();
 
-  // Observa a sessÃ£o do usuÃ¡rio para atualizar o estado clientSession. Isso
-  // garante que o componente saiba se o cliente estÃ¡ logado e possa restringir
-  // o checkout para usuÃ¡rios autenticados. Tipamos explicitamente os
-  // retornos para evitar erros de compilaÃ§Ã£o.
+    checkoutHydrationPromiseRef.current = hydrationPromise;
+    return hydrationPromise;
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then((res: any) => {
       const { data }: any = res;
       setClientSession(data?.session ?? null);
+
+      if (data?.session?.user?.id) {
+        void hydrateCheckoutFromAccount({ force: true });
+      }
     });
+
     const { data: listener }: any = supabase.auth.onAuthStateChange((_: any, session: any) => {
-      setClientSession(session);
+      setClientSession(session ?? null);
+
+      if (session?.user?.id) {
+        void hydrateCheckoutFromAccount({ force: lastHydratedUserIdRef.current !== session.user.id });
+      } else {
+        lastHydratedUserIdRef.current = null;
+      }
     });
+
     return () => {
       listener?.subscription?.unsubscribe?.();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -492,7 +499,7 @@ export function CartDrawer() {
 
   const resetCheckout = () => {
     setAddress({ cep: '', rua: '', numero: '', bairro: '', cidade: '', estado: '', complemento: '' });
-    setCustomer({ nome: '', telefone: '', email: '' });
+    setCustomer({ nome: '', telefone: '', email: '', cpf_cnpj: '' });
     setLastFetchedCep('');
     setCepError('');
     setPixPayment(null);
@@ -644,7 +651,7 @@ export function CartDrawer() {
     setIsCheckingOut(true);
     try {
       const orderNumber = `NS${Date.now()}`;
-      const message = generateProfessionalOrderMessage({
+      const message = buildOrderWhatsAppMessage({
         orderNumber,
         catalogType: catalogType!,
         items: orderItems.map((item) => ({
@@ -659,7 +666,9 @@ export function CartDrawer() {
         total: finalTotal,
         address,
         customer,
-        paymentMethod: 'WhatsApp',
+        paymentMethod: 'whatsapp',
+        status_pagamento: 'not_applicable',
+        status_pedido: 'aguardando_contato',
       });
 
       const { data: order, error } = await supabase
@@ -695,7 +704,25 @@ export function CartDrawer() {
 
       if (error) throw new Error(error.message);
 
-      const whatsappLink = getWhatsAppLink(COMPANY_INFO.whatsapp, message);
+      const whatsappLink = getOrderWhatsAppLink({
+        orderNumber: order?.numero_pedido || orderNumber,
+        catalogType: catalogType!,
+        items: orderItems.map((item) => ({
+          name: item.product_name,
+          sku: item.sku,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          totalPrice: item.total_price,
+        })),
+        subtotal,
+        discount: discount + couponDiscount,
+        total: finalTotal,
+        address,
+        customer,
+        paymentMethod: 'whatsapp',
+        status_pagamento: 'not_applicable',
+        status_pedido: 'aguardando_contato',
+      }, COMPANY_INFO.whatsapp);
       clearCart();
       await clearAbandonedCart('converted');
       resetCheckout();
@@ -713,6 +740,9 @@ export function CartDrawer() {
         },
         email: customer.email,
       });
+      if (!whatsappLink) {
+        throw new Error('Nao foi possivel montar o link do WhatsApp para este pedido.');
+      }
       openWhatsApp(whatsappLink);
     } catch (error: any) {
       console.error(error);
@@ -772,6 +802,7 @@ export function CartDrawer() {
 
       setPixOrderSnapshot({
         customer: { ...customer },
+        address: { ...address },
         items: orderItems.map((item) => ({
           product_name: item.product_name,
           sku: item.sku,
@@ -779,6 +810,9 @@ export function CartDrawer() {
           unit_price: item.unit_price,
           total_price: item.total_price,
         })),
+        catalogType: catalogType!,
+        subtotal,
+        discount: discount + couponDiscount,
         total: finalTotal,
       });
 
@@ -801,40 +835,28 @@ export function CartDrawer() {
     }
   };
 
-
-  const buildApprovedWhatsAppLink = () => {
-    // Somente gera link se houver pagamento confirmado e snapshot do pedido
+  const buildOrderWhatsAppLink = () => {
     if (!pixPayment || !pixOrderSnapshot) return null;
 
-    // Converte os itens do snapshot para o formato esperado por generateOrderMessage
-    const orderItemsForMessage = pixOrderSnapshot.items.map((item) => ({
-      name: item.product_name,
-      sku: item.sku,
-      quantity: item.quantity,
-      unitPrice: item.unit_price,
-      totalPrice: item.total_price,
-    }));
-
-    // Calcula subtotal e desconto com base nos itens do snapshot
-    const subtotalValue = orderItemsForMessage.reduce((acc, item) => acc + item.totalPrice, 0);
-    const totalValue = pixOrderSnapshot.total;
-    const discountValue = subtotalValue - totalValue;
-
-    // Gera mensagem estruturada utilizando utilidade padrÃ£o do projeto
-    const message = generateProfessionalOrderMessage({
+    return getOrderWhatsAppLink({
       orderNumber: pixPayment.numero_pedido,
-      catalogType: catalogType!,
-      items: orderItemsForMessage,
-      subtotal: subtotalValue,
-      discount: discountValue,
-      total: totalValue,
-      address,
-      customer,
-      paymentMethod: 'Pix aprovado',
-    });
-
-    // Usa o nÃºmero de WhatsApp da empresa definido em constants para enviar a mensagem
-    return getWhatsAppLink(COMPANY_INFO.whatsapp, message);
+      catalogType: pixOrderSnapshot.catalogType,
+      items: pixOrderSnapshot.items.map((item) => ({
+        name: item.product_name,
+        sku: item.sku,
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        totalPrice: item.total_price,
+      })),
+      subtotal: pixOrderSnapshot.subtotal,
+      discount: pixOrderSnapshot.discount,
+      total: pixOrderSnapshot.total,
+      address: pixOrderSnapshot.address,
+      customer: pixOrderSnapshot.customer,
+      paymentMethod: 'pix',
+      status_pagamento: pixPayment.status_pagamento,
+      status_pedido: pixPayment.status_pagamento === 'approved' ? 'confirmado' : 'aguardando_pagamento',
+    }, COMPANY_INFO.whatsapp);
   };
 
   const handleCopyPix = async () => {
@@ -948,6 +970,15 @@ export function CartDrawer() {
                   <div className="rounded-xl border p-4 space-y-3 text-sm">
                     <p className="font-medium">Status automÃ¡tico</p>
                     <p className="text-muted-foreground">ApÃ³s o pagamento, o Mercado Pago envia o webhook e o pedido Ã© liberado automaticamente.</p>
+                    <div className="rounded-lg border border-dashed p-3">
+                      <p className="font-medium">Status para envio no WhatsApp</p>
+                      <p className="mt-1 text-muted-foreground">
+                        {getOrderWhatsAppStatusText({
+                          status_pagamento: pixPayment.status_pagamento,
+                          status_pedido: pixPayment.status_pagamento === 'approved' ? 'confirmado' : 'aguardando_pagamento',
+                        })}
+                      </p>
+                    </div>
                     <Button variant="outline" className="w-full" onClick={async () => {
                       if (!pixPayment) return;
                       const reference = pixPayment.checkout_token || pixPayment.numero_pedido;
@@ -972,22 +1003,27 @@ export function CartDrawer() {
                       Atualizar status agora
                     </Button>
 
+                    <Button
+                      variant={pixApproved ? 'default' : 'outline'}
+                      className={`w-full ${pixApproved ? 'bg-green-500 text-black hover:bg-green-500/90' : ''}`}
+                      onClick={() => {
+                        const whatsappLink = buildOrderWhatsAppLink();
+                        if (!whatsappLink) {
+                          toast.error('Nao foi possivel montar o link do WhatsApp para este pedido.');
+                          return;
+                        }
+                        openWhatsApp(whatsappLink);
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {getOrderWhatsAppActionLabel({
+                        status_pagamento: pixPayment.status_pagamento,
+                        status_pedido: pixPayment.status_pagamento === 'approved' ? 'confirmado' : 'aguardando_pagamento',
+                      })}
+                    </Button>
+
                     {pixApproved && (
                       <div className="space-y-2">
-                        <Button
-                          className="w-full bg-green-500 text-black hover:bg-green-500/90"
-                          onClick={() => {
-                            const whatsappLink = buildApprovedWhatsAppLink();
-                            if (!whatsappLink) {
-                              toast.error('Telefone do cliente nÃ£o encontrado para abrir o WhatsApp.');
-                              return;
-                            }
-                            openWhatsApp(whatsappLink);
-                          }}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Enviar pedido aprovado para WhatsApp
-                        </Button>
                         <Button className="w-full bg-neon-blue text-black hover:bg-neon-blue/90" onClick={() => {
                           resetCheckout();
                           setIsOpen(false);
@@ -1137,6 +1173,15 @@ export function CartDrawer() {
                     </Button>
                     <MapPin className="h-4 w-4" /> Checkout
                   </div>
+
+                  {clientSession && (
+                    <div className="rounded-xl border border-neon-blue/20 bg-neon-blue/5 p-4 text-sm">
+                      <p className="font-medium text-neon-blue">Dados reaproveitados da sua conta</p>
+                      <p className="mt-1 text-muted-foreground">
+                        Preenchemos automaticamente os dados salvos no cadastro. Ajuste apenas o que quiser alterar antes de finalizar.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-4">
                     <div className="grid gap-2">
@@ -1288,6 +1333,7 @@ export function CartDrawer() {
                       }
                       return;
                     }
+                    await hydrateCheckoutFromAccount({ showLoading: true });
                     await trackClientEvent({
                       eventName: 'initiate_checkout',
                       page: '/checkout',
@@ -1300,10 +1346,11 @@ export function CartDrawer() {
                     });
                     setShowCheckoutForm(true);
                   }}
-                  disabled={!canCheckout}
+                  disabled={!canCheckout || isHydratingCheckout}
                   className="flex-1 bg-neon-blue text-black hover:bg-neon-blue/90"
                 >
-                  <Check className="h-4 w-4 mr-2" /> Continuar checkout
+                  {isHydratingCheckout ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+                  {isHydratingCheckout ? 'Carregando seus dados' : 'Continuar checkout'}
                 </Button>
               </div>
             ) : (
