@@ -68,9 +68,9 @@ interface CustomerData {
   telefone: string;
   email: string;
   /**
-   * CPF ou CNPJ do comprador. NÃ£o Ã© obrigatÃ³rio, mas ajuda no controle
-   * administrativo e na emissÃ£o de notas fiscais. Deve ser informado
-   * sem mÃ¡scara ou com mÃ¡scara (o backend removerÃ¡ os caracteres nÃ£o numÃ©ricos).
+   * CPF ou CNPJ do comprador. Não é obrigatório, mas ajuda no controle
+   * administrativo e na emissão de notas fiscais. Deve ser informado
+   * sem máscara ou com máscara (o backend removerá os caracteres não numéricos).
    */
   cpf_cnpj?: string;
 }
@@ -144,7 +144,7 @@ function playApprovedTone() {
     oscillator.start();
     oscillator.stop(audioCtx.currentTime + 0.5);
   } catch (error) {
-    console.warn('NÃ£o foi possÃ­vel tocar o Ã¡udio de aprovaÃ§Ã£o.', error);
+    console.warn('Não foi possível tocar o áudio de aprovação.', error);
   }
 }
 
@@ -186,8 +186,8 @@ export function CartDrawer() {
   const [checkoutAccountData, setCheckoutAccountData] = useState<Record<string, unknown> | null>(null);
   const [isHydratingCheckout, setIsHydratingCheckout] = useState(false);
   const [recentlyAddedProductName, setRecentlyAddedProductName] = useState<string | null>(null);
-  // SessÃ£o do cliente. Se null, o usuÃ¡rio nÃ£o estÃ¡ autenticado. Ã‰ usada
-  // para impedir o checkout de usuÃ¡rios nÃ£o logados.
+  // Sessão do cliente. Se null, o usuário não está autenticado. É usada
+  // para impedir o checkout de usuários não logados.
   const [clientSession, setClientSession] = useState<any>(null);
   const numberInputRef = useRef<HTMLInputElement | null>(null);
   const lastHydratedUserIdRef = useRef<string | null>(null);
@@ -439,7 +439,7 @@ export function CartDrawer() {
           setAbandonedCartId(json.data.id);
         }
       } catch {
-        // nÃ£o bloquear o carrinho por causa disso
+      // não bloquear o carrinho por causa disso
       }
     };
 
@@ -518,7 +518,7 @@ export function CartDrawer() {
           email: customer.email || clientSession?.user?.email || null,
         });
       } catch {
-        // abandono nÃ£o deve travar checkout
+        // abandono não deve travar checkout
       }
     }, 1000 * 60 * 4);
 
@@ -537,8 +537,8 @@ export function CartDrawer() {
         const data: ViaCepResponse = await response.json();
 
         if (!response.ok || data.erro) {
-          setCepError('CEP nÃ£o encontrado. Confira o nÃºmero e preencha manualmente.');
-          toast.error('CEP nÃ£o encontrado');
+          setCepError('CEP não encontrado. Confira o número e preencha manualmente.');
+          toast.error('CEP não encontrado');
           return;
         }
 
@@ -551,11 +551,11 @@ export function CartDrawer() {
           complemento: prev.complemento || data.complemento || '',
         }));
         setLastFetchedCep(cepNumbers);
-        toast.success('EndereÃ§o preenchido automaticamente');
+        toast.success('Endereço preenchido automaticamente');
         setTimeout(() => numberInputRef.current?.focus(), 60);
       } catch (error) {
         console.error(error);
-        setCepError('NÃ£o foi possÃ­vel consultar o CEP agora.');
+        setCepError('Não foi possível consultar o CEP agora.');
         toast.error('Falha ao consultar o CEP');
       } finally {
         setIsFetchingCep(false);
@@ -651,7 +651,7 @@ export function CartDrawer() {
         }),
       });
     } catch {
-      // melhor esforÃ§o
+      // melhor esforço
     }
   };
 
@@ -742,11 +742,11 @@ export function CartDrawer() {
       return false;
     }
     if (!isValidEmail(customer.email)) {
-      toast.error('Digite um e-mail vÃ¡lido.');
+      toast.error('Digite um e-mail válido.');
       return false;
     }
     if (!address.cep || !address.rua || !address.numero || !address.bairro || !address.cidade || !address.estado) {
-      toast.error('Preencha todos os campos obrigatÃ³rios do endereÃ§o.');
+      toast.error('Preencha todos os campos obrigatórios do endereço.');
       return false;
     }
     return true;
@@ -762,9 +762,9 @@ export function CartDrawer() {
   };
 
   const handleWhatsAppCheckout = async () => {
-    // Impede checkout via WhatsApp se nÃ£o houver sessÃ£o do cliente
+    // Impede checkout via WhatsApp se não houver sessão do cliente
     if (!clientSession) {
-      toast.error('VocÃª precisa estar logado para finalizar o pedido.');
+      toast.error('Você precisa estar logado para finalizar o pedido.');
       return;
     }
     if (!canCheckout || !validateCheckoutData()) return;
@@ -874,11 +874,11 @@ export function CartDrawer() {
   };
 
   const handlePixCheckout = async () => {
-    // Impede checkout se o usuÃ¡rio nÃ£o estiver autenticado. Esse check
-    // complementa a validaÃ§Ã£o feita ao abrir o formulÃ¡rio, garantindo que
-    // requisiÃ§Ãµes programÃ¡ticas tambÃ©m sejam bloqueadas.
+    // Impede checkout se o usuário não estiver autenticado. Esse check
+    // complementa a validação feita ao abrir o formulário, garantindo que
+    // requisições programáticas também sejam bloqueadas.
     if (!clientSession) {
-      toast.error('VocÃª precisa estar logado para finalizar o pedido.');
+      toast.error('Você precisa estar logado para finalizar o pedido.');
       return;
     }
     if (!canCheckout || !validateCheckoutData()) return;
@@ -947,7 +947,7 @@ export function CartDrawer() {
         status_pagamento: data.status_pagamento,
       });
 
-      toast.success('Pix gerado com sucesso. Pague e aguarde a confirmaÃ§Ã£o automÃ¡tica.');
+      toast.success('Pix gerado com sucesso. Pague e aguarde a confirmação automática.');
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Erro ao gerar o Pix.');
@@ -984,9 +984,9 @@ export function CartDrawer() {
     if (!pixPayment?.pix_copia_cola) return;
     try {
       await navigator.clipboard.writeText(pixPayment.pix_copia_cola);
-      toast.success('CÃ³digo Pix copiado.');
+      toast.success('Código Pix copiado.');
     } catch {
-      toast.error('NÃ£o foi possÃ­vel copiar o cÃ³digo Pix.');
+      toast.error('Não foi possível copiar o código Pix.');
     }
   };
 
@@ -1082,15 +1082,15 @@ export function CartDrawer() {
 
                   <div className="rounded-xl border p-4 space-y-3">
                     <p className="font-medium">Pix copia e cola</p>
-                    <div className="rounded-lg border p-3 text-xs break-all">{pixPayment.pix_copia_cola || 'CÃ³digo indisponÃ­vel.'}</div>
+                    <div className="rounded-lg border p-3 text-xs break-all">{pixPayment.pix_copia_cola || 'Código indisponível.'}</div>
                     <Button variant="outline" className="w-full" onClick={handleCopyPix} disabled={!pixPayment.pix_copia_cola}>
-                      <Copy className="h-4 w-4 mr-2" /> Copiar cÃ³digo Pix
+                      <Copy className="h-4 w-4 mr-2" /> Copiar código Pix
                     </Button>
                   </div>
 
                   <div className="rounded-xl border p-4 space-y-3 text-sm">
-                    <p className="font-medium">Status automÃ¡tico</p>
-                    <p className="text-muted-foreground">ApÃ³s o pagamento, o Mercado Pago envia o webhook e o pedido Ã© liberado automaticamente.</p>
+                    <p className="font-medium">Status automático</p>
+                    <p className="text-muted-foreground">Após o pagamento, o Mercado Pago envia o webhook e o pedido é liberado automaticamente.</p>
                     <div className="rounded-lg border border-dashed p-3">
                       <p className="font-medium">Status para envio no WhatsApp</p>
                       <p className="mt-1 text-muted-foreground">
@@ -1115,9 +1115,9 @@ export function CartDrawer() {
                         setPostPurchaseSuggestions(cartSuggestions.slice(0, 3));
                         clearCart();
                         await clearAbandonedCart('converted');
-                        toast.success('Pagamento jÃ¡ aprovado.');
+                        toast.success('Pagamento já aprovado.');
                       } else {
-                        toast('Pagamento ainda nÃ£o aprovado.');
+                        toast('Pagamento ainda não aprovado.');
                       }
                     }}>
                       {isPollingPayment ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
@@ -1215,7 +1215,7 @@ export function CartDrawer() {
 
                   <div>
                     <Badge variant={catalogType === 'UNITARIO' ? 'default' : 'secondary'}>
-                      {catalogType === 'UNITARIO' ? 'CatÃ¡logo UnitÃ¡rio' : 'Caixa Fechada'}
+                      {catalogType === 'UNITARIO' ? 'Catálogo Unitário' : 'Caixa Fechada'}
                     </Badge>
                   </div>
 
@@ -1223,8 +1223,8 @@ export function CartDrawer() {
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-start gap-2">
                       <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                       <div className="text-sm">
-                        <p className="font-medium text-yellow-500">Pedido mÃ­nimo nÃ£o atingido</p>
-                        <p className="text-muted-foreground">Faltam {formatPrice(remainingForMinOrder)} para atingir o pedido mÃ­nimo de {formatPrice(BUSINESS_RULES.minOrderValue)}.</p>
+                        <p className="font-medium text-yellow-500">Pedido mínimo não atingido</p>
+                        <p className="text-muted-foreground">Faltam {formatPrice(remainingForMinOrder)} para atingir o pedido mínimo de {formatPrice(BUSINESS_RULES.minOrderValue)}.</p>
                       </div>
                     </motion.div>
                   )}
@@ -1344,7 +1344,7 @@ export function CartDrawer() {
                   </div>
 
                   <div className="space-y-4 border-t pt-4">
-                    <h4 className="font-semibold">EndereÃ§o de entrega</h4>
+                    <h4 className="font-semibold">Endereço de entrega</h4>
                     <div className="grid gap-2">
                       <Label>CEP *</Label>
                       <Input
@@ -1359,7 +1359,7 @@ export function CartDrawer() {
                         placeholder="00000-000"
                         inputMode="numeric"
                       />
-                      {isFetchingCep && <p className="text-xs text-muted-foreground">Buscando endereÃ§o pelo CEP...</p>}
+                      {isFetchingCep && <p className="text-xs text-muted-foreground">Buscando endereço pelo CEP...</p>}
                       {cepError && <p className="text-xs text-red-500">{cepError}</p>}
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -1371,7 +1371,7 @@ export function CartDrawer() {
                         }} placeholder="Nome da rua" />
                       </div>
                       <div className="grid gap-2">
-                        <Label>NÃºmero *</Label>
+                        <Label>Número *</Label>
                         <Input ref={numberInputRef} value={address.numero} onChange={(e) => {
                           markAddressAsEdited();
                           setAddress((prev) => ({ ...prev, numero: e.target.value }));
@@ -1391,7 +1391,7 @@ export function CartDrawer() {
                         <Input value={address.cidade} onChange={(e) => {
                           markAddressAsEdited();
                           setAddress((prev) => ({ ...prev, cidade: e.target.value }));
-                        }} placeholder="SÃ£o Paulo" />
+                        }} placeholder="São Paulo" />
                       </div>
                       <div className="grid gap-2">
                         <Label>Estado *</Label>
@@ -1406,7 +1406,7 @@ export function CartDrawer() {
                       <Input value={address.complemento} onChange={(e) => {
                         markAddressAsEdited();
                         setAddress((prev) => ({ ...prev, complemento: e.target.value }));
-                      }} placeholder="Apto, bloco, referÃªncia..." />
+                        }} placeholder="Apto, bloco, referência..." />
                     </div>
                   </div>
 
@@ -1458,7 +1458,7 @@ export function CartDrawer() {
                       </button>
                       <button type="button" onClick={() => setPaymentMethod('whatsapp')} className={`rounded-xl border p-4 text-left transition ${paymentMethod === 'whatsapp' ? 'border-neon-blue bg-neon-blue/10' : 'border-border'}`}>
                         <div className="flex items-center gap-2 font-medium"><MessageCircle className="h-4 w-4" /> WhatsApp</div>
-                        <p className="text-xs text-muted-foreground mt-1">MantÃ©m o fluxo atual de pedido pelo WhatsApp.</p>
+                        <p className="text-xs text-muted-foreground mt-1">Mantém o fluxo atual de pedido pelo WhatsApp.</p>
                       </button>
                     </div>
                   </div>
@@ -1537,7 +1537,7 @@ export function CartDrawer() {
                 )}
                 {paymentMethod === 'pix' && (
                   <p className="text-xs text-muted-foreground text-center">
-                    O pagamento fica vinculado por <code>external_reference = numero_pedido</code> e confirmado sÃ³ pelo webhook.
+                    O pagamento fica vinculado por <code>external_reference = numero_pedido</code> e confirmado só pelo webhook.
                   </p>
                 )}
               </div>
