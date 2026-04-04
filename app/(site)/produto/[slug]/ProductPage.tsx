@@ -433,10 +433,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
 
         <div className="mt-16 rounded-[28px] border border-neon-blue/15 bg-card/70 p-6">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold">Clientes tambem levam</h2>
-            <p className="text-sm text-muted-foreground">
-              Sugestoes automaticas com base no comportamento de compra, no tipo de catalogo e no historico real.
-            </p>
+            <h2 className="text-2xl font-bold">Produtos relacionados</h2>
           </div>
           {crossSellProducts.length > 0 ? (
             <ProductGrid
@@ -450,7 +447,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           )}
         </div>
 
-        {relatedProducts.length > 0 && (
+        {crossSellProducts.length === 0 && relatedProducts.length > 0 && (
           <div className="mt-16">
             <h2 className="mb-8 text-2xl font-bold">Produtos relacionados</h2>
             <ProductGrid products={relatedProducts} catalogType="UNITARIO" />
