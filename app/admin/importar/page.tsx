@@ -15,6 +15,7 @@ interface ImportRow {
   sku: string;
   description?: string;
   category_slug: string;
+  catalog_type?: 'UNITARIO' | 'CAIXA_FECHADA';
   price_unit?: number;
   price_box?: number;
   stock_unit?: number;
@@ -28,6 +29,36 @@ interface ValidationError {
   row: number;
   field: string;
   message: string;
+}
+
+function normalizeCatalogType(value: unknown): 'UNITARIO' | 'CAIXA_FECHADA' | null {
+  const normalized = String(value || '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/\s+/g, '_');
+
+  if (!normalized) return null;
+  if (normalized === 'UNITARIO' || normalized === 'UNIDADE' || normalized === 'TIPO_UNITARIO') {
+    return 'UNITARIO';
+  }
+  if (
+    normalized === 'CAIXA_FECHADA' ||
+    normalized === 'CAIXA' ||
+    normalized === 'TIPO_CAIXA_FECHADA'
+  ) {
+    return 'CAIXA_FECHADA';
+  }
+
+  return null;
+}
+
+function getRowCatalogType(
+  row: Partial<ImportRow> & { tipo_catalogo?: unknown },
+  fallbackType: 'UNITARIO' | 'CAIXA_FECHADA',
+) {
+  return normalizeCatalogType(row.catalog_type ?? row.tipo_catalogo) || fallbackType;
 }
 
 export default function ImportPage() {
@@ -50,6 +81,7 @@ export default function ImportPage() {
 
   const validateRow = (row: any, index: number): ValidationError[] => {
     const errors: ValidationError[] = [];
+    const rowCatalogType = getRowCatalogType(row, importType);
 
     if (!row.name) {
       errors.push({ row: index + 1, field: 'name', message: 'Nome é obrigatório' });
@@ -62,7 +94,7 @@ export default function ImportPage() {
     }
     
     // Validação específica por tipo de importação
-    if (importType === 'UNITARIO') {
+    if (rowCatalogType === 'UNITARIO') {
       if (!row.price_unit || isNaN(row.price_unit)) {
         errors.push({ row: index + 1, field: 'price_unit', message: 'Preço unitário é obrigatório para produtos unitários' });
       }
@@ -113,6 +145,7 @@ export default function ImportPage() {
           const parsed = parseInt(row.stock_box, 10);
           row.stock_box = isNaN(parsed) ? undefined : parsed;
         }
+        row.catalog_type = getRowCatalogType(row, importType);
 
         const rowErrors = validateRow(row, index);
         if (rowErrors.length > 0) {
@@ -170,6 +203,7 @@ export default function ImportPage() {
 
     for (const row of preview) {
       try {
+        const rowCatalogType = getRowCatalogType(row, importType);
         // Obtém o ID da categoria pelo slug. Usa try/catch para evitar que um
         // erro em uma linha interrompa todo o processo.
         const { data: categoria, error: catError } = await supabase
@@ -204,7 +238,7 @@ export default function ImportPage() {
             preco_caixa: row.price_box ?? null,
             estoque_unitario: row.stock_unit ?? 0,
             estoque_caixa: row.stock_box ?? 0,
-            tipo_catalogo: importType,
+            tipo_catalogo: rowCatalogType,
             quantidade_por_caixa: row.quantity_per_box ?? null,
             imagem_principal: row.main_image || '/images/placeholder.jpg',
             is_active: true,
@@ -250,6 +284,7 @@ export default function ImportPage() {
         sku: 'SKU001',
         description: 'Descrição do produto',
         category_slug: 'caixa-de-som',
+        catalog_type: importType,
         price_unit: importType === 'UNITARIO' ? 29.90 : null,
         price_box: importType === 'CAIXA_FECHADA' ? 299.00 : null,
         stock_unit: importType === 'UNITARIO' ? 100 : 0,
@@ -294,11 +329,12 @@ export default function ImportPage() {
         sku: product.sku || '',
         description: product.descricao || '',
         category_slug: product.categoria?.slug || '',
-        price_unit: importType === 'UNITARIO' ? Number(product.preco_unitario || 0) : null,
-        price_box: importType === 'CAIXA_FECHADA' ? Number(product.preco_caixa || 0) : null,
-        stock_unit: importType === 'UNITARIO' ? Number(product.estoque_unitario || 0) : 0,
-        stock_box: importType === 'CAIXA_FECHADA' ? Number(product.estoque_caixa || 0) : 0,
-        quantity_per_box: importType === 'CAIXA_FECHADA' ? Number(product.quantidade_por_caixa || 0) || null : null,
+        catalog_type: getRowCatalogType({ catalog_type: product.tipo_catalogo }, importType),
+        price_unit: Number(product.preco_unitario || 0) || null,
+        price_box: Number(product.preco_caixa || 0) || null,
+        stock_unit: Number(product.estoque_unitario || 0) || 0,
+        stock_box: Number(product.estoque_caixa || 0) || 0,
+        quantity_per_box: Number(product.quantidade_por_caixa || 0) || null,
         main_image: product.imagem_principal || '',
       }));
 
@@ -376,8 +412,9 @@ export default function ImportPage() {
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mt-3">
-                💡 <strong>Importante:</strong> Todos os produtos desta planilha serão cadastrados como "{importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}".
-                Para importar produtos de tipos diferentes, faça importações separadas.
+                💡 <strong>Importante:</strong> Use a coluna <strong>catalog_type</strong> na planilha para definir cada linha como
+                {' '}<strong>UNITARIO</strong> ou <strong>CAIXA_FECHADA</strong>. Se ela não vier preenchida, o sistema usa
+                {' '}“{importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}” como padrão.
               </p>
             </CardContent>
           </Card>
@@ -474,6 +511,12 @@ export default function ImportPage() {
                     <strong>category_slug</strong> - Slug da categoria (obrigatório)
                   </span>
                 </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span>
+                    <strong>catalog_type</strong> - UNITARIO ou CAIXA_FECHADA
+                  </span>
+                </li>
                 {importType === 'UNITARIO' ? (
                   <li className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-green-500 mt-0.5" />
@@ -506,7 +549,7 @@ export default function ImportPage() {
               </ul>
               <div className="mt-4 p-3 bg-blue-500/10 rounded-lg">
                 <p className="text-sm text-blue-500">
-                  📌 <strong>Importando como {importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}</strong>
+                  📌 <strong>Se a coluna catalog_type estiver vazia, o importador usa {importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'} como padrão.</strong>
                 </p>
               </div>
             </CardContent>
@@ -525,9 +568,7 @@ export default function ImportPage() {
                 <div>
                   <CardTitle>Pré-visualização ({preview.length} produtos)</CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Tipo: <Badge variant={importType === 'UNITARIO' ? 'default' : 'secondary'}>
-                      {importType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
-                    </Badge>
+                    A coluna <strong>catalog_type</strong> da planilha define o tipo do produto. O seletor acima é usado apenas como fallback.
                   </p>
                 </div>
                 <Button
@@ -556,18 +597,30 @@ export default function ImportPage() {
                         <th className="text-left py-2">Nome</th>
                         <th className="text-left py-2">SKU</th>
                         <th className="text-left py-2">Categoria</th>
+                        <th className="text-left py-2">Tipo</th>
                         <th className="text-right py-2">Preço</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {preview.slice(0, 5).map((row, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="py-2">{row.name}</td>
-                          <td className="py-2">{row.sku}</td>
-                          <td className="py-2">{row.category_slug}</td>
-                          <td className="py-2 text-right">R$ {row.price_unit}</td>
-                        </tr>
-                      ))}
+                      {preview.slice(0, 5).map((row, index) => {
+                        const rowCatalogType = getRowCatalogType(row, importType);
+                        const price =
+                          rowCatalogType === 'CAIXA_FECHADA' ? row.price_box : row.price_unit;
+
+                        return (
+                          <tr key={index} className="border-b">
+                            <td className="py-2">{row.name}</td>
+                            <td className="py-2">{row.sku}</td>
+                            <td className="py-2">{row.category_slug}</td>
+                            <td className="py-2">
+                              <Badge variant={rowCatalogType === 'UNITARIO' ? 'default' : 'secondary'}>
+                                {rowCatalogType === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
+                              </Badge>
+                            </td>
+                            <td className="py-2 text-right">R$ {price ?? 0}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                   {preview.length > 5 && (
