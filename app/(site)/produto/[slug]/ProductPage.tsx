@@ -71,6 +71,12 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
   const boxPricing = getBoxSavings(product);
   const unitPriceInBox = getBoxUnitPrice(product);
   const isLowStock = stock > 0 && stock <= 5;
+  const unitCrossSellProducts = crossSellProducts.filter(
+    (item) => item.tipo_catalogo === 'UNITARIO' || item.tipo_catalogo === 'AMBOS',
+  );
+  const unitRelatedProducts = relatedProducts.filter(
+    (item) => item.tipo_catalogo === 'UNITARIO' || item.tipo_catalogo === 'AMBOS',
+  );
 
   useEffect(() => {
     trackClientEvent({
@@ -435,11 +441,13 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           <div className="mb-8">
             <h2 className="text-2xl font-bold">Produtos relacionados</h2>
           </div>
-          {crossSellProducts.length > 0 ? (
+          {unitCrossSellProducts.length > 0 ? (
             <ProductGrid
-              products={crossSellProducts}
-              catalogType={catalogType === 'CAIXA_FECHADA' ? 'UNITARIO' : 'CAIXA_FECHADA'}
+              products={unitCrossSellProducts}
+              catalogType="UNITARIO"
             />
+          ) : unitRelatedProducts.length > 0 ? (
+            <ProductGrid products={unitRelatedProducts} catalogType="UNITARIO" />
           ) : (
             <div className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">
               Ainda nao ha sinal suficiente para montar recomendacoes personalizadas deste produto. Quando houver mais interacao, este bloco passa a sugerir complementos automaticamente.
@@ -447,12 +455,6 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           )}
         </div>
 
-        {crossSellProducts.length === 0 && relatedProducts.length > 0 && (
-          <div className="mt-16">
-            <h2 className="mb-8 text-2xl font-bold">Produtos relacionados</h2>
-            <ProductGrid products={relatedProducts} catalogType="UNITARIO" />
-          </div>
-        )}
       </div>
     </div>
   );
