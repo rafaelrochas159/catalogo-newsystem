@@ -33,6 +33,7 @@ interface ValidationError {
 export default function ImportPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isExportingProducts, setIsExportingProducts] = useState(false);
   const [preview, setPreview] = useState<ImportRow[]>([]);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [importType, setImportType] = useState<'UNITARIO' | 'CAIXA_FECHADA'>('UNITARIO');
@@ -264,6 +265,64 @@ export default function ImportPage() {
     XLSX.writeFile(wb, 'template-produtos.xlsx');
   };
 
+  const downloadRegisteredProducts = async () => {
+    setIsExportingProducts(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select(`
+          nome,
+          sku,
+          descricao,
+          tipo_catalogo,
+          preco_unitario,
+          preco_caixa,
+          estoque_unitario,
+          estoque_caixa,
+          quantidade_por_caixa,
+          imagem_principal,
+          categoria:categorias(slug)
+        `)
+        .eq('tipo_catalogo', importType)
+        .order('nome', { ascending: true });
+
+      if (error) throw error;
+
+      const rows = (data || []).map((product: any) => ({
+        name: product.nome || '',
+        sku: product.sku || '',
+        description: product.descricao || '',
+        category_slug: product.categoria?.slug || '',
+        price_unit: importType === 'UNITARIO' ? Number(product.preco_unitario || 0) : null,
+        price_box: importType === 'CAIXA_FECHADA' ? Number(product.preco_caixa || 0) : null,
+        stock_unit: importType === 'UNITARIO' ? Number(product.estoque_unitario || 0) : 0,
+        stock_box: importType === 'CAIXA_FECHADA' ? Number(product.estoque_caixa || 0) : 0,
+        quantity_per_box: importType === 'CAIXA_FECHADA' ? Number(product.quantidade_por_caixa || 0) || null : null,
+        main_image: product.imagem_principal || '',
+      }));
+
+      if (rows.length === 0) {
+        toast('Nao ha produtos cadastrados neste tipo para exportar.');
+        return;
+      }
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
+      XLSX.writeFile(
+        wb,
+        `produtos-cadastrados-${importType === 'UNITARIO' ? 'unitario' : 'caixa-fechada'}.xlsx`,
+      );
+      toast.success(`${rows.length} produtos exportados para edicao em massa.`);
+    } catch (error) {
+      console.error('Erro ao exportar produtos cadastrados', error);
+      toast.error('Nao foi possivel baixar os produtos cadastrados.');
+    } finally {
+      setIsExportingProducts(false);
+    }
+  };
+
   return (
     <div className="p-6 lg:p-8">
       <motion.div
@@ -368,6 +427,24 @@ export default function ImportPage() {
               >
                 <Download className="h-4 w-4 mr-2" />
                 Baixar Template
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={downloadRegisteredProducts}
+                disabled={isExportingProducts}
+              >
+                {isExportingProducts ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+                    Gerando planilha...
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Baixar produtos cadastrados
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
