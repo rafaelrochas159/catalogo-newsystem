@@ -115,6 +115,17 @@ export default function ProductsPage() {
           </div>
         </div>
 
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <Badge variant="outline" className="px-3 py-1 text-sm">
+            Total cadastrados: {products.length}
+          </Badge>
+          {searchQuery.trim() && (
+            <Badge variant="secondary" className="px-3 py-1 text-sm">
+              Exibindo na busca: {filteredProducts.length}
+            </Badge>
+          )}
+        </div>
+
         {/* Products Table */}
         <Card>
           <CardContent className="p-0">
