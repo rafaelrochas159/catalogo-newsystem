@@ -1,0 +1,37 @@
+PLANILHA OPERACIONAL DE IMPORTACAO
+
+Campos obrigatorios antes do import:
+- sku
+- name
+- slug_sugerido
+- imagem_principal
+- category_slug
+- catalog_type
+- is_active
+- pelo menos um preco valido conforme o tipo:
+  UNITARIO -> preco_unitario
+  CAIXA_FECHADA -> preco_caixa
+  AMBOS -> preco_unitario e preco_caixa
+
+Campos que podem ficar vazios quando nao houver base segura:
+- quantidade_por_caixa
+- preco_unitario ou preco_caixa nao aplicavel ao tipo escolhido
+
+Revisar antes do import:
+- confirmar nome comercial correto
+- confirmar categoria pelo slug real existente no admin
+- confirmar tipo do catalogo
+- confirmar preco correto
+- confirmar se quantidade_por_caixa faz sentido para itens de caixa
+- confirmar se a imagem principal abre corretamente
+
+Nunca alterar manualmente sem validacao:
+- sku
+- slug_sugerido, exceto se houver conflito real de slug
+- imagem_principal quando a URL/arquivo ja vier da auditoria segura
+- qualquer SKU bloqueado em manual_review.csv
+
+Modo de uso:
+- preencher apenas as colunas pendentes
+- manter status_preenchimento e campos_pendentes como controle operacional
+- exportar para Excel ou CSV e usar no fluxo atual do admin/importador

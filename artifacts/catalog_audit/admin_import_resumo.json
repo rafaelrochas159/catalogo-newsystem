@@ -1,0 +1,205 @@
+{
+  "total_skus": 16,
+  "completos": 0,
+  "pendentes": 16,
+  "pendencias_por_produto": [
+    {
+      "sku": "AJ-3452",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AJ-3452.png",
+      "slug_sugerido": "aj-3452"
+    },
+    {
+      "sku": "AJ-3453",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AJ-3453.png",
+      "slug_sugerido": "aj-3453"
+    },
+    {
+      "sku": "AL-1010",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-1010.png",
+      "slug_sugerido": "al-1010"
+    },
+    {
+      "sku": "AL-2659",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-2659.png",
+      "slug_sugerido": "al-2659"
+    },
+    {
+      "sku": "AL-A155",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-A155.png",
+      "slug_sugerido": "al-a155"
+    },
+    {
+      "sku": "AL-A230",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-A230.png",
+      "slug_sugerido": "al-a230"
+    },
+    {
+      "sku": "AL-C223",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-C223.png",
+      "slug_sugerido": "al-c223"
+    },
+    {
+      "sku": "AL-D890",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-D890_C款.png",
+      "slug_sugerido": "al-d890"
+    },
+    {
+      "sku": "AL-S380",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AL-S380.png",
+      "slug_sugerido": "al-s380"
+    },
+    {
+      "sku": "AU-4U",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/AU-4U.png",
+      "slug_sugerido": "au-4u"
+    },
+    {
+      "sku": "PN-951",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/PN-951.png",
+      "slug_sugerido": "pn-951"
+    },
+    {
+      "sku": "PN-952",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/PN-952.png",
+      "slug_sugerido": "pn-952"
+    },
+    {
+      "sku": "T10",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/T10.png",
+      "slug_sugerido": "t10"
+    },
+    {
+      "sku": "T11",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/T11.png",
+      "slug_sugerido": "t11"
+    },
+    {
+      "sku": "TX04",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/TX04.png",
+      "slug_sugerido": "tx04"
+    },
+    {
+      "sku": "ZQ-01",
+      "status_preenchimento": "PENDENTE",
+      "campos_pendentes": [
+        "name",
+        "category_slug",
+        "catalog_type",
+        "preco_unitario_ou_preco_caixa"
+      ],
+      "imagem_principal": "/imported-product-images-clean/ZQ-01.png",
+      "slug_sugerido": "zq-01"
+    }
+  ],
+  "outputs": {
+    "admin_import_operacional_csv": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\admin_import_operacional.csv",
+    "admin_import_operacional_xlsx": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\admin_import_operacional.xlsx",
+    "admin_import_instrucoes_txt": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\admin_import_instrucoes.txt",
+    "admin_import_resumo_json": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\admin_import_resumo.json"
+  }
+}
