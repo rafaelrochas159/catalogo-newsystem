@@ -28,6 +28,7 @@ import { openCartDrawer } from '@/lib/cart-ui';
 import { Produto } from '@/types';
 import { formatPrice, getBoxSavings, getBoxUnitPrice, getWhatsAppLink } from '@/lib/utils';
 import { getBoxPrice, getBoxQuantity, getCatalogOriginalPrice, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
+import { getProductImageGallery } from '@/lib/product-images';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
 import toast from 'react-hot-toast';
@@ -55,7 +56,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
   const addItem = useCart((state) => state.addItem);
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const images = [product.imagem_principal, ...(product.galeria_imagens || [])];
+  const images = getProductImageGallery(product);
 
   const price = getCatalogPrice(product, catalogType);
   const originalPrice = getCatalogOriginalPrice(product, catalogType);

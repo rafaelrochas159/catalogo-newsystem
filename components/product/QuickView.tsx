@@ -12,6 +12,7 @@ import { openCartDrawer } from '@/lib/cart-ui';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
 import { getBoxPrice, getBoxQuantity, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
+import { getProductPrimaryImage } from '@/lib/product-images';
 import { ShoppingCart, Minus, Plus, Check } from 'lucide-react';
 import { ProductBadges } from './ProductBadges';
 import toast from 'react-hot-toast';
@@ -27,6 +28,7 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const addItem = useCart((state) => state.addItem);
+  const primaryImage = getProductPrimaryImage(product);
 
   const price = getCatalogPrice(product, catalogType);
   const boxQuantity = getBoxQuantity(product);
@@ -79,7 +81,7 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
             {/* Image */}
             <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
               <Image
-                src={product.imagem_principal || '/images/placeholder.jpg'}
+                src={primaryImage}
                 alt={product.nome}
                 fill
                 className="object-cover"

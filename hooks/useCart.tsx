@@ -6,6 +6,7 @@ import { Produto, CartItem } from '@/types';
 import { trackClientEvent } from '@/lib/client-auth';
 import { BUSINESS_RULES, STORAGE_KEYS } from '@/lib/constants';
 import { getBoxQuantity, getCatalogPrice } from '@/lib/pricing';
+import { getProductPrimaryImage } from '@/lib/product-images';
 
 interface CartState {
   items: CartItem[];
@@ -119,7 +120,7 @@ export const useCart = create<CartState & CartActions>()(
             productId: product.id,
             name: product.nome,
             sku: product.sku,
-            image: product.imagem_principal,
+            image: getProductPrimaryImage(product),
             price, 
             quantity, 
             boxQuantity,

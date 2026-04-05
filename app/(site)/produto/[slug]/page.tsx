@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ProductPage } from './ProductPage';
 import { createServerClient } from '@/lib/supabase/client';
+import { getProductPrimaryImage } from '@/lib/product-images';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     openGraph: {
       title: product.meta_title || product.nome,
       description: product.meta_description || product.descricao,
-      images: [product.imagem_principal],
+      images: [getProductPrimaryImage(product)],
     },
   };
 }
