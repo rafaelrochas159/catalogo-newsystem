@@ -28,6 +28,13 @@ const FORCE_IMPORTED_PRODUCT_IMAGE_SKUS = new Set([
   'AL-3936',
 ]);
 
+const BLOCK_IMPORTED_PRODUCT_IMAGE_SKUS = new Set([
+  'J-60-AIR31',
+  'J-80-PRO',
+  'J-85-PRO',
+  'J-88-PRO',
+]);
+
 const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
   'AL-2336': [],
   'AL-3829': [
@@ -46,6 +53,9 @@ const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
 
 export function getImportedProductImagesBySku(sku: string | null | undefined) {
   const key = normalizeSkuKey(sku);
+  if (BLOCK_IMPORTED_PRODUCT_IMAGE_SKUS.has(key)) {
+    return [];
+  }
   return PRODUCT_IMAGE_OVERRIDES[key] ?? GENERATED_PRODUCT_IMAGE_MANIFEST[key] ?? [];
 }
 
