@@ -22,13 +22,31 @@ function uniqueImages(items: string[]) {
 }
 
 const FORCE_IMPORTED_PRODUCT_IMAGE_SKUS = new Set([
+  'AL-2336',
   'AL-3829',
+  'AL-8391',
   'AL-3936',
 ]);
 
+const PRODUCT_IMAGE_OVERRIDES: Record<string, string[]> = {
+  'AL-2336': [],
+  'AL-3829': [
+    '/imported-product-images-renamed/produtos_imagens_renomeadas/AL-3829.jpg',
+    '/imported-product-images-renamed/produtos_imagens_renomeadas/AL-3829_1.jpg',
+  ],
+  'AL-8391': [
+    '/imported-product-images-renamed/produtos_imagens_renomeadas/AL-8391.jpg',
+    '/imported-product-images-renamed/produtos_imagens_renomeadas/AL-8391_1.jpg',
+  ],
+  'AL-3936': [
+    '/imported-product-images-renamed/produtos_imagens_renomeadas/AL-3936_1.jpg',
+    '/imported-product-images-renamed/produtos_imagens_renomeadas/AL-3936.jpg',
+  ],
+};
+
 export function getImportedProductImagesBySku(sku: string | null | undefined) {
   const key = normalizeSkuKey(sku);
-  return GENERATED_PRODUCT_IMAGE_MANIFEST[key] || [];
+  return PRODUCT_IMAGE_OVERRIDES[key] ?? GENERATED_PRODUCT_IMAGE_MANIFEST[key] ?? [];
 }
 
 export function getProductImageCandidates(product: ProductImageLike) {
