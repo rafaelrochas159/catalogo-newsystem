@@ -1,0 +1,63 @@
+{
+  "mode_default": "dry_run",
+  "mode_execute": "manual_and_explicit_only",
+  "products_to_create_count": 16,
+  "safe_image_updates_count": 1,
+  "safe_image_update_skus": [
+    "J-60-AIR39"
+  ],
+  "blocked_manual_review_count": 24,
+  "blocked_manual_review_skus": [
+    "A-05-TYPE-C",
+    "A-607-M10",
+    "A-607-Q",
+    "A-607-Q-MC",
+    "A-607-W",
+    "A-607-W-PB",
+    "A-607-Y",
+    "A-607-Y-2",
+    "AG-690-C",
+    "AL-15-CC",
+    "AL-305-V8",
+    "AL-306-5G",
+    "AL-C91-TYPE-C",
+    "AL-HDMI-10M",
+    "AL-U-32",
+    "C-052",
+    "EL-3111-5G",
+    "EL-3111-CC",
+    "EL-3111-TY",
+    "EL-3111-V8",
+    "F-060",
+    "F-060-BW",
+    "I12",
+    "I12-TWS",
+    "J-60",
+    "J-70-PRO-B",
+    "J-70-PRO-B-2",
+    "K9-IP-2IN1",
+    "M-10"
+  ],
+  "validations": {
+    "duplicate_sku_in_create": false,
+    "duplicate_slug_in_create": false,
+    "duplicate_slug_values": [],
+    "manual_review_overlap_in_create": false,
+    "manual_review_overlap_in_updates": false,
+    "all_create_images_valid": true,
+    "all_update_images_valid": true
+  },
+  "source_artifacts": {
+    "create_source": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\products_to_create.csv",
+    "link_source": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\products_to_link_images.csv",
+    "manual_review_source": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\manual_review.csv",
+    "audit_source": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\audit_sku_matches.csv"
+  },
+  "outputs": {
+    "create_products_ready_csv": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\create_products_ready.csv",
+    "create_products_ready_json": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\create_products_ready.json",
+    "safe_image_updates_sql": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\safe_image_updates.sql",
+    "safe_image_updates_json": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\safe_image_updates.json",
+    "execution_summary_json": "C:\\Users\\rafae\\OneDrive\\Documentos\\SITE DA LOJA NEW SYSTEM\\catalogo-newsystem\\artifacts\\catalog_audit\\execution_summary.json"
+  }
+}

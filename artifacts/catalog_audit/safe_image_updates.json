@@ -1,0 +1,11 @@
+[
+  {
+    "sku": "J-60-AIR39",
+    "site_name": "Fone de Ouvido J-60 AIR39",
+    "before_image": "produto_p18_img8.jpg",
+    "after_image": "/imported-product-images-clean/J-60(AIR_39款).png",
+    "mode": "dry_run",
+    "idempotent": true,
+    "will_change_only_if_different": true
+  }
+]
