@@ -1,0 +1,72 @@
+[
+  {
+    "id": "df467b5b-fcef-48c7-8c86-c14062fe5f8c",
+    "nome": "Adaptador Bluetooth",
+    "slug": "adaptador-bluetooth",
+    "is_active": true,
+    "order_index": 21
+  },
+  {
+    "id": "02e4c1b0-a99c-4847-934c-975966079b07",
+    "nome": "Cadeado",
+    "slug": "cadeado",
+    "is_active": true,
+    "order_index": 22
+  },
+  {
+    "id": "09df9ab2-2ab6-4dff-ad77-a1728410cb36",
+    "nome": "Camera de Seguranca",
+    "slug": "camera-de-seguranca",
+    "is_active": true,
+    "order_index": 23
+  },
+  {
+    "id": "1f3109e5-cc85-4a06-97bc-94ee5774e1ab",
+    "nome": "Guarda Chuva",
+    "slug": "guarda-chuva",
+    "is_active": true,
+    "order_index": 18
+  },
+  {
+    "id": "7003901f-e09e-4e03-84fc-257ef39585c6",
+    "nome": "Hub USB",
+    "slug": "hub-usb",
+    "is_active": true,
+    "order_index": 24
+  },
+  {
+    "id": "85c865a2-5ad0-46db-b76b-1f3c2ca2e7e5",
+    "nome": "Kit de Bolas",
+    "slug": "kit-de-bolas",
+    "is_active": true,
+    "order_index": 27
+  },
+  {
+    "id": "14ed7cd5-11ca-4661-8d1b-5326ee085666",
+    "nome": "Powerbank",
+    "slug": "powerbank",
+    "is_active": true,
+    "order_index": 25
+  },
+  {
+    "id": "c1ebed01-b25c-4ba0-ba7f-8333523e7819",
+    "nome": "Rastreador",
+    "slug": "rastreador",
+    "is_active": true,
+    "order_index": 19
+  },
+  {
+    "id": "fed5f00d-66fc-4feb-82a4-98a10f13a490",
+    "nome": "Smartwatch",
+    "slug": "smartwatch",
+    "is_active": true,
+    "order_index": 26
+  },
+  {
+    "id": "9f8df97d-3673-48c0-aaab-f4d9bead9187",
+    "nome": "Telescopio",
+    "slug": "telescopio",
+    "is_active": true,
+    "order_index": 20
+  }
+]

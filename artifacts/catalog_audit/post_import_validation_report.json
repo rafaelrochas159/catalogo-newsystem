@@ -1,0 +1,366 @@
+{
+  "db_validation": [
+    {
+      "sku": "AJ-3452",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "guarda-chuva-23-polegadas-aj-3452-aj-3452"
+    },
+    {
+      "sku": "AJ-3453",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "guarda-chuva-21-polegadas-aj-3453-aj-3453"
+    },
+    {
+      "sku": "AL-1010",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "rastreador-al-1010-al-1010"
+    },
+    {
+      "sku": "AL-2659",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "telescopio-monocular-al-2659-al-2659"
+    },
+    {
+      "sku": "AL-A155",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "adaptador-bluetooth-3-5mm-al-a155-al-a155"
+    },
+    {
+      "sku": "AL-A230",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "adaptador-bluetooth-usb-al-a230-al-a230"
+    },
+    {
+      "sku": "AL-C223",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "cadeado-de-capacete-al-c223-al-c223"
+    },
+    {
+      "sku": "AL-D890",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "camera-de-seguranca-bocal-al-d890-al-d890"
+    },
+    {
+      "sku": "AL-S380",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "camera-de-seguranca-al-s380-al-s380"
+    },
+    {
+      "sku": "AU-4U",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "hub-usb-4-portas-au-4u-au-4u"
+    },
+    {
+      "sku": "PN-951",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "powerbank-10000mah-pn-951-pn-951"
+    },
+    {
+      "sku": "PN-952",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "powerbank-5000mah-pn-952-pn-952"
+    },
+    {
+      "sku": "T10",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "smartwatch-t10-t10"
+    },
+    {
+      "sku": "T11",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "smartwatch-t11-t11"
+    },
+    {
+      "sku": "TX04",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "rastreador-tx04-tx04"
+    },
+    {
+      "sku": "ZQ-01",
+      "exists_in_db": true,
+      "nome_ok": true,
+      "tipo_catalogo_ok": true,
+      "imagem_ok": true,
+      "preco_unitario_ok": true,
+      "quantidade_por_caixa_ok": true,
+      "preco_caixa_ok": true,
+      "categoria_ok": true,
+      "slug": "kit-de-bolas-zq-01-zq-01"
+    }
+  ],
+  "image_update_validation": {
+    "sku": "J-60-AIR39",
+    "expected_image": "/imported-product-images-clean/J-60-AIR39.png",
+    "actual_image": "/imported-product-images-clean/J-60-AIR39.png",
+    "ok": true
+  },
+  "public_page_validation": [
+    {
+      "sku": "AJ-3452",
+      "slug": "guarda-chuva-23-polegadas-aj-3452-aj-3452",
+      "url": "https://catalogo-newsystem.vercel.app/produto/guarda-chuva-23-polegadas-aj-3452-aj-3452",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AJ-3453",
+      "slug": "guarda-chuva-21-polegadas-aj-3453-aj-3453",
+      "url": "https://catalogo-newsystem.vercel.app/produto/guarda-chuva-21-polegadas-aj-3453-aj-3453",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-1010",
+      "slug": "rastreador-al-1010-al-1010",
+      "url": "https://catalogo-newsystem.vercel.app/produto/rastreador-al-1010-al-1010",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-2659",
+      "slug": "telescopio-monocular-al-2659-al-2659",
+      "url": "https://catalogo-newsystem.vercel.app/produto/telescopio-monocular-al-2659-al-2659",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-A155",
+      "slug": "adaptador-bluetooth-3-5mm-al-a155-al-a155",
+      "url": "https://catalogo-newsystem.vercel.app/produto/adaptador-bluetooth-3-5mm-al-a155-al-a155",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-A230",
+      "slug": "adaptador-bluetooth-usb-al-a230-al-a230",
+      "url": "https://catalogo-newsystem.vercel.app/produto/adaptador-bluetooth-usb-al-a230-al-a230",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-C223",
+      "slug": "cadeado-de-capacete-al-c223-al-c223",
+      "url": "https://catalogo-newsystem.vercel.app/produto/cadeado-de-capacete-al-c223-al-c223",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-D890",
+      "slug": "camera-de-seguranca-bocal-al-d890-al-d890",
+      "url": "https://catalogo-newsystem.vercel.app/produto/camera-de-seguranca-bocal-al-d890-al-d890",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AL-S380",
+      "slug": "camera-de-seguranca-al-s380-al-s380",
+      "url": "https://catalogo-newsystem.vercel.app/produto/camera-de-seguranca-al-s380-al-s380",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "AU-4U",
+      "slug": "hub-usb-4-portas-au-4u-au-4u",
+      "url": "https://catalogo-newsystem.vercel.app/produto/hub-usb-4-portas-au-4u-au-4u",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "PN-951",
+      "slug": "powerbank-10000mah-pn-951-pn-951",
+      "url": "https://catalogo-newsystem.vercel.app/produto/powerbank-10000mah-pn-951-pn-951",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "PN-952",
+      "slug": "powerbank-5000mah-pn-952-pn-952",
+      "url": "https://catalogo-newsystem.vercel.app/produto/powerbank-5000mah-pn-952-pn-952",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "T10",
+      "slug": "smartwatch-t10-t10",
+      "url": "https://catalogo-newsystem.vercel.app/produto/smartwatch-t10-t10",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "T11",
+      "slug": "smartwatch-t11-t11",
+      "url": "https://catalogo-newsystem.vercel.app/produto/smartwatch-t11-t11",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "TX04",
+      "slug": "rastreador-tx04-tx04",
+      "url": "https://catalogo-newsystem.vercel.app/produto/rastreador-tx04-tx04",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "ZQ-01",
+      "slug": "kit-de-bolas-zq-01-zq-01",
+      "url": "https://catalogo-newsystem.vercel.app/produto/kit-de-bolas-zq-01-zq-01",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    },
+    {
+      "sku": "J-60-AIR39",
+      "slug": "fone-de-ouvido-j-60-air39-j-60-air39",
+      "url": "https://catalogo-newsystem.vercel.app/produto/fone-de-ouvido-j-60-air39-j-60-air39",
+      "status": 200,
+      "contains_name": true,
+      "contains_image": true
+    }
+  ],
+  "blocked_skus_untouched": [
+    "A-05-TYPE-C",
+    "A-607-Q",
+    "A-607-Q-MC",
+    "A-607-W-PB",
+    "A-607-Y-2",
+    "AG-690-C",
+    "AL-15-CC",
+    "AL-305-V8",
+    "AL-306-5G",
+    "AL-C91-TYPE-C",
+    "AL-HDMI-10M",
+    "AL-U-32",
+    "C-052",
+    "EL-3111-5G",
+    "EL-3111-CC",
+    "EL-3111-TY",
+    "EL-3111-V8",
+    "F-060",
+    "F-060-BW",
+    "I12-TWS",
+    "J-60",
+    "J-70-PRO-B-2",
+    "K9-IP-2IN1",
+    "M-10"
+  ]
+}
