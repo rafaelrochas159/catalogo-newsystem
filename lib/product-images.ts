@@ -21,6 +21,11 @@ function uniqueImages(items: string[]) {
   return Array.from(new Set(items.map((item) => String(item || '').trim()).filter(Boolean)));
 }
 
+const FORCE_IMPORTED_PRODUCT_IMAGE_SKUS = new Set([
+  'AL-3829',
+  'AL-3936',
+]);
+
 export function getImportedProductImagesBySku(sku: string | null | undefined) {
   const key = normalizeSkuKey(sku);
   return GENERATED_PRODUCT_IMAGE_MANIFEST[key] || [];
@@ -34,11 +39,14 @@ export function getProductImageCandidates(product: ProductImageLike) {
     ? product.galeria_imagens.filter(isUsableImage).map((item) => String(item))
     : [];
   const imported = getImportedProductImagesBySku(product.sku);
+  const key = normalizeSkuKey(product.sku);
+  const preferImported = FORCE_IMPORTED_PRODUCT_IMAGE_SKUS.has(key);
 
   return uniqueImages([
-    ...existingPrimary,
-    ...existingGallery,
-    ...imported,
+    ...(preferImported ? imported : existingPrimary),
+    ...(preferImported ? [] : existingGallery),
+    ...(preferImported ? existingPrimary : imported),
+    ...(preferImported ? existingGallery : []),
     '/images/placeholder.jpg',
   ]);
 }
