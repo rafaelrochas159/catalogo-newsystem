@@ -61,8 +61,11 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
   const originalPrice = getCatalogOriginalPrice(product, catalogType);
   const boxQuantity = getBoxQuantity(product);
   const unitPrice = getUnitPrice(product);
+  const displayPrice = catalogType === 'CAIXA_FECHADA' ? unitPrice : price;
+  const displayOriginalPrice =
+    catalogType === 'CAIXA_FECHADA' ? unitPrice : originalPrice;
 
-  const hasDiscount = price < originalPrice;
+  const hasDiscount = displayPrice < displayOriginalPrice;
   const stock = catalogType === 'UNITARIO' ? product.estoque_unitario : product.estoque_caixa;
   const supportsUnit = product.tipo_catalogo === 'UNITARIO' || product.tipo_catalogo === 'AMBOS';
   const supportsBox = product.tipo_catalogo === 'CAIXA_FECHADA' || product.tipo_catalogo === 'AMBOS';
@@ -265,9 +268,9 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neon-blue">Preco principal</p>
                     <div className="mt-2 flex items-center gap-3">
-                      <span className="text-4xl font-bold text-neon-blue">{formatPrice(price)}</span>
+                      <span className="text-4xl font-bold text-neon-blue">{formatPrice(displayPrice)}</span>
                       {hasDiscount && (
-                        <span className="text-lg text-muted-foreground line-through">{formatPrice(originalPrice)}</span>
+                        <span className="text-lg text-muted-foreground line-through">{formatPrice(displayOriginalPrice)}</span>
                       )}
                     </div>
                     {catalogType === 'UNITARIO' ? (
