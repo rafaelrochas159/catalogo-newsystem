@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { ProductBadges } from '@/components/product/ProductBadges';
+import { ProductImage } from '@/components/product/ProductImage';
 import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
 import { openCartDrawer } from '@/lib/cart-ui';
@@ -171,8 +172,12 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
               <div className="absolute left-4 top-4 z-10">
                 <ProductBadges product={product} catalogType={catalogType} />
               </div>
-              <Image
-                src={images[selectedImage] || '/images/placeholder.jpg'}
+              <ProductImage
+                product={{
+                  sku: product.sku,
+                  imagem_principal: images[selectedImage] || '/images/placeholder.jpg',
+                  galeria_imagens: images.slice(selectedImage + 1),
+                }}
                 alt={product.nome}
                 width={1200}
                 height={1200}
@@ -191,7 +196,16 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                       selectedImage === index ? 'border-neon-blue' : 'border-transparent hover:border-border'
                     }`}
                   >
-                    <Image src={image} alt={`${product.nome} - ${index + 1}`} fill className="object-cover" />
+                    <ProductImage
+                      product={{
+                        sku: product.sku,
+                        imagem_principal: image,
+                        galeria_imagens: images.filter((_, imageIndex) => imageIndex !== index),
+                      }}
+                      alt={`${product.nome} - ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
                   </button>
                 ))}
               </div>

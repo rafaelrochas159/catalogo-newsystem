@@ -19,7 +19,7 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { Produto } from '@/types';
 import { formatPrice } from '@/lib/utils';
-import { getProductPrimaryImage } from '@/lib/product-images';
+import { ProductImage } from '@/components/product/ProductImage';
 import toast from 'react-hot-toast';
 
 export default function ProductsPage() {
@@ -162,9 +162,11 @@ export default function ProductsPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden">
-                            <img
-                              src={getProductPrimaryImage(product)}
+                            <ProductImage
+                              product={product}
                               alt={product.nome}
+                              width={40}
+                              height={40}
                               className="w-full h-full object-cover"
                             />
                           </div>

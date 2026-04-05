@@ -12,9 +12,9 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { openCartDrawer } from '@/lib/cart-ui';
 import { formatPrice, getBoxSavings, getBoxUnitPrice } from '@/lib/utils';
 import { getBoxPrice, getBoxQuantity, getCatalogOriginalPrice, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
-import { getProductPrimaryImage } from '@/lib/product-images';
 import { PRODUCT_BADGES } from '@/lib/constants';
 import { QuickView } from './QuickView';
+import { ProductImage } from './ProductImage';
 import toast from 'react-hot-toast';
 
 interface ProductCardProps {
@@ -29,7 +29,6 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const addItem = useCart((state) => state.addItem);
   const { isFavorite, toggleFavorite } = useFavorites();
-  const primaryImage = getProductPrimaryImage(product);
 
   const price = getCatalogPrice(product, catalogType);
   const originalPrice = getCatalogOriginalPrice(product, catalogType);
@@ -82,8 +81,8 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
         isHovered ? 'border-neon-blue/40 shadow-[0_22px_60px_rgba(0,243,255,0.12)]' : 'border-border'
       }`}>
         <div className="relative aspect-square cursor-pointer overflow-hidden bg-muted" onClick={() => setIsQuickViewOpen(true)}>
-          <Image
-            src={primaryImage}
+          <ProductImage
+            product={product}
             alt={product.nome}
             fill
             className={`object-cover transition-transform duration-500 ${isHovered ? 'scale-110' : 'scale-100'}`}

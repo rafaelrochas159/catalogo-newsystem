@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +11,9 @@ import { openCartDrawer } from '@/lib/cart-ui';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
 import { getBoxPrice, getBoxQuantity, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
-import { getProductPrimaryImage } from '@/lib/product-images';
 import { ShoppingCart, Minus, Plus, Check } from 'lucide-react';
 import { ProductBadges } from './ProductBadges';
+import { ProductImage } from './ProductImage';
 import toast from 'react-hot-toast';
 
 interface QuickViewProps {
@@ -28,7 +27,6 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const addItem = useCart((state) => state.addItem);
-  const primaryImage = getProductPrimaryImage(product);
 
   const price = getCatalogPrice(product, catalogType);
   const boxQuantity = getBoxQuantity(product);
@@ -80,8 +78,8 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
           <div className="grid md:grid-cols-2 gap-6 p-6">
             {/* Image */}
             <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-              <Image
-                src={primaryImage}
+              <ProductImage
+                product={product}
                 alt={product.nome}
                 fill
                 className="object-cover"
