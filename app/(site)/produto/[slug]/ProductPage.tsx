@@ -27,6 +27,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { openCartDrawer } from '@/lib/cart-ui';
 import { Produto } from '@/types';
 import { formatPrice, getBoxSavings, getBoxUnitPrice, getWhatsAppLink } from '@/lib/utils';
+import { getBoxPrice, getBoxQuantity, getCatalogOriginalPrice, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
 import { COMPANY_INFO, BUSINESS_RULES } from '@/lib/constants';
 import { authorizedFetch, getAnonymousVisitorId, trackClientEvent } from '@/lib/client-auth';
 import toast from 'react-hot-toast';
@@ -56,13 +57,10 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
 
   const images = [product.imagem_principal, ...(product.galeria_imagens || [])];
 
-  const price = catalogType === 'UNITARIO'
-    ? (product.preco_promocional_unitario || product.preco_unitario || 0)
-    : (product.preco_promocional_caixa || product.preco_caixa || 0);
-
-  const originalPrice = catalogType === 'UNITARIO'
-    ? (product.preco_unitario || 0)
-    : (product.preco_caixa || 0);
+  const price = getCatalogPrice(product, catalogType);
+  const originalPrice = getCatalogOriginalPrice(product, catalogType);
+  const boxQuantity = getBoxQuantity(product);
+  const unitPrice = getUnitPrice(product);
 
   const hasDiscount = price < originalPrice;
   const stock = catalogType === 'UNITARIO' ? product.estoque_unitario : product.estoque_caixa;
@@ -272,6 +270,21 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                         <span className="text-lg text-muted-foreground line-through">{formatPrice(originalPrice)}</span>
                       )}
                     </div>
+                    {catalogType === 'UNITARIO' ? (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {formatPrice(unitPrice)} / unidade
+                      </p>
+                    ) : (
+                      <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                        <p>{formatPrice(unitPrice)} / unidade</p>
+                        {boxQuantity && (
+                          <>
+                            <p>Caixa com {boxQuantity} unidades</p>
+                            <p>Total da caixa: <span className="font-medium text-foreground">{formatPrice(getBoxPrice(product))}</span></p>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   {hasDiscount && (
                     <Badge className="border-0 bg-emerald-500 text-white">

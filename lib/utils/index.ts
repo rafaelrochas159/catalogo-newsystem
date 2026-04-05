@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { getBoxUnitPrice as getComputedBoxUnitPrice } from '@/lib/pricing';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -175,11 +176,7 @@ interface CatalogPricingProduct {
 }
 
 export function getBoxUnitPrice(product: CatalogPricingProduct): number | null {
-  if (!product.preco_caixa || !product.quantidade_por_caixa || product.quantidade_por_caixa <= 0) {
-    return null;
-  }
-
-  return product.preco_caixa / product.quantidade_por_caixa;
+  return getComputedBoxUnitPrice(product);
 }
 
 export function getBoxSavings(product: CatalogPricingProduct): {

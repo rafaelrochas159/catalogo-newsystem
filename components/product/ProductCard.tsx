@@ -11,6 +11,7 @@ import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
 import { openCartDrawer } from '@/lib/cart-ui';
 import { formatPrice, getBoxSavings, getBoxUnitPrice } from '@/lib/utils';
+import { getBoxPrice, getBoxQuantity, getCatalogOriginalPrice, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
 import { PRODUCT_BADGES } from '@/lib/constants';
 import { QuickView } from './QuickView';
 import toast from 'react-hot-toast';
@@ -28,13 +29,10 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
   const addItem = useCart((state) => state.addItem);
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const price = catalogType === 'UNITARIO'
-    ? (product.preco_promocional_unitario || product.preco_unitario || 0)
-    : (product.preco_promocional_caixa || product.preco_caixa || 0);
-
-  const originalPrice = catalogType === 'UNITARIO'
-    ? (product.preco_unitario || 0)
-    : (product.preco_caixa || 0);
+  const price = getCatalogPrice(product, catalogType);
+  const originalPrice = getCatalogOriginalPrice(product, catalogType);
+  const boxQuantity = getBoxQuantity(product);
+  const unitPrice = getUnitPrice(product);
 
   const hasDiscount = price < originalPrice;
   const stock = catalogType === 'UNITARIO' ? product.estoque_unitario : product.estoque_caixa;
@@ -173,17 +171,22 @@ export function ProductCard({ product, catalogType, showQuickView = true }: Prod
                   )}
                 </div>
               </div>
-              {catalogType === 'CAIXA_FECHADA' && product.quantidade_por_caixa ? (
+              {catalogType === 'CAIXA_FECHADA' && boxQuantity ? (
                 <div className="rounded-xl bg-background/80 px-3 py-2 text-right text-xs">
-                  <p className="font-semibold">{product.quantidade_por_caixa} un</p>
+                  <p className="font-semibold">{boxQuantity} un</p>
                   <p className="text-muted-foreground">por caixa</p>
                 </div>
               ) : null}
             </div>
 
-            {catalogType === 'CAIXA_FECHADA' && unitPriceInBox && (
-              <p className="mt-3 text-sm text-emerald-500">Cada unidade na caixa sai por {formatPrice(unitPriceInBox)}.</p>
-            )}
+            {catalogType === 'CAIXA_FECHADA' ? (
+              <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+                <p>{formatPrice(unitPrice)} / unidade</p>
+                {boxQuantity && (
+                  <p>Total da caixa: <span className="font-medium text-foreground">{formatPrice(getBoxPrice(product))}</span></p>
+                )}
+              </div>
+            ) : null}
 
             {catalogType === 'UNITARIO' && boxPricing.savingsPerUnit > 0 && (
               <p className="mt-3 text-sm text-emerald-500">

@@ -11,6 +11,7 @@ import { trackClientEvent } from '@/lib/client-auth';
 import { openCartDrawer } from '@/lib/cart-ui';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
+import { getBoxPrice, getBoxQuantity, getCatalogPrice, getUnitPrice } from '@/lib/pricing';
 import { ShoppingCart, Minus, Plus, Check } from 'lucide-react';
 import { ProductBadges } from './ProductBadges';
 import toast from 'react-hot-toast';
@@ -27,9 +28,9 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
   const [isAdding, setIsAdding] = useState(false);
   const addItem = useCart((state) => state.addItem);
 
-  const price = catalogType === 'UNITARIO'
-    ? (product.preco_promocional_unitario || product.preco_unitario || 0)
-    : (product.preco_promocional_caixa || product.preco_caixa || 0);
+  const price = getCatalogPrice(product, catalogType);
+  const boxQuantity = getBoxQuantity(product);
+  const unitPrice = getUnitPrice(product);
 
   const stock = catalogType === 'UNITARIO'
     ? (product.estoque_unitario || 0)
@@ -112,12 +113,20 @@ export function QuickView({ product, isOpen, onClose, catalogType }: QuickViewPr
                 <span className="text-3xl font-bold text-neon-blue">
                   {formatPrice(price)}
                 </span>
-                {catalogType === 'CAIXA_FECHADA' && product.quantidade_por_caixa && (
+                {catalogType === 'CAIXA_FECHADA' && boxQuantity && (
                   <span className="text-sm text-muted-foreground">
-                    ({product.quantidade_por_caixa} un/caixa)
+                    ({boxQuantity} un/caixa)
                   </span>
                 )}
               </div>
+              {catalogType === 'CAIXA_FECHADA' && (
+                <div className="space-y-1 text-sm text-muted-foreground">
+                  <p>{formatPrice(unitPrice)} / unidade</p>
+                  {boxQuantity && (
+                    <p>Total da caixa: <span className="font-medium text-foreground">{formatPrice(getBoxPrice(product))}</span></p>
+                  )}
+                </div>
+              )}
 
               {/* Stock */}
               <p className="text-sm">

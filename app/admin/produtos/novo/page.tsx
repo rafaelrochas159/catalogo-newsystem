@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase/client";
+import { getBoxPrice } from "@/lib/pricing";
 import toast from "react-hot-toast";
 
 interface Category {
@@ -60,6 +61,12 @@ export default function NovoProdutoPage() {
     highlight_on_home: false,
     related_product_ids_input: "",
   });
+  const isBoxCatalog = formData.catalog_type === "CAIXA_FECHADA" || formData.catalog_type === "AMBOS";
+  const boxQuantityValue = parseInt(formData.quantity_per_box, 10);
+  const computedBoxPrice = getBoxPrice({
+    preco_unitario: parseFloat(formData.price_unit) || 0,
+    quantidade_por_caixa: Number.isFinite(boxQuantityValue) ? boxQuantityValue : null,
+  });
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -80,6 +87,10 @@ export default function NovoProdutoPage() {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
+    if (isBoxCatalog && (!Number.isFinite(boxQuantityValue) || boxQuantityValue <= 0)) {
+      toast.error("Informe uma quantidade por caixa maior que zero.");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -91,7 +102,7 @@ export default function NovoProdutoPage() {
         : null;
 
       const priceUnit = parseFloat(formData.price_unit);
-      const priceBox = formData.price_box ? parseFloat(formData.price_box) : null;
+      const priceBox = isBoxCatalog ? computedBoxPrice : null;
 
       const productData = {
         nome: formData.name.trim(),
@@ -379,10 +390,13 @@ export default function NovoProdutoPage() {
                     <Input
                       type="number"
                       step="0.01"
-                      value={formData.price_box}
-                      onChange={(e) => setFormData({ ...formData, price_box: e.target.value })}
+                      value={isBoxCatalog && computedBoxPrice > 0 ? computedBoxPrice.toFixed(2) : ""}
+                      readOnly
                       placeholder="0,00"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Calculado automaticamente: preço unitário x quantidade por caixa.
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label>Estoque Caixa</Label>
@@ -433,9 +447,10 @@ export default function NovoProdutoPage() {
                   <div className="pt-4 border-t space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Qtd por Caixa</Label>
+                        <Label>Qtd por Caixa *</Label>
                         <Input
                           type="number"
+                          min="1"
                           value={formData.quantity_per_box}
                           onChange={(e) => setFormData({ ...formData, quantity_per_box: e.target.value })}
                           placeholder="Ex: 10"
@@ -666,7 +681,9 @@ export default function NovoProdutoPage() {
                 </div>
                 <p className="font-medium truncate">{formData.name || "Produto"}</p>
                 <p className="text-neon-blue font-bold">
-                  {formData.price_unit ? `R$ ${parseFloat(formData.price_unit).toFixed(2)}` : "R$ 0,00"}
+                  {isBoxCatalog && computedBoxPrice > 0
+                    ? `Caixa: R$ ${computedBoxPrice.toFixed(2)}`
+                    : formData.price_unit ? `R$ ${parseFloat(formData.price_unit).toFixed(2)}` : "R$ 0,00"}
                 </p>
                 <div className="flex gap-1 mt-2 flex-wrap">
                   {formData.is_new && <Badge className="bg-green-500">Novo</Badge>}

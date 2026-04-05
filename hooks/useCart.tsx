@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware';
 import { Produto, CartItem } from '@/types';
 import { trackClientEvent } from '@/lib/client-auth';
 import { BUSINESS_RULES, STORAGE_KEYS } from '@/lib/constants';
+import { getBoxQuantity, getCatalogPrice } from '@/lib/pricing';
 
 interface CartState {
   items: CartItem[];
@@ -26,11 +27,7 @@ interface CartActions {
 }
 
 const getProductPrice = (product: Produto, type: 'UNITARIO' | 'CAIXA_FECHADA'): number => {
-  if (type === 'UNITARIO') {
-    return product.preco_promocional_unitario || product.preco_unitario || 0;
-  } else {
-    return product.preco_promocional_caixa || product.preco_caixa || 0;
-  }
+  return getCatalogPrice(product, type);
 };
 
 export const useCart = create<CartState & CartActions>()(
@@ -86,6 +83,7 @@ export const useCart = create<CartState & CartActions>()(
         }
 
         const price = getProductPrice(product, type);
+        const boxQuantity = type === 'CAIXA_FECHADA' ? getBoxQuantity(product) || 1 : undefined;
         
         if (price === 0 && type === 'CAIXA_FECHADA') {
           return { 
@@ -124,6 +122,8 @@ export const useCart = create<CartState & CartActions>()(
             image: product.imagem_principal,
             price, 
             quantity, 
+            boxQuantity,
+            isBox: type === 'CAIXA_FECHADA',
             type: normalizedType as 'unit' | 'box',
             catalogType: type 
           }];

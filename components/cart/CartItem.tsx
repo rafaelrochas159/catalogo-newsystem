@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CartItem as CartItemType } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
+import { getBoxLabel } from '@/lib/pricing';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 
 interface CartItemProps {
@@ -16,8 +17,12 @@ export function CartItem({ item, catalogType }: CartItemProps) {
   const updateQuantity = useCart((state) => state.updateQuantity);
   const removeItem = useCart((state) => state.removeItem);
 
-  const { productId, name, sku, image, price, quantity, type } = item;
+  const { productId, name, sku, image, price, quantity, type, boxQuantity } = item;
   const total = price * quantity;
+  const boxLabel =
+    type === 'box' || type === 'CAIXA_FECHADA'
+      ? getBoxLabel({ box_quantity: boxQuantity }, quantity)
+      : null;
 
   const handleUpdateQuantity = (newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -50,6 +55,11 @@ export function CartItem({ item, catalogType }: CartItemProps) {
         <p className="text-xs text-muted-foreground">
           {type === 'unit' || type === 'UNITARIO' ? 'Unitário' : 'Caixa Fechada'}
         </p>
+        {boxLabel && (
+          <p className="text-xs text-muted-foreground">
+            {boxLabel}
+          </p>
+        )}
 
         {/* Quantity Controls */}
         <div className="flex items-center justify-between mt-2">

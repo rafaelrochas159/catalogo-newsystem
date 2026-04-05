@@ -111,6 +111,8 @@ export interface ItemCarrinho {
   image: string;
   price: number;
   quantity: number;
+  boxQuantity?: number;
+  isBox?: boolean;
   type: 'unit' | 'box' | 'UNITARIO' | 'CAIXA_FECHADA';
   catalogType?: 'UNITARIO' | 'CAIXA_FECHADA';
 
