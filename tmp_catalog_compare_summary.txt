@@ -1,0 +1,44 @@
+site_unique=149
+image_pack_unique=143
+missing_on_site=17
+MISSING_ON_SITE,AJ-3452,AJ-3452.png
+MISSING_ON_SITE,AJ-3453,AJ-3453.png
+MISSING_ON_SITE,AL-1010,AL-1010.png
+MISSING_ON_SITE,AL-2659,AL-2659.png
+MISSING_ON_SITE,AL-A155,AL-A155.png
+MISSING_ON_SITE,AL-A230,AL-A230.png
+MISSING_ON_SITE,AL-C223,AL-C223.png
+MISSING_ON_SITE,AL-D890,AL-D890_C款.png
+MISSING_ON_SITE,AL-S380,AL-S380.png
+MISSING_ON_SITE,AU-4U,AU-4U.png
+MISSING_ON_SITE,J-60-AIR-39,J-60(AIR_39款).png
+MISSING_ON_SITE,PN-951,PN-951.png
+MISSING_ON_SITE,PN-952,PN-952.png
+MISSING_ON_SITE,T10,T10.png
+MISSING_ON_SITE,T11,T11.png
+MISSING_ON_SITE,TX04,TX04.png
+MISSING_ON_SITE,ZQ-01,ZQ-01.png
+missing_in_pack=23
+MISSING_IN_PACK,A-05-TYPE-C,Carregador completo Tipo C,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,A-607-Q-MC,Fone de Ouvido A-607 Q Macaron,https://catalogo-newsystem.vercel.app/catalogo/caixa-fechada
+MISSING_IN_PACK,A-607-W-PB,Fone de Ouvido A-607 W com Powerbank,https://catalogo-newsystem.vercel.app/catalogo/caixa-fechada
+MISSING_IN_PACK,A-607-Y-2,Fone de Ouvido A-607 Y,https://catalogo-newsystem.vercel.app/catalogo/caixa-fechada
+MISSING_IN_PACK,AG-690-C,Mouse sem fio,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,AL-15-CC,Cabo USB-C CC altomex,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,AL-305-V8,Cabo V8 Altomex,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,AL-306-5G,Cabo IOS 2 METROS,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,AL-C91-TYPE-C,Carregador Veicular AL-C91-TYPE-C,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,AL-HDMI-10M,Cabo HDMI 10 METROS,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,AL-U-32,PENDRIVE AL-U-32GB,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,C-052,Suporte TV C-052,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,EL-3111-5G,Cabo IOS 1M EL-3111-5G,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,EL-3111-CC,Cabo USB-C tipo c / tipo c,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,EL-3111-TY,Cabo USB Tipo C Eletro,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,EL-3111-V8,Cabo V8 EL-3111-V8,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,F-060-BW,Fone P2 EMB F-060,https://catalogo-newsystem.vercel.app/catalogo/caixa-fechada
+MISSING_IN_PACK,I12-TWS,Fone de ouvido sem fio i12 branco,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,J-60,Fone Bluetooth J-60,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,J-60-AIR39,Fone de Ouvido J-60 AIR39,https://catalogo-newsystem.vercel.app/catalogo/caixa-fechada
+MISSING_IN_PACK,J-70-PRO-B-2,Fone de Ouvido Esportivo J-70 PRO B,https://catalogo-newsystem.vercel.app/catalogo/caixa-fechada
+MISSING_IN_PACK,K9-IP-2IN1,Microfone K9-IP-2IN1,https://catalogo-newsystem.vercel.app/catalogo/unitario
+MISSING_IN_PACK,M-10,FONE DE OUVIDO M10,https://catalogo-newsystem.vercel.app/catalogo/unitario

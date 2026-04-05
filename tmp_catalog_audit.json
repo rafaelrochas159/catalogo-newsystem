@@ -1,0 +1,1094 @@
+[
+  {
+    "sku": "5V-1A",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "895B",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido 895B"
+  },
+  {
+    "sku": "A-07",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 A-07"
+  },
+  {
+    "sku": "A-169",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-169"
+  },
+  {
+    "sku": "A-2019",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio A-2019"
+  },
+  {
+    "sku": "A-286",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-286"
+  },
+  {
+    "sku": "A-331",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-331"
+  },
+  {
+    "sku": "A-388",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-388"
+  },
+  {
+    "sku": "A-505",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-505"
+  },
+  {
+    "sku": "A-607",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Gamer A-607"
+  },
+  {
+    "sku": "A-607-A",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Gamer RGB A-607 A"
+  },
+  {
+    "sku": "A-607-F9",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 F9"
+  },
+  {
+    "sku": "A-607-M10",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 M10"
+  },
+  {
+    "sku": "A-607-MAX",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido com Caixa de Som A-607 MAX"
+  },
+  {
+    "sku": "A-607-P",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 P"
+  },
+  {
+    "sku": "A-607-Q",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 Q"
+  },
+  {
+    "sku": "A-607-T",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 T"
+  },
+  {
+    "sku": "A-607-W",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 W com Powerbank"
+  },
+  {
+    "sku": "A-607-X",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 X"
+  },
+  {
+    "sku": "A-607-Y",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-607 Y"
+  },
+  {
+    "sku": "A-609",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-609"
+  },
+  {
+    "sku": "A-686",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-686"
+  },
+  {
+    "sku": "A-707",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Tipo IP A-707"
+  },
+  {
+    "sku": "A-708",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Silicone A-708"
+  },
+  {
+    "sku": "A-808-5G",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Tipo IP A-808-5G"
+  },
+  {
+    "sku": "A-905-5G",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido IP A-905-5G"
+  },
+  {
+    "sku": "A-908",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 A-908"
+  },
+  {
+    "sku": "A-908-5G",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Tipo IP A-908-5G"
+  },
+  {
+    "sku": "A-918-TY",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Tipo C A-918-TY"
+  },
+  {
+    "sku": "A-FN06",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 A-FN06"
+  },
+  {
+    "sku": "A-P12",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Ponteiro Laser A-P12"
+  },
+  {
+    "sku": "A-W3",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido A-W3"
+  },
+  {
+    "sku": "AD-1088",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio BT Retrô 9 Bandas AD-1088"
+  },
+  {
+    "sku": "AD-137",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth AD-137"
+  },
+  {
+    "sku": "AD-190",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio 3 Bandas AD-190"
+  },
+  {
+    "sku": "AD-230",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio AD-230"
+  },
+  {
+    "sku": "AD-231",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio AD-231"
+  },
+  {
+    "sku": "AD-3088",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Retro 3 Bandas AD-3088"
+  },
+  {
+    "sku": "AD-3099",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Retro 3 Bandas AD-3099"
+  },
+  {
+    "sku": "AD-3188",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth AD-3188"
+  },
+  {
+    "sku": "AD-3199",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio BT Retrô 3 Bandas AD-3199"
+  },
+  {
+    "sku": "AD-520",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Relógio Despertador AD-520"
+  },
+  {
+    "sku": "AD-6080",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio 3 Bandas AD-6080"
+  },
+  {
+    "sku": "AD-8077",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth AD-8077"
+  },
+  {
+    "sku": "AD-8099",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth AD-8099"
+  },
+  {
+    "sku": "AD-8106",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth AD-8106"
+  },
+  {
+    "sku": "AD-8399",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth AD-8399"
+  },
+  {
+    "sku": "AD-8528",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio 3 Bandas AD-8528"
+  },
+  {
+    "sku": "AD-8529",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio 3 Bandas AD-8529"
+  },
+  {
+    "sku": "AG-690",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Mouse Sem Fio AG-690"
+  },
+  {
+    "sku": "AIR31",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AJ-3452",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AJ-3453",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-036",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Carregador e Bateria 360 AL-036"
+  },
+  {
+    "sku": "AL-1010",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-1050",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Mini Laser EMB AL-1050"
+  },
+  {
+    "sku": "AL-15-TY",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Tipo C AL-15-TY"
+  },
+  {
+    "sku": "AL-2336",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Aparador de Cabelo AL-2336"
+  },
+  {
+    "sku": "AL-2656",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Display Digital AL-2656"
+  },
+  {
+    "sku": "AL-2659",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-2667",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Máquina de Cortar Cabelo AL-2667"
+  },
+  {
+    "sku": "AL-2669",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Produto AL-2669"
+  },
+  {
+    "sku": "AL-2743",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio AL-2743"
+  },
+  {
+    "sku": "AL-3699",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth RGB AL-3699"
+  },
+  {
+    "sku": "AL-3829",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Caixa de Som AL-3829"
+  },
+  {
+    "sku": "AL-3916",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Máquina de Barbear Dragão AL-3916"
+  },
+  {
+    "sku": "AL-3936",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Aparador de Cabelo AL-3936"
+  },
+  {
+    "sku": "AL-5G",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone P2 EMB AL-5G"
+  },
+  {
+    "sku": "AL-7A",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Silicone AL-7A"
+  },
+  {
+    "sku": "AL-8391",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Caixa de Som 50W AL-8391"
+  },
+  {
+    "sku": "AL-8816-TY",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido AL-8816-TY"
+  },
+  {
+    "sku": "AL-8817-5G",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido AL-8817-5G"
+  },
+  {
+    "sku": "AL-A155",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-A230",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-B5207",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Lanterna LED AL-B5207"
+  },
+  {
+    "sku": "AL-B7760",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Isqueiro Elétrico AL-B7760"
+  },
+  {
+    "sku": "AL-B9001",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Lanterna Tática X900 AL-B9001"
+  },
+  {
+    "sku": "AL-BB20",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Display Digital AL-BB20"
+  },
+  {
+    "sku": "AL-C223",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-D890",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-E13",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 AL-E13"
+  },
+  {
+    "sku": "AL-E16",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 AL-E16"
+  },
+  {
+    "sku": "AL-E17",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 AL-E17"
+  },
+  {
+    "sku": "AL-L50",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Lanterna AL-L50"
+  },
+  {
+    "sku": "AL-P9",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Headset AL-P9"
+  },
+  {
+    "sku": "AL-S380",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "AL-T2",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 AL-T2"
+  },
+  {
+    "sku": "AL-T3",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 AL-T3"
+  },
+  {
+    "sku": "AL-X7",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Silicone AL-X7"
+  },
+  {
+    "sku": "AL-ZP33",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Suporte para Celular AL-ZP33"
+  },
+  {
+    "sku": "AU-4U",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "C-231",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Suporte para TV 32-55 C-231"
+  },
+  {
+    "sku": "C-233",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Suporte para TV 14-42 C-233"
+  },
+  {
+    "sku": "CR2032",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "F-060",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Sem Fio P2 F-060"
+  },
+  {
+    "sku": "F-070",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido P2 F-070"
+  },
+  {
+    "sku": "G9S",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido G9S"
+  },
+  {
+    "sku": "GUARDA-CHUVA",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "I11",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido i11"
+  },
+  {
+    "sku": "I12",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido i12"
+  },
+  {
+    "sku": "I7MINI",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido i7mini"
+  },
+  {
+    "sku": "I7S",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido i7s"
+  },
+  {
+    "sku": "I9S",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido i9s"
+  },
+  {
+    "sku": "J-60",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": true,
+    "site_name": "Fone Bluetooth J-60"
+  },
+  {
+    "sku": "J-60-A",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 A"
+  },
+  {
+    "sku": "J-60-AIR-39",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "J-60-AIR31",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 AIR31"
+  },
+  {
+    "sku": "J-60-D",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 D"
+  },
+  {
+    "sku": "J-60-G",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 G"
+  },
+  {
+    "sku": "J-60-L",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 L"
+  },
+  {
+    "sku": "J-60-P",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 P"
+  },
+  {
+    "sku": "J-60-R",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Touch J-60 R"
+  },
+  {
+    "sku": "J-60-U",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Gamer J-60 U"
+  },
+  {
+    "sku": "J-60-Y",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J-60 Y com Powerbank"
+  },
+  {
+    "sku": "J-70",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "J-70-PRO-B",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Esportivo J-70 PRO B"
+  },
+  {
+    "sku": "J-80",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "J-80-PRO",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Bluetooth J-80 PRO"
+  },
+  {
+    "sku": "J-85",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "J-85-PRO",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Bluetooth J-85 PRO"
+  },
+  {
+    "sku": "J-88",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "J-88-PRO",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Gamer J-88 PRO"
+  },
+  {
+    "sku": "J-99",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "J-99-PRO",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Bluetooth J-99 PRO"
+  },
+  {
+    "sku": "J930",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J930"
+  },
+  {
+    "sku": "J940",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido J940"
+  },
+  {
+    "sku": "JD-107",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth JD-107"
+  },
+  {
+    "sku": "JD-108",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Clássico JD-108"
+  },
+  {
+    "sku": "JD-30",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth JD-30"
+  },
+  {
+    "sku": "JD-31",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth JD-31"
+  },
+  {
+    "sku": "JD-32",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth JD-32"
+  },
+  {
+    "sku": "JD-35",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Rádio Bluetooth JD-35"
+  },
+  {
+    "sku": "K98",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido K98 com Powerbank"
+  },
+  {
+    "sku": "LYF-01",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica LYF-01"
+  },
+  {
+    "sku": "LYF-02",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica 1250ml LYF-02"
+  },
+  {
+    "sku": "LYF-03",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica LYF-03"
+  },
+  {
+    "sku": "LYF-05",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica LYF-05"
+  },
+  {
+    "sku": "LYF-10",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica 1250ml LYF-10"
+  },
+  {
+    "sku": "LYF-14",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica 1000ml LYF-14"
+  },
+  {
+    "sku": "LYF-15",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica 1250ml LYF-15"
+  },
+  {
+    "sku": "LYF-20",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Garrafa Térmica 1200ml LYF-20"
+  },
+  {
+    "sku": "M-303",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Microfone M-303"
+  },
+  {
+    "sku": "M10",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "PN-951",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "PN-952",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "RS13",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido RS13"
+  },
+  {
+    "sku": "RS15",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido RS15"
+  },
+  {
+    "sku": "S20",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido S20"
+  },
+  {
+    "sku": "S6",
+    "in_pdf_text": false,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido Bluetooth S6"
+  },
+  {
+    "sku": "SW1",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "T10",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "T11",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "TX04",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "U60",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": true,
+    "site_name": "Fone de Ouvido U60"
+  },
+  {
+    "sku": "X900",
+    "in_pdf_text": true,
+    "in_image_pack": false,
+    "on_site": false,
+    "site_name": ""
+  },
+  {
+    "sku": "ZQ-01",
+    "in_pdf_text": true,
+    "in_image_pack": true,
+    "on_site": false,
+    "site_name": ""
+  }
+]
