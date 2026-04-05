@@ -1,10 +1,11 @@
 import { Produto } from '@/types';
 import { GENERATED_PRODUCT_IMAGE_MANIFEST } from '@/lib/generated-product-image-manifest';
 
-export type ProductImageLike = Partial<Pick<Produto, 'sku' | 'imagem_principal' | 'galeria_imagens'>> & {
+export type ProductImageLike = Partial<Pick<Produto, 'sku' | 'imagem_principal' | 'galeria_imagens' | 'tipo_catalogo'>> & {
   sku?: string | null;
   imagem_principal?: string | null;
   galeria_imagens?: string[] | null;
+  tipo_catalogo?: Produto['tipo_catalogo'] | null;
 };
 
 function normalizeSkuKey(value: unknown) {
@@ -66,7 +67,10 @@ export function getProductImageCandidates(product: ProductImageLike) {
   const existingGallery = Array.isArray(product.galeria_imagens)
     ? product.galeria_imagens.filter(isUsableImage).map((item) => String(item))
     : [];
-  const imported = getImportedProductImagesBySku(product.sku);
+  const imported =
+    product.tipo_catalogo === 'CAIXA_FECHADA'
+      ? []
+      : getImportedProductImagesBySku(product.sku);
   const key = normalizeSkuKey(product.sku);
   const preferImported = FORCE_IMPORTED_PRODUCT_IMAGE_SKUS.has(key);
 
