@@ -19,6 +19,7 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { Produto } from '@/types';
 import { formatPrice } from '@/lib/utils';
+import { getProductPrimaryImage } from '@/lib/product-images';
 import toast from 'react-hot-toast';
 
 export default function ProductsPage() {
@@ -162,7 +163,7 @@ export default function ProductsPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden">
                             <img
-                              src={product.imagem_principal || '/images/placeholder.jpg'}
+                              src={getProductPrimaryImage(product)}
                               alt={product.nome}
                               className="w-full h-full object-cover"
                             />
