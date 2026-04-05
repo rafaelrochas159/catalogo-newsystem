@@ -1,0 +1,1377 @@
+[
+  {
+    "sku": "895B",
+    "site_name": "Fone de Ouvido 895B",
+    "current_image_url": "produto_p16_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/895B.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "895B",
+      "imagem_principal_not_equals": "/imported-product-images-clean/895B.png"
+    }
+  },
+  {
+    "sku": "A-07",
+    "site_name": "Fone de Ouvido P2 A-07",
+    "current_image_url": "produto_p14_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/A-07.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-07",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-07.png"
+    }
+  },
+  {
+    "sku": "A-169",
+    "site_name": "Fone de Ouvido A-169",
+    "current_image_url": "produto_p15_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/A-169.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-169",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-169.png"
+    }
+  },
+  {
+    "sku": "A-2019",
+    "site_name": "Rádio A-2019",
+    "current_image_url": "produto_p11_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/A-2019.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-2019",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-2019.png"
+    }
+  },
+  {
+    "sku": "A-286",
+    "site_name": "Fone de Ouvido A-286",
+    "current_image_url": "produto_p18_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/A-286.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-286",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-286.png"
+    }
+  },
+  {
+    "sku": "A-331",
+    "site_name": "Fone de Ouvido A-331",
+    "current_image_url": "produto_p15_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/A-331.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-331",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-331.png"
+    }
+  },
+  {
+    "sku": "A-388",
+    "site_name": "Fone de Ouvido A-388",
+    "current_image_url": "produto_p16_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/A-388.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-388",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-388.png"
+    }
+  },
+  {
+    "sku": "A-505",
+    "site_name": "Fone de Ouvido A-505",
+    "current_image_url": "produto_p17_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/A-505.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-505",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-505.png"
+    }
+  },
+  {
+    "sku": "A-607",
+    "site_name": "Fone de Ouvido Gamer A-607",
+    "current_image_url": "produto_p15_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607.png"
+    }
+  },
+  {
+    "sku": "A-607-A",
+    "site_name": "Fone de Ouvido Gamer RGB A-607 A",
+    "current_image_url": "produto_p18_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_A款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-A",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_A款.png"
+    }
+  },
+  {
+    "sku": "A-607-F9",
+    "site_name": "Fone de Ouvido A-607 F9",
+    "current_image_url": "produto_p17_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_F9款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-F9",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_F9款.png"
+    }
+  },
+  {
+    "sku": "A-607-M10",
+    "site_name": "Fone de Ouvido A-607 M10",
+    "current_image_url": "produto_p14_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607(M10).png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-M10",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607(M10).png"
+    }
+  },
+  {
+    "sku": "A-607-MAX",
+    "site_name": "Fone de Ouvido com Caixa de Som A-607 MAX",
+    "current_image_url": "produto_p16_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_MAX.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-MAX",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_MAX.png"
+    }
+  },
+  {
+    "sku": "A-607-P",
+    "site_name": "Fone de Ouvido A-607 P",
+    "current_image_url": "produto_p16_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_P款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-P",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_P款.png"
+    }
+  },
+  {
+    "sku": "A-607-T",
+    "site_name": "Fone de Ouvido A-607 T",
+    "current_image_url": "produto_p15_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_T款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-T",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_T款.png"
+    }
+  },
+  {
+    "sku": "A-607-W",
+    "site_name": "Fone de Ouvido A-607 W com Powerbank",
+    "current_image_url": "produto_p2_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_W款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-W",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_W款.png"
+    }
+  },
+  {
+    "sku": "A-607-X",
+    "site_name": "Fone de Ouvido A-607 X",
+    "current_image_url": "produto_p15_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_X款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-X",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_X款.png"
+    }
+  },
+  {
+    "sku": "A-607-Y",
+    "site_name": "Fone de Ouvido A-607 Y",
+    "current_image_url": "produto_p2_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/A-607_Y款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-607-Y",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-607_Y款.png"
+    }
+  },
+  {
+    "sku": "A-609",
+    "site_name": "Fone de Ouvido A-609",
+    "current_image_url": "produto_p16_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/A-609.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-609",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-609.png"
+    }
+  },
+  {
+    "sku": "A-686",
+    "site_name": "Fone de Ouvido A-686",
+    "current_image_url": "produto_p17_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/A-686.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-686",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-686.png"
+    }
+  },
+  {
+    "sku": "A-707",
+    "site_name": "Fone de Ouvido Tipo IP A-707",
+    "current_image_url": "produto_p12_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/A-707.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-707",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-707.png"
+    }
+  },
+  {
+    "sku": "A-708",
+    "site_name": "Fone de Ouvido Silicone A-708",
+    "current_image_url": "produto_p13_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/A-708.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-708",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-708.png"
+    }
+  },
+  {
+    "sku": "A-808-5G",
+    "site_name": "Fone de Ouvido Tipo IP A-808-5G",
+    "current_image_url": "produto_p12_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/A-808-5G.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-808-5G",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-808-5G.png"
+    }
+  },
+  {
+    "sku": "A-905-5G",
+    "site_name": "Fone de Ouvido IP A-905-5G",
+    "current_image_url": "produto_p13_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/A-905-5G.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-905-5G",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-905-5G.png"
+    }
+  },
+  {
+    "sku": "A-908",
+    "site_name": "Fone de Ouvido P2 A-908",
+    "current_image_url": "produto_p13_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/A-908.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-908",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-908.png"
+    }
+  },
+  {
+    "sku": "A-908-5G",
+    "site_name": "Fone de Ouvido Tipo IP A-908-5G",
+    "current_image_url": "produto_p13_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/A-908-5G.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-908-5G",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-908-5G.png"
+    }
+  },
+  {
+    "sku": "A-918-TY",
+    "site_name": "Fone de Ouvido Tipo C A-918-TY",
+    "current_image_url": "produto_p12_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/A-918-TY.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-918-TY",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-918-TY.png"
+    }
+  },
+  {
+    "sku": "A-FN06",
+    "site_name": "Fone de Ouvido P2 A-FN06",
+    "current_image_url": "produto_p12_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/A-FN06.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-FN06",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-FN06.png"
+    }
+  },
+  {
+    "sku": "A-P12",
+    "site_name": "Ponteiro Laser A-P12",
+    "current_image_url": "produto_p7_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/A-P12.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-P12",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-P12.png"
+    }
+  },
+  {
+    "sku": "A-W3",
+    "site_name": "Fone de Ouvido A-W3",
+    "current_image_url": "produto_p18_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/A-W3.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "A-W3",
+      "imagem_principal_not_equals": "/imported-product-images-clean/A-W3.png"
+    }
+  },
+  {
+    "sku": "AD-1088",
+    "site_name": "Rádio BT Retrô 9 Bandas AD-1088",
+    "current_image_url": "produto_p10_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-1088.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-1088",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-1088.png"
+    }
+  },
+  {
+    "sku": "AD-137",
+    "site_name": "Rádio Bluetooth AD-137",
+    "current_image_url": "produto_p11_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-137.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-137",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-137.png"
+    }
+  },
+  {
+    "sku": "AD-190",
+    "site_name": "Rádio 3 Bandas AD-190",
+    "current_image_url": "produto_p11_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-190.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-190",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-190.png"
+    }
+  },
+  {
+    "sku": "AD-230",
+    "site_name": "Rádio AD-230",
+    "current_image_url": "produto_p10_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-230.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-230",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-230.png"
+    }
+  },
+  {
+    "sku": "AD-231",
+    "site_name": "Rádio AD-231",
+    "current_image_url": "produto_p10_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-231.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-231",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-231.png"
+    }
+  },
+  {
+    "sku": "AD-3088",
+    "site_name": "Rádio Retro 3 Bandas AD-3088",
+    "current_image_url": "produto_p11_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-3088.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-3088",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-3088.png"
+    }
+  },
+  {
+    "sku": "AD-3099",
+    "site_name": "Rádio Retro 3 Bandas AD-3099",
+    "current_image_url": "produto_p11_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-3099.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-3099",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-3099.png"
+    }
+  },
+  {
+    "sku": "AD-3188",
+    "site_name": "Rádio Bluetooth AD-3188",
+    "current_image_url": "produto_p10_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-3188.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-3188",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-3188.png"
+    }
+  },
+  {
+    "sku": "AD-3199",
+    "site_name": "Rádio BT Retrô 3 Bandas AD-3199",
+    "current_image_url": "produto_p10_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-3199.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-3199",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-3199.png"
+    }
+  },
+  {
+    "sku": "AD-520",
+    "site_name": "Relógio Despertador AD-520",
+    "current_image_url": "produto_p11_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-520.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-520",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-520.png"
+    }
+  },
+  {
+    "sku": "AD-6080",
+    "site_name": "Rádio 3 Bandas AD-6080",
+    "current_image_url": "produto_p10_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-6080.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-6080",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-6080.png"
+    }
+  },
+  {
+    "sku": "AD-8077",
+    "site_name": "Rádio Bluetooth AD-8077",
+    "current_image_url": "produto_p11_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-8077.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-8077",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-8077.png"
+    }
+  },
+  {
+    "sku": "AD-8099",
+    "site_name": "Rádio Bluetooth AD-8099",
+    "current_image_url": "produto_p11_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-8099.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-8099",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-8099.png"
+    }
+  },
+  {
+    "sku": "AD-8106",
+    "site_name": "Rádio Bluetooth AD-8106",
+    "current_image_url": "produto_p10_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-8106.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-8106",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-8106.png"
+    }
+  },
+  {
+    "sku": "AD-8399",
+    "site_name": "Rádio Bluetooth AD-8399",
+    "current_image_url": "produto_p9_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-8399.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-8399",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-8399.png"
+    }
+  },
+  {
+    "sku": "AD-8528",
+    "site_name": "Rádio 3 Bandas AD-8528",
+    "current_image_url": "produto_p9_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-8528.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-8528",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-8528.png"
+    }
+  },
+  {
+    "sku": "AD-8529",
+    "site_name": "Rádio 3 Bandas AD-8529",
+    "current_image_url": "produto_p9_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AD-8529.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AD-8529",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AD-8529.png"
+    }
+  },
+  {
+    "sku": "AG-690",
+    "site_name": "Mouse Sem Fio AG-690",
+    "current_image_url": "produto_p3_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AG-690_B款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AG-690",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AG-690_B款.png"
+    }
+  },
+  {
+    "sku": "AL-036",
+    "site_name": "Carregador e Bateria 360 AL-036",
+    "current_image_url": "produto_p7_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-036.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-036",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-036.png"
+    }
+  },
+  {
+    "sku": "AL-1050",
+    "site_name": "Mini Laser EMB AL-1050",
+    "current_image_url": "produto_p4_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-1050.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-1050",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-1050.png"
+    }
+  },
+  {
+    "sku": "AL-15-TY",
+    "site_name": "Fone de Ouvido Tipo C AL-15-TY",
+    "current_image_url": "produto_p13_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-15-TY.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-15-TY",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-15-TY.png"
+    }
+  },
+  {
+    "sku": "AL-2336",
+    "site_name": "Aparador de Cabelo AL-2336",
+    "current_image_url": "produto_p4_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-2336.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-2336",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-2336.png"
+    }
+  },
+  {
+    "sku": "AL-2656",
+    "site_name": "Display Digital AL-2656",
+    "current_image_url": "produto_p4_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-2656.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-2656",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-2656.png"
+    }
+  },
+  {
+    "sku": "AL-2667",
+    "site_name": "Máquina de Cortar Cabelo AL-2667",
+    "current_image_url": "produto_p4_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-2667.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-2667",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-2667.png"
+    }
+  },
+  {
+    "sku": "AL-2669",
+    "site_name": "Produto AL-2669",
+    "current_image_url": "produto_p8_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-2669.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-2669",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-2669.png"
+    }
+  },
+  {
+    "sku": "AL-2743",
+    "site_name": "Rádio AL-2743",
+    "current_image_url": "produto_p2_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-2743_B款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-2743",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-2743_B款.png"
+    }
+  },
+  {
+    "sku": "AL-3699",
+    "site_name": "Rádio Bluetooth RGB AL-3699",
+    "current_image_url": "produto_p10_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-3699.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-3699",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-3699.png"
+    }
+  },
+  {
+    "sku": "AL-3829",
+    "site_name": "Caixa de Som AL-3829",
+    "current_image_url": "produto_p3_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-3829.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-3829",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-3829.png"
+    }
+  },
+  {
+    "sku": "AL-3916",
+    "site_name": "Máquina de Barbear Dragão AL-3916",
+    "current_image_url": "produto_p4_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-3916.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-3916",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-3916.png"
+    }
+  },
+  {
+    "sku": "AL-3936",
+    "site_name": "Aparador de Cabelo AL-3936",
+    "current_image_url": "produto_p4_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-3936.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-3936",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-3936.png"
+    }
+  },
+  {
+    "sku": "AL-5G",
+    "site_name": "Fone P2 EMB AL-5G",
+    "current_image_url": "produto_p14_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-5G.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-5G",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-5G.png"
+    }
+  },
+  {
+    "sku": "AL-7A",
+    "site_name": "Fone de Ouvido Silicone AL-7A",
+    "current_image_url": "produto_p13_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-7A.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-7A",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-7A.png"
+    }
+  },
+  {
+    "sku": "AL-8391",
+    "site_name": "Caixa de Som 50W AL-8391",
+    "current_image_url": "produto_p3_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-8391_B款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-8391",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-8391_B款.png"
+    }
+  },
+  {
+    "sku": "AL-8816-TY",
+    "site_name": "Fone de Ouvido AL-8816-TY",
+    "current_image_url": "produto_p12_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-8816-TY.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-8816-TY",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-8816-TY.png"
+    }
+  },
+  {
+    "sku": "AL-8817-5G",
+    "site_name": "Fone de Ouvido AL-8817-5G",
+    "current_image_url": "produto_p12_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-8817-5G.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-8817-5G",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-8817-5G.png"
+    }
+  },
+  {
+    "sku": "AL-B5207",
+    "site_name": "Lanterna LED AL-B5207",
+    "current_image_url": "produto_p5_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-B5207.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-B5207",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-B5207.png"
+    }
+  },
+  {
+    "sku": "AL-B7760",
+    "site_name": "Isqueiro Elétrico AL-B7760",
+    "current_image_url": "produto_p5_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-B7760.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-B7760",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-B7760.png"
+    }
+  },
+  {
+    "sku": "AL-B9001",
+    "site_name": "Lanterna Tática X900 AL-B9001",
+    "current_image_url": "produto_p5_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-B9001.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-B9001",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-B9001.png"
+    }
+  },
+  {
+    "sku": "AL-BB20",
+    "site_name": "Display Digital AL-BB20",
+    "current_image_url": "produto_p4_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-BB20.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-BB20",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-BB20.png"
+    }
+  },
+  {
+    "sku": "AL-E13",
+    "site_name": "Fone de Ouvido P2 AL-E13",
+    "current_image_url": "produto_p14_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-E13.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-E13",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-E13.png"
+    }
+  },
+  {
+    "sku": "AL-E16",
+    "site_name": "Fone de Ouvido P2 AL-E16",
+    "current_image_url": "produto_p14_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-E16.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-E16",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-E16.png"
+    }
+  },
+  {
+    "sku": "AL-E17",
+    "site_name": "Fone de Ouvido P2 AL-E17",
+    "current_image_url": "produto_p14_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-E17.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-E17",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-E17.png"
+    }
+  },
+  {
+    "sku": "AL-L50",
+    "site_name": "Lanterna AL-L50",
+    "current_image_url": "produto_p5_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-L50-灯.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-L50",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-L50-灯.png"
+    }
+  },
+  {
+    "sku": "AL-P9",
+    "site_name": "Headset AL-P9",
+    "current_image_url": "produto_p3_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-P9.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-P9",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-P9.png"
+    }
+  },
+  {
+    "sku": "AL-T2",
+    "site_name": "Fone de Ouvido P2 AL-T2",
+    "current_image_url": "produto_p13_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-T2.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-T2",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-T2.png"
+    }
+  },
+  {
+    "sku": "AL-T3",
+    "site_name": "Fone de Ouvido P2 AL-T3",
+    "current_image_url": "produto_p13_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-T3.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-T3",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-T3.png"
+    }
+  },
+  {
+    "sku": "AL-X7",
+    "site_name": "Fone de Ouvido Silicone AL-X7",
+    "current_image_url": "produto_p13_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-X7.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-X7",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-X7.png"
+    }
+  },
+  {
+    "sku": "AL-ZP33",
+    "site_name": "Suporte para Celular AL-ZP33",
+    "current_image_url": "produto_p5_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/AL-ZP33.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "AL-ZP33",
+      "imagem_principal_not_equals": "/imported-product-images-clean/AL-ZP33.png"
+    }
+  },
+  {
+    "sku": "C-231",
+    "site_name": "Suporte para TV 32-55 C-231",
+    "current_image_url": "produto_p5_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/C-231.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "C-231",
+      "imagem_principal_not_equals": "/imported-product-images-clean/C-231.png"
+    }
+  },
+  {
+    "sku": "C-233",
+    "site_name": "Suporte para TV 14-42 C-233",
+    "current_image_url": "produto_p5_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/C-233.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "C-233",
+      "imagem_principal_not_equals": "/imported-product-images-clean/C-233.png"
+    }
+  },
+  {
+    "sku": "F-070",
+    "site_name": "Fone de Ouvido P2 F-070",
+    "current_image_url": "produto_p14_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/F-070.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "F-070",
+      "imagem_principal_not_equals": "/imported-product-images-clean/F-070.png"
+    }
+  },
+  {
+    "sku": "G9S",
+    "site_name": "Fone de Ouvido G9S",
+    "current_image_url": "produto_p17_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/G9S.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "G9S",
+      "imagem_principal_not_equals": "/imported-product-images-clean/G9S.png"
+    }
+  },
+  {
+    "sku": "I11",
+    "site_name": "Fone de Ouvido i11",
+    "current_image_url": "produto_p15_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/i11.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "I11",
+      "imagem_principal_not_equals": "/imported-product-images-clean/i11.png"
+    }
+  },
+  {
+    "sku": "I12",
+    "site_name": "Fone de Ouvido i12",
+    "current_image_url": "produto_p15_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/i12(马卡龙).png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "I12",
+      "imagem_principal_not_equals": "/imported-product-images-clean/i12(马卡龙).png"
+    }
+  },
+  {
+    "sku": "I7MINI",
+    "site_name": "Fone de Ouvido i7mini",
+    "current_image_url": "produto_p15_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/i7mini.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "I7MINI",
+      "imagem_principal_not_equals": "/imported-product-images-clean/i7mini.png"
+    }
+  },
+  {
+    "sku": "I7S",
+    "site_name": "Fone de Ouvido i7s",
+    "current_image_url": "produto_p15_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/i7s(马卡龙黑色).png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "I7S",
+      "imagem_principal_not_equals": "/imported-product-images-clean/i7s(马卡龙黑色).png"
+    }
+  },
+  {
+    "sku": "I9S",
+    "site_name": "Fone de Ouvido i9s",
+    "current_image_url": "produto_p15_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/i9s.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "I9S",
+      "imagem_principal_not_equals": "/imported-product-images-clean/i9s.png"
+    }
+  },
+  {
+    "sku": "J-60-A",
+    "site_name": "Fone de Ouvido J-60 A",
+    "current_image_url": "produto_p18_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_A款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-A",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_A款.png"
+    }
+  },
+  {
+    "sku": "J-60-AIR31",
+    "site_name": "Fone de Ouvido J-60 AIR31",
+    "current_image_url": "produto_p18_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60(AIR31).png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-AIR31",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60(AIR31).png"
+    }
+  },
+  {
+    "sku": "J-60-AIR39",
+    "site_name": "Fone de Ouvido J-60 AIR39",
+    "current_image_url": "produto_p18_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60(AIR_39款).png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-AIR39",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60(AIR_39款).png"
+    }
+  },
+  {
+    "sku": "J-60-D",
+    "site_name": "Fone de Ouvido J-60 D",
+    "current_image_url": "produto_p18_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_D款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-D",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_D款.png"
+    }
+  },
+  {
+    "sku": "J-60-G",
+    "site_name": "Fone de Ouvido J-60 G",
+    "current_image_url": "produto_p16_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_G款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-G",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_G款.png"
+    }
+  },
+  {
+    "sku": "J-60-L",
+    "site_name": "Fone de Ouvido J-60 L",
+    "current_image_url": "produto_p19_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_L款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-L",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_L款.png"
+    }
+  },
+  {
+    "sku": "J-60-P",
+    "site_name": "Fone de Ouvido J-60 P",
+    "current_image_url": "produto_p17_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_P款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-P",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_P款.png"
+    }
+  },
+  {
+    "sku": "J-60-R",
+    "site_name": "Fone de Ouvido Touch J-60 R",
+    "current_image_url": "produto_p19_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_R款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-R",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_R款.png"
+    }
+  },
+  {
+    "sku": "J-60-U",
+    "site_name": "Fone de Ouvido Gamer J-60 U",
+    "current_image_url": "produto_p2_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_U款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-U",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_U款.png"
+    }
+  },
+  {
+    "sku": "J-60-Y",
+    "site_name": "Fone de Ouvido J-60 Y com Powerbank",
+    "current_image_url": "produto_p17_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/J-60_Y款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-60-Y",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-60_Y款.png"
+    }
+  },
+  {
+    "sku": "J-70-PRO-B",
+    "site_name": "Fone de Ouvido Esportivo J-70 PRO B",
+    "current_image_url": "produto_p2_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/J-70_PRO_B款.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-70-PRO-B",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-70_PRO_B款.png"
+    }
+  },
+  {
+    "sku": "J-80-PRO",
+    "site_name": "Fone de Ouvido Bluetooth J-80 PRO",
+    "current_image_url": "produto_p19_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/J-80_PRO.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-80-PRO",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-80_PRO.png"
+    }
+  },
+  {
+    "sku": "J-85-PRO",
+    "site_name": "Fone de Ouvido Bluetooth J-85 PRO",
+    "current_image_url": "https://rocglobeaztnwwuhefel.supabase.co/storage/v1/object/public/images/products/1775399393051-v5mleu.png",
+    "new_image_url": "/imported-product-images-clean/J-85_PRO.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-85-PRO",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-85_PRO.png"
+    }
+  },
+  {
+    "sku": "J-88-PRO",
+    "site_name": "Fone de Ouvido Gamer J-88 PRO",
+    "current_image_url": "https://rocglobeaztnwwuhefel.supabase.co/storage/v1/object/public/images/products/1775399325991-pt6m7t.png",
+    "new_image_url": "/imported-product-images-clean/J-88_PRO.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-88-PRO",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-88_PRO.png"
+    }
+  },
+  {
+    "sku": "J-99-PRO",
+    "site_name": "Fone de Ouvido Bluetooth J-99 PRO",
+    "current_image_url": "produto_p3_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/J-99_PRO.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J-99-PRO",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J-99_PRO.png"
+    }
+  },
+  {
+    "sku": "J930",
+    "site_name": "Fone de Ouvido J930",
+    "current_image_url": "produto_p16_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/J930.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J930",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J930.png"
+    }
+  },
+  {
+    "sku": "J940",
+    "site_name": "Fone de Ouvido J940",
+    "current_image_url": "produto_p16_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/J940.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "J940",
+      "imagem_principal_not_equals": "/imported-product-images-clean/J940.png"
+    }
+  },
+  {
+    "sku": "JD-107",
+    "site_name": "Rádio Bluetooth JD-107",
+    "current_image_url": "produto_p10_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/JD-107.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "JD-107",
+      "imagem_principal_not_equals": "/imported-product-images-clean/JD-107.png"
+    }
+  },
+  {
+    "sku": "JD-108",
+    "site_name": "Rádio Clássico JD-108",
+    "current_image_url": "produto_p10_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/JD-108.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "JD-108",
+      "imagem_principal_not_equals": "/imported-product-images-clean/JD-108.png"
+    }
+  },
+  {
+    "sku": "JD-30",
+    "site_name": "Rádio Bluetooth JD-30",
+    "current_image_url": "produto_p11_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/JD-30.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "JD-30",
+      "imagem_principal_not_equals": "/imported-product-images-clean/JD-30.png"
+    }
+  },
+  {
+    "sku": "JD-31",
+    "site_name": "Rádio Bluetooth JD-31",
+    "current_image_url": "produto_p11_img10.jpg",
+    "new_image_url": "/imported-product-images-clean/JD-31.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "JD-31",
+      "imagem_principal_not_equals": "/imported-product-images-clean/JD-31.png"
+    }
+  },
+  {
+    "sku": "JD-32",
+    "site_name": "Rádio Bluetooth JD-32",
+    "current_image_url": "produto_p12_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/JD-32.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "JD-32",
+      "imagem_principal_not_equals": "/imported-product-images-clean/JD-32.png"
+    }
+  },
+  {
+    "sku": "JD-35",
+    "site_name": "Rádio Bluetooth JD-35",
+    "current_image_url": "produto_p12_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/JD-35.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "JD-35",
+      "imagem_principal_not_equals": "/imported-product-images-clean/JD-35.png"
+    }
+  },
+  {
+    "sku": "K98",
+    "site_name": "Fone de Ouvido K98 com Powerbank",
+    "current_image_url": "produto_p17_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/K98.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "K98",
+      "imagem_principal_not_equals": "/imported-product-images-clean/K98.png"
+    }
+  },
+  {
+    "sku": "LYF-01",
+    "site_name": "Garrafa Térmica LYF-01",
+    "current_image_url": "produto_p7_img3.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-01.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-01",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-01.png"
+    }
+  },
+  {
+    "sku": "LYF-02",
+    "site_name": "Garrafa Térmica 1250ml LYF-02",
+    "current_image_url": "produto_p7_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-02.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-02",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-02.png"
+    }
+  },
+  {
+    "sku": "LYF-03",
+    "site_name": "Garrafa Térmica LYF-03",
+    "current_image_url": "produto_p7_img5.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-03.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-03",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-03.png"
+    }
+  },
+  {
+    "sku": "LYF-05",
+    "site_name": "Garrafa Térmica LYF-05",
+    "current_image_url": "produto_p7_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-05.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-05",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-05.png"
+    }
+  },
+  {
+    "sku": "LYF-10",
+    "site_name": "Garrafa Térmica 1250ml LYF-10",
+    "current_image_url": "produto_p7_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-10.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-10",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-10.png"
+    }
+  },
+  {
+    "sku": "LYF-14",
+    "site_name": "Garrafa Térmica 1000ml LYF-14",
+    "current_image_url": "produto_p7_img8.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-14.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-14",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-14.png"
+    }
+  },
+  {
+    "sku": "LYF-15",
+    "site_name": "Garrafa Térmica 1250ml LYF-15",
+    "current_image_url": "produto_p7_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-15.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-15",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-15.png"
+    }
+  },
+  {
+    "sku": "LYF-20",
+    "site_name": "Garrafa Térmica 1200ml LYF-20",
+    "current_image_url": "produto_p8_img1.jpg",
+    "new_image_url": "/imported-product-images-clean/LYF-20.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "LYF-20",
+      "imagem_principal_not_equals": "/imported-product-images-clean/LYF-20.png"
+    }
+  },
+  {
+    "sku": "M-303",
+    "site_name": "Microfone M-303",
+    "current_image_url": "produto_p4_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/M-303.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "M-303",
+      "imagem_principal_not_equals": "/imported-product-images-clean/M-303.png"
+    }
+  },
+  {
+    "sku": "RS13",
+    "site_name": "Fone de Ouvido RS13",
+    "current_image_url": "produto_p17_img6.jpg",
+    "new_image_url": "/imported-product-images-clean/RS13.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "RS13",
+      "imagem_principal_not_equals": "/imported-product-images-clean/RS13.png"
+    }
+  },
+  {
+    "sku": "RS15",
+    "site_name": "Fone de Ouvido RS15",
+    "current_image_url": "produto_p17_img7.jpg",
+    "new_image_url": "/imported-product-images-clean/RS15.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "RS15",
+      "imagem_principal_not_equals": "/imported-product-images-clean/RS15.png"
+    }
+  },
+  {
+    "sku": "S20",
+    "site_name": "Fone de Ouvido S20",
+    "current_image_url": "produto_p14_img9.jpg",
+    "new_image_url": "/imported-product-images-clean/S20.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "S20",
+      "imagem_principal_not_equals": "/imported-product-images-clean/S20.png"
+    }
+  },
+  {
+    "sku": "S6",
+    "site_name": "Fone de Ouvido Bluetooth S6",
+    "current_image_url": "produto_p13_img2.jpg",
+    "new_image_url": "/imported-product-images-clean/S6蓝牙耳机.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "S6",
+      "imagem_principal_not_equals": "/imported-product-images-clean/S6蓝牙耳机.png"
+    }
+  },
+  {
+    "sku": "U60",
+    "site_name": "Fone de Ouvido U60",
+    "current_image_url": "produto_p16_img4.jpg",
+    "new_image_url": "/imported-product-images-clean/U60.png",
+    "mode": "dry_run",
+    "idempotent_where": {
+      "sku": "U60",
+      "imagem_principal_not_equals": "/imported-product-images-clean/U60.png"
+    }
+  }
+]

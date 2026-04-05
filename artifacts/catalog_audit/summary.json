@@ -1,0 +1,18 @@
+{
+  "total_rows": 165,
+  "group_counts": {
+    "grupo_b_vincular_imagem": 125,
+    "grupo_c_cadastrar": 16,
+    "grupo_d_revisao_manual": 24
+  },
+  "match_counts": {
+    "exato": 126,
+    "normalizado": 1,
+    "provavel": 7,
+    "sem_match": 31
+  },
+  "problematic_rows": 165,
+  "products_to_create": 16,
+  "products_to_link_images": 125,
+  "manual_review": 24
+}
